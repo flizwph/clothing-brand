@@ -1,0 +1,8 @@
+version: "3.7"
+
+services:
+  project-service:
+    container_name: project-service
+    image: clothingbrand
+    ports:
+    - '8080:8080'
