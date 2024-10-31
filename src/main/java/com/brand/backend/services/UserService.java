@@ -2,18 +2,20 @@ package com.brand.backend.services;
 
 import com.brand.backend.models.User;
 import com.brand.backend.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -23,16 +25,25 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
     public User createUser(User user) {
+
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
+        user.setRole(user.getRole() != null ? user.getRole() : "customer");
+        user.setActive(true);
+
+        user.setEmailVerified(false);
+
         return userRepository.save(user);
     }
+
 
     public User updateUser(User user) {
         user.setUpdatedAt(LocalDateTime.now());

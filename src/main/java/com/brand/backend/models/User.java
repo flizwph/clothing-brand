@@ -1,28 +1,35 @@
 package com.brand.backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "users")
 @Setter
 @Getter
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name ="username",nullable = false)
+    @NotBlank
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name ="password_hash", nullable = false)
+    @NotBlank
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name ="email", nullable = false, unique = true)
+    @NotBlank
+    @Email
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "role", nullable = false)
@@ -46,4 +53,6 @@ public class User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    @Column(name = "verification_code")
+    private String verificationCode;
 }
