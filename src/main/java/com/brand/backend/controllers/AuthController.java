@@ -15,14 +15,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Регистрация нового пользователя с обязательной верификацией
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         User createdUser = authService.registerUser(user);
         return ResponseEntity.ok("User registered successfully. Please verify your email.");
     }
 
-    // Вход пользователя
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestParam String email, @RequestParam String password) {
         Optional<User> userOptional = authService.authenticateUser(email, password);
@@ -35,8 +33,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
-
-    // Подтверждение аккаунта
+    
     @PostMapping("/verify")
     public ResponseEntity<String> verifyUser(@RequestParam String email, @RequestParam String code) {
         boolean isVerified = authService.verifyUser(email, code);
