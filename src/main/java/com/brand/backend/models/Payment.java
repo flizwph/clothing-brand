@@ -6,27 +6,26 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "payments")
 @Getter
 @Setter
+@Entity
+@Table(name = "payments")
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
-    @Column(name = "cryptocurrency", nullable = false)
-    private String cryptocurrency;
+    @Column(name = "status", nullable = false)
+    private String status;
 
     @Column(name = "amount", nullable = false)
     private double amount;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Column(name = "payment_method", nullable = false)
+    private String paymentMethod;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

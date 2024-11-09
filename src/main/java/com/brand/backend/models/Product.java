@@ -3,13 +3,12 @@ package com.brand.backend.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "products")
 @Getter
 @Setter
+@Entity
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,15 +17,31 @@ public class Product {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "size", nullable = false)
-    private String size;
-
     @Column(name = "price", nullable = false)
     private double price;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @ElementCollection
+    @CollectionTable(name = "product_sizes", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "size")
+    private List<String> sizes;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "available_quantity_s", nullable = false)
+    private int availableQuantityS;
+
+    @Column(name = "available_quantity_m", nullable = false)
+    private int availableQuantityM;
+
+    @Column(name = "available_quantity_l", nullable = false)
+    private int availableQuantityL;
+
+    public static Product createProduct(String name, double price, int quantityS, int quantityM, int quantityL) {
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(price);
+        product.setSizes(List.of("S", "M", "L"));
+        product.setAvailableQuantityS(quantityS);
+        product.setAvailableQuantityM(quantityM);
+        product.setAvailableQuantityL(quantityL);
+        return product;
+    }
 }

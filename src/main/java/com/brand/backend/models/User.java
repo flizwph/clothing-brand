@@ -3,7 +3,6 @@ package com.brand.backend.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,10 +17,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank
-    @Column(name = "username", nullable = false)
-    private String username;
 
     @NotBlank
     @Column(name = "password_hash", nullable = false)

@@ -14,8 +14,9 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.clothingstore.controllers"))
+                .apis(RequestHandlerSelectors.basePackage("com.brand.backend.controllers"))
                 .paths(PathSelectors.any())
                 .build();
     }
 }
+

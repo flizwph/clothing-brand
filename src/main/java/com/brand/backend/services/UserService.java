@@ -59,7 +59,6 @@ public class UserService {
         logger.info("Updating user with id: {}", userDTO.getId());
         User user = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + userDTO.getId() + " not found"));
-        user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setRole(userDTO.getRole());
         user.setActive(userDTO.isActive());
