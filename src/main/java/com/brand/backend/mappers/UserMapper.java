@@ -8,10 +8,9 @@ public class UserMapper {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
-        userDTO.setEmail(user.getEmail());
         userDTO.setRole(user.getRole());
         userDTO.setActive(user.isActive());
-        userDTO.setEmailVerified(user.isEmailVerified());
+        userDTO.setTelegramId(user.getTelegramId());
         userDTO.setCreatedAt(user.getCreatedAt());
         userDTO.setUpdatedAt(user.getUpdatedAt());
         return userDTO;
@@ -21,10 +20,9 @@ public class UserMapper {
         User user = new User();
         user.setId(userDTO.getId());
         user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
         user.setRole(userDTO.getRole());
         user.setActive(userDTO.isActive());
-        user.setEmailVerified(userDTO.isEmailVerified());
+        user.setTelegramId(userDTO.getTelegramId());
         return user;
     }
 }
