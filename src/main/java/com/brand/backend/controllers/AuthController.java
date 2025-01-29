@@ -1,7 +1,9 @@
 package com.brand.backend.controllers;
 
+import com.brand.backend.dtos.UserRegistrationRequest;
 import com.brand.backend.models.User;
 import com.brand.backend.services.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,31 +18,29 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        User createdUser = authService.registerUser(user);
-        return ResponseEntity.ok("User registered successfully. Please verify your email.");
+    public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationRequest request) {
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setVerified(false);
+
+        authService.registerUser(user, request.getPassword());
+
+        System.out.println("Verification code for user " + user.getUsername() + ": " + user.getVerificationCode());
+
+        return ResponseEntity.ok("User registered successfully. Check console for verification code.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestParam String email, @RequestParam String password) {
-        Optional<User> userOptional = authService.authenticateUser(email, password);
+    public ResponseEntity<String> loginUser(@RequestParam String username, @RequestParam String password) {
+        Optional<User> userOptional = authService.authenticateUser(username, password);
         if (userOptional.isPresent()) {
-            if (!userOptional.get().isEmailVerified()) {
-                return ResponseEntity.status(403).body("Please verify your email before logging in.");
+            if (!userOptional.get().isVerified()) {
+                return ResponseEntity.status(403).body("Please verify your account before logging in.");
             }
             return ResponseEntity.ok("Login successful");
         } else {
             return ResponseEntity.status(401).body("Invalid credentials");
-        }
-    }
-    
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyUser(@RequestParam String email, @RequestParam String code) {
-        boolean isVerified = authService.verifyUser(email, code);
-        if (isVerified) {
-            return ResponseEntity.ok("Account verified successfully");
-        } else {
-            return ResponseEntity.status(400).body("Invalid verification code");
         }
     }
 }

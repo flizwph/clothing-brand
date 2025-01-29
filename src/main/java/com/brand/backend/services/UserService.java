@@ -40,17 +40,18 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserDTO userDTO) {
-        logger.info("Creating user with email: {}", userDTO.getEmail());
+        logger.info("Creating user with username: {}", userDTO.getUsername());
 
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("User with email " + userDTO.getEmail() + " already exists");
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("User with username " + userDTO.getUsername() + " already exists");
         }
 
         User user = UserMapper.toEntity(userDTO);
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
         prepareUserForSave(user);
+
         User savedUser = userRepository.save(user);
-        logger.info("User with email {} successfully created", user.getEmail());
+        logger.info("User with username {} successfully created", user.getUsername());
         return UserMapper.toDTO(savedUser);
     }
 
@@ -59,12 +60,13 @@ public class UserService {
         logger.info("Updating user with id: {}", userDTO.getId());
         User user = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + userDTO.getId() + " not found"));
-        user.setEmail(userDTO.getEmail());
+
+        user.setUsername(userDTO.getUsername());
         user.setRole(userDTO.getRole());
         user.setActive(userDTO.isActive());
-        user.setEmailVerified(userDTO.isEmailVerified());
         user.setUpdatedAt(LocalDateTime.now());
         User updatedUser = userRepository.save(user);
+
         logger.info("User with id {} successfully updated", user.getId());
         return UserMapper.toDTO(updatedUser);
     }
@@ -78,44 +80,10 @@ public class UserService {
         logger.info("User with id {} successfully deleted", id);
     }
 
-    @Transactional
-    public void setResetToken(Long userId, String token) {
-        logger.info("Setting reset token for user with id: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
-        user.setResetToken(token);
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
-        logger.info("Reset token set for user with id: {}", userId);
-    }
-
-    @Transactional
-    public void verifyEmail(Long userId) {
-        logger.info("Verifying email for user with id: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
-        user.setEmailVerified(true);
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
-        logger.info("Email verified for user with id: {}", userId);
-    }
-
-    @Transactional
-    public void setLastLogin(Long userId) {
-        logger.info("Setting last login for user with id: {}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
-        user.setLastLogin(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
-        logger.info("Last login set for user with id: {}", userId);
-    }
-
     private void prepareUserForSave(User user) {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         user.setRole(user.getRole() != null ? user.getRole() : "customer");
         user.setActive(true);
-        user.setEmailVerified(false);
     }
 }

@@ -1,7 +1,6 @@
 package com.brand.backend.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +18,12 @@ public class User {
     private Long id;
 
     @NotBlank
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "username", unique = true, nullable = false)
+    private String username;
 
     @NotBlank
-    @Email
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
     @Column(name = "role", nullable = false)
     private String role = "customer";
@@ -39,15 +37,15 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Column(name = "reset_token")
-    private String resetToken;
+    @Column(name = "verification_code")
+    private String verificationCode;
 
-    @Column(name = "email_verified", nullable = false)
-    private boolean emailVerified = false;
+    @Column(name = "telegram_id", unique = true)
+    private Long telegramId;
+
+    @Column(name = "verified", nullable = false)
+    private boolean verified = false;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
-
-    @Column(name = "verification_code")
-    private String verificationCode;
 }

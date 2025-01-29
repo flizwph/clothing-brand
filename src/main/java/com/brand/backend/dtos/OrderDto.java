@@ -15,8 +15,9 @@ public class OrderDto {
     private String postalCode;
     private String phoneNumber;
     private String telegramUsername;
-    private String metamaskAddress;
+    private String cryptoAddress;
     private String orderComment;
     private String promoCode;
     private String paymentMethod;
+    private Long telegramId; // ID юзера в телеграме
 }
