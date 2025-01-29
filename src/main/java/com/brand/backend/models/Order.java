@@ -52,8 +52,8 @@ public class Order {
     @Column(name = "telegram_username")
     private String telegramUsername;
 
-    @Column(name = "metamask_address")
-    private String metamaskAddress;
+    @Column(name = "crypto_address")
+    private String cryptoAddress;
 
     @Column(name = "order_comment")
     private String orderComment;
@@ -62,7 +62,7 @@ public class Order {
     private String promoCode;
 
     @Column(name = "payment_method", nullable = false)
-    private String paymentMethod; // bank_card, BTC, ETH, USDT, LTC
+    private String paymentMethod;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

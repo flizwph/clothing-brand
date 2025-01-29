@@ -1,11 +1,12 @@
 package com.brand.backend.services;
 
+import java.security.SecureRandom;
 import com.brand.backend.models.User;
 import com.brand.backend.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,30 +17,32 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
 
+    @Transactional
+    public User registerUser(User user, String rawPassword) {
+        if (rawPassword == null || rawPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
 
-    public User registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
-
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
-        user.setEmailVerified(false);
+        user.setVerified(false);
 
-        User createdUser = userRepository.save(user);
-
-        emailService.sendVerificationEmail(user.getEmail(), verificationCode);
-
-        return createdUser;
+        return userRepository.save(user);
     }
 
+    public Optional<User> authenticateUser(String username, String password) {
 
-    public Optional<User> authenticateUser(String email, String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
         if (userOptional.isPresent() && passwordEncoder.matches(password, userOptional.get().getPasswordHash())) {
             return userOptional;
         } else {
@@ -47,22 +50,16 @@ public class AuthService {
         }
     }
 
-
-    public boolean verifyUser(String email, String code) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.getVerificationCode().equals(code)) {
-                user.setEmailVerified(true);
-                user.setVerificationCode(null);
-                userRepository.save(user);
-                return true;
-            }
-        }
-        return false;
-    }
-
     private String generateVerificationCode() {
-        return org.apache.commons.lang3.RandomStringUtils.randomNumeric(6);
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder code = new StringBuilder();
+
+        for (int i = 0; i < 32; i++) {
+            int index = random.nextInt(chars.length());
+            code.append(chars.charAt(index));
+        }
+
+        return code.toString();
     }
 }

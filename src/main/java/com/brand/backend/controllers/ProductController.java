@@ -54,7 +54,8 @@ public class ProductController {
         }
     }
 
-    // Получить продукты по размеру
+
+
     @GetMapping("/size/{size}")
     public ResponseEntity<List<Product>> getProductsBySize(@PathVariable String size) {
         return ResponseEntity.ok(productService.getProductsBySize(size));
