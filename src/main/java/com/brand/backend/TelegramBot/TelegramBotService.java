@@ -108,24 +108,20 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
     private void handleCallback(String data, Long chatId, Integer messageId) {
         System.out.println("Получен callback: " + data);
-        // Сброс состояния пользователя при любом callback запросе
         userStates.remove(chatId);
 
         try {
             if (data.startsWith("page_")) {
-                // Переход по страницам товаров
                 int pageIndex = Integer.parseInt(data.split("_")[1]);
                 editProductPage(chatId, messageId, pageIndex);
 
             } else if (data.startsWith("size_")) {
-                // Обработка выбора размера товара
                 String[] parts = data.split("_");
                 Long productId = Long.parseLong(parts[1]);
                 String size = parts[2];
                 sendMessage(String.valueOf(chatId), "Вы выбрали размер: " + size + ". Оплата будет доступна в будущем.");
 
             } else {
-                // Обработка действий, связанных с командами
                 switch (data) {
                     case "action_buy":
                         showProductPage(String.valueOf(chatId), 0);
@@ -145,7 +141,6 @@ public class TelegramBotService extends TelegramLongPollingBot {
                         break;
 
                     default:
-                        // Для неизвестных callback запросов
                         sendMessage(String.valueOf(chatId), "Неизвестный запрос. Попробуйте снова.");
                         break;
                 }

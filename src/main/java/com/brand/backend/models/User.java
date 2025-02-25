@@ -46,6 +46,24 @@ public class User {
     @Column(name = "verified", nullable = false)
     private boolean verified = false;
 
+    @Column(name = "discord_id", unique = true)
+    private Long discordId;
+
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    @Column(name = "telegram_username", unique = true)
+    private String telegramUsername;
+
+    @Column(name = "discord_username", unique = true)
+    private String discordUsername;
+
+    @Column(name = "vk_username", unique = true)
+    private String vkUsername;
+
+    @Column(name = "is_linked_discord", nullable = false)
+    private boolean isLinkedDiscord = false;
+
+    @Column(name = "is_linked_vkontakte", nullable = false)
+    private boolean isLinkedVkontakte = false;
 }

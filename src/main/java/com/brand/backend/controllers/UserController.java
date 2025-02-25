@@ -1,48 +1,81 @@
 package com.brand.backend.controllers;
 
-import com.brand.backend.dtos.UserDTO;
+import com.brand.backend.models.User;
+import com.brand.backend.repositories.UserRepository;
 import com.brand.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<UserDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    // ✅ Получение текущего пользователя
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        log.info("📌 [USER PROFILE] Запрос профиля пользователя: {}", username);
+        User user = userRepository.findByUsername(username).orElseThrow();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", user.getUsername());
+        response.put("telegramUsername", user.getTelegramUsername() != null ? user.getTelegramUsername() : "Not linked");
+        response.put("discordUsername", user.getDiscordUsername() != null ? user.getDiscordUsername() : "Not linked");
+        response.put("vkUsername", user.getVkUsername() != null ? user.getVkUsername() : "Not linked");
+        response.put("isLinkedTelegram", user.isVerified());
+        response.put("isLinkedDiscord", user.isLinkedDiscord());
+        response.put("isLinkedVkontakte", user.isLinkedVkontakte());
+
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        UserDTO user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    // ✅ Изменение имени пользователя (принимает JSON)
+    @PutMapping("/update")
+    public ResponseEntity<Map<String, String>> updateUsername(@RequestBody Map<String, String> request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        String newUsername = request.get("newUsername");
+        if (newUsername == null || newUsername.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "New username is required"));
+        }
+
+        log.info("✏️ [UPDATE USERNAME] {} → {}", currentUsername, newUsername);
+        userService.updateUsername(currentUsername, newUsername);
+
+        return ResponseEntity.ok(Map.of("message", "Username updated successfully"));
     }
 
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        UserDTO createdUser = userService.createUser(userDTO);
-        return ResponseEntity.ok(createdUser);
-    }
+    // ✅ Смена пароля (принимает JSON)
+    @PutMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody Map<String, String> request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        userDTO.setId(id);
-        UserDTO updatedUser = userService.updateUser(userDTO);
-        return ResponseEntity.ok(updatedUser);
-    }
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+        if (oldPassword == null || newPassword == null || oldPassword.isBlank() || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Old and new passwords are required"));
+        }
+
+        log.info("🔑 [CHANGE PASSWORD] Пользователь: {}", username);
+        userService.changePassword(username, oldPassword, newPassword);
+
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
     }
 }

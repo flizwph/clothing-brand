@@ -8,6 +8,7 @@ import lombok.Setter;
 public class OrderDto {
     private Long productId;
     private String size;
+    private Long userId;
     private String email;
     private String fullName;
     private String country;
@@ -19,5 +20,5 @@ public class OrderDto {
     private String orderComment;
     private String promoCode;
     private String paymentMethod;
-    private Long telegramId; // ID юзера в телеграме
+    private Long telegramId;
 }

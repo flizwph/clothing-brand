@@ -1,7 +1,8 @@
-FROM  eclipse-temurin:23-jre
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY target/clothing-brand-0.0.1-SNAPSHOT.jar pisospro.jar
+COPY target/clothing-brand-0.0.1-SNAPSHOT.jar app.jar
 
-CMD ["java", "-jar", "pisospro.jar"]
+
+CMD ["sh", "-c", "java -jar app.jar"]

@@ -1,6 +1,7 @@
 package com.brand.backend.services;
 
 import com.brand.backend.dtos.OrderDto;
+import com.brand.backend.dtos.OrderResponseDto;
 import com.brand.backend.models.Order;
 import com.brand.backend.models.Product;
 import com.brand.backend.models.User;
@@ -24,28 +25,32 @@ public class OrderService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Order createOrder(OrderDto orderDto) {
-        // Проверяем, существует ли продукт
+    public OrderResponseDto createOrder(OrderDto orderDto) {
         Product product = productRepository.findById(orderDto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
-        // Проверяем, есть ли выбранный размер в наличии
         if (!isProductAvailable(product, orderDto.getSize())) {
             throw new RuntimeException("Выбранный размер недоступен");
         }
 
-        // Проверяем, есть ли такой пользователь
-        Optional<User> userOptional = userRepository.findByTelegramId(orderDto.getTelegramId());
+        Optional<User> userOptional;
+
+        if (orderDto.getUserId() != null) {
+            userOptional = userRepository.findById(orderDto.getUserId());
+        } else if (orderDto.getTelegramId() != null) {
+            userOptional = userRepository.findByTelegramId(orderDto.getTelegramId());
+        } else {
+            throw new RuntimeException("Не передан ни userId, ни telegramId");
+        }
+
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Пользователь не найден");
         }
 
         User user = userOptional.get();
 
-        // Генерируем уникальный номер заказа
         String orderNumber = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
 
-        // Создаем заказ
         Order order = new Order();
         order.setOrderNumber(orderNumber);
         order.setProduct(product);
@@ -66,35 +71,48 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUser(user);
 
-        // Сохраняем заказ
         Order savedOrder = orderRepository.save(order);
 
-        // Уменьшаем количество товара
         reduceProductQuantity(product, orderDto.getSize());
 
-        return savedOrder;
+        return mapToDto(savedOrder);
+    }
+
+    public Optional<OrderResponseDto> getOrderById(Long id) {
+        return orderRepository.findById(id).map(this::mapToDto);
     }
 
     private boolean isProductAvailable(Product product, String size) {
         return switch (size.toLowerCase()) {
-            case "s" -> product.getAvailableQuantityS() > 0;
-            case "m" -> product.getAvailableQuantityM() > 0;
-            case "l" -> product.getAvailableQuantityL() > 0;
+            case "M" -> product.getAvailableQuantityS() > 0;
+            case "L" -> product.getAvailableQuantityM() > 0;
+            case "XL" -> product.getAvailableQuantityL() > 0;
             default -> false;
         };
     }
 
     private void reduceProductQuantity(Product product, String size) {
         switch (size.toLowerCase()) {
-            case "s" -> product.setAvailableQuantityS(product.getAvailableQuantityS() - 1);
-            case "m" -> product.setAvailableQuantityM(product.getAvailableQuantityM() - 1);
-            case "l" -> product.setAvailableQuantityL(product.getAvailableQuantityL() - 1);
+            case "M" -> product.setAvailableQuantityS(product.getAvailableQuantityS() - 1);
+            case "L" -> product.setAvailableQuantityM(product.getAvailableQuantityM() - 1);
+            case "XL" -> product.setAvailableQuantityL(product.getAvailableQuantityL() - 1);
         }
         productRepository.save(product);
     }
 
-    public Optional<Order> getOrderById(Long id) {
-        return orderRepository.findById(id);
+    private OrderResponseDto mapToDto(Order order) {
+        return new OrderResponseDto(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getProduct().getName(),
+                order.getSize(),
+                order.getQuantity(),
+                order.getPrice(),
+                order.getTelegramUsername(),
+                order.getPaymentMethod(),
+                order.getOrderComment(),
+                order.getCreatedAt()
+        );
     }
 
 }

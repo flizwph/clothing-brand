@@ -1,8 +1,43 @@
-version: "3.7"
 
 services:
-  project-service:
-    container_name: project-service
-    image: clothingbrand
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: clothingbrand
     ports:
-    - '8080:8080'
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clothingbrand"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  spring_boot_app:
+    build:
+      context: .
+    image: clothingbrand:latest
+    container_name: project-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/clothingbrand"
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      JWT_SECRET: "VfbJTwagLbTybf0Wq28UZd8GD1PfbwCg6gZlMblkyeE="
+      JWT_EXPIRATION: "3600000"
+      JWT_REFRESH_EXPIRATION: "604800000"
+
+
+    restart: always
+
+volumes:
+  pgdata:
