@@ -12,7 +12,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Обработчик команд, связанных с пользователями
@@ -104,39 +106,74 @@ public class UserHandler {
     }
     
     /**
-     * Отправляет сообщение с результатами поиска пользователей
+     * Выполняет поиск пользователей по заданному запросу
      */
     public SendMessage handleUserSearch(String chatId, String query) {
-        List<User> users = adminBotService.getAllUsers();
+        return handleUserSearch(chatId, query, "general");
+    }
+
+    /**
+     * Выполняет поиск пользователей по заданному запросу и типу поиска
+     */
+    public SendMessage handleUserSearch(String chatId, String query, String searchType) {
+        log.info("Поиск пользователей по запросу: {}, тип поиска: {}", query, searchType);
         
+        List<User> users = adminBotService.getAllUsers();
         List<User> filteredUsers = users.stream()
-                .filter(user -> matchesUser(user, query))
-                .toList();
+                .filter(user -> matchesUser(user, query, searchType))
+                .sorted(Comparator.comparing(User::getCreatedAt).reversed())
+                .collect(Collectors.toList());
         
         if (filteredUsers.isEmpty()) {
-            return createMessage(chatId, "Пользователи по запросу \"" + query + "\" не найдены.", false);
+            return createMessage(chatId, "Пользователи не найдены по запросу: " + query);
         }
         
-        StringBuilder message = new StringBuilder("🔍 Результаты поиска:\n\n");
+        StringBuilder messageText = new StringBuilder();
+        messageText.append("🔍 *Результаты поиска по запросу:* ").append(query).append("\n\n");
         
-        for (int i = 0; i < filteredUsers.size(); i++) {
+        int count = 0;
+        for (User user : filteredUsers) {
+            count++;
+            messageText.append("👤 *").append(user.getUsername()).append("*\n");
+            messageText.append("ID: `").append(user.getId()).append("`\n");
+            messageText.append("Email: ").append(user.getEmail()).append("\n");
+            messageText.append("Телефон: ").append(user.getPhoneNumber() != null ? user.getPhoneNumber() : "не указан").append("\n");
+            
+            if (count < filteredUsers.size()) {
+                messageText.append("\n");
+            }
+            
+            // Ограничиваем количество выводимых пользователей
+            if (count >= 10) {
+                messageText.append("\n_...и еще ")
+                        .append(filteredUsers.size() - 10)
+                        .append(" пользователей_");
+                break;
+            }
+        }
+        
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        
+        for (int i = 0; i < Math.min(5, filteredUsers.size()); i++) {
             User user = filteredUsers.get(i);
-            message.append(i + 1).append(". ").append(user.getUsername());
+            List<InlineKeyboardButton> row = new ArrayList<>();
             
-            if (user.getEmail() != null) {
-                message.append(" (").append(user.getEmail()).append(")");
-            }
-            
-            message.append("\n");
-            
-            if (user.getTelegramUsername() != null) {
-                message.append("🔗 Telegram: @").append(user.getTelegramUsername()).append("\n");
-            }
-            
-            message.append("/user_").append(user.getId()).append(" - подробная информация\n\n");
+            InlineKeyboardButton viewButton = createButton(
+                    "👁️ " + user.getUsername(),
+                    "viewUser:" + user.getId()
+            );
+            row.add(viewButton);
+            keyboard.add(row);
         }
         
-        return createMessage(chatId, message.toString(), false);
+        // Добавляем кнопку "Назад"
+        List<InlineKeyboardButton> backRow = new ArrayList<>();
+        backRow.add(createButton("◀️ Назад в меню", "menu:main"));
+        keyboard.add(backRow);
+        
+        keyboardMarkup.setKeyboard(keyboard);
+        return createMessage(chatId, messageText.toString(), keyboardMarkup);
     }
     
     /**
@@ -189,12 +226,33 @@ public class UserHandler {
      * Проверяет, соответствует ли пользователь поисковому запросу
      */
     private boolean matchesUser(User user, String query) {
-        query = query.toLowerCase();
+        return matchesUser(user, query, "general");
+    }
+
+    /**
+     * Проверяет, соответствует ли пользователь поисковому запросу по определенному типу поиска
+     */
+    private boolean matchesUser(User user, String query, String searchType) {
+        if (query == null || query.isEmpty()) {
+            return false;
+        }
         
-        return (user.getUsername() != null && user.getUsername().toLowerCase().contains(query)) ||
-               (user.getEmail() != null && user.getEmail().toLowerCase().contains(query)) ||
-               (user.getPhoneNumber() != null && user.getPhoneNumber().contains(query)) ||
-               (user.getTelegramUsername() != null && user.getTelegramUsername().toLowerCase().contains(query));
+        String lowerQuery = query.toLowerCase();
+        
+        switch (searchType) {
+            case "name":
+                return user.getUsername() != null && user.getUsername().toLowerCase().contains(lowerQuery);
+            case "email":
+                return user.getEmail() != null && user.getEmail().toLowerCase().contains(lowerQuery);
+            case "phone":
+                return user.getPhoneNumber() != null && user.getPhoneNumber().toLowerCase().contains(lowerQuery);
+            case "general":
+            default:
+                return (user.getUsername() != null && user.getUsername().toLowerCase().contains(lowerQuery)) ||
+                       (user.getEmail() != null && user.getEmail().toLowerCase().contains(lowerQuery)) ||
+                       (user.getPhoneNumber() != null && user.getPhoneNumber().toLowerCase().contains(lowerQuery)) ||
+                       (user.getId() != null && user.getId().toString().equals(lowerQuery));
+        }
     }
     
     /**

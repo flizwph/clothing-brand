@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Обработчик команд, связанных с заказами
@@ -38,12 +41,15 @@ public class OrderHandler {
      * Отправляет сообщение со всеми заказами
      */
     public SendMessage handleAllOrders(String chatId) {
+        log.info("Обработка запроса на показ всех заказов для администратора {}", chatId);
         List<Order> orders = adminBotService.getOrdersByStatus(null);
         
         if (orders.isEmpty()) {
+            log.info("Заказы не найдены для администратора {}", chatId);
             return createMessage(chatId, "Заказы не найдены.", AdminKeyboards.createOrderFiltersKeyboard());
         }
         
+        log.info("Отправка списка всех заказов ({}) администратору {}", orders.size(), chatId);
         return createMessage(
             chatId, 
             formatOrdersList(orders, "Все заказы (" + orders.size() + "):"), 
@@ -55,9 +61,11 @@ public class OrderHandler {
      * Отправляет сообщение с заказами по статусу
      */
     public SendMessage handleOrdersByStatus(String chatId, OrderStatus status) {
+        log.info("Обработка запроса на показ заказов со статусом {} для администратора {}", status, chatId);
         List<Order> orders = adminBotService.getOrdersByStatus(status);
         
         if (orders.isEmpty()) {
+            log.info("Заказы со статусом {} не найдены для администратора {}", status, chatId);
             return createMessage(
                 chatId, 
                 "Заказы со статусом " + status + " не найдены.", 
@@ -65,6 +73,7 @@ public class OrderHandler {
             );
         }
         
+        log.info("Отправка списка заказов со статусом {} ({}) администратору {}", status, orders.size(), chatId);
         return createMessage(
             chatId, 
             formatOrdersList(orders, "Заказы со статусом " + status + " (" + orders.size() + "):"), 
@@ -76,6 +85,7 @@ public class OrderHandler {
      * Отправляет сообщение с заказами за сегодня
      */
     public SendMessage handleTodayOrders(String chatId) {
+        log.info("Обработка запроса на показ заказов за сегодня для администратора {}", chatId);
         LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
         List<Order> allOrders = adminBotService.getOrdersByStatus(null);
         
@@ -84,9 +94,11 @@ public class OrderHandler {
                 .toList();
         
         if (todayOrders.isEmpty()) {
+            log.info("Заказы за сегодня не найдены для администратора {}", chatId);
             return createMessage(chatId, "Заказов за сегодня не найдено.", AdminKeyboards.createOrderFiltersKeyboard());
         }
         
+        log.info("Отправка списка заказов за сегодня ({}) администратору {}", todayOrders.size(), chatId);
         return createMessage(
             chatId, 
             formatOrdersList(todayOrders, "Заказы за сегодня (" + todayOrders.size() + "):"), 
@@ -98,6 +110,7 @@ public class OrderHandler {
      * Отправляет сообщение с заказами за неделю
      */
     public SendMessage handleWeekOrders(String chatId) {
+        log.info("Обработка запроса на показ заказов за неделю для администратора {}", chatId);
         LocalDateTime startOfWeek = LocalDateTime.now().minusDays(7);
         List<Order> allOrders = adminBotService.getOrdersByStatus(null);
         
@@ -106,9 +119,11 @@ public class OrderHandler {
                 .toList();
         
         if (weekOrders.isEmpty()) {
+            log.info("Заказы за неделю не найдены для администратора {}", chatId);
             return createMessage(chatId, "Заказов за неделю не найдено.", AdminKeyboards.createOrderFiltersKeyboard());
         }
         
+        log.info("Отправка списка заказов за неделю ({}) администратору {}", weekOrders.size(), chatId);
         return createMessage(
             chatId, 
             formatOrdersList(weekOrders, "Заказы за неделю (" + weekOrders.size() + "):"), 
@@ -120,6 +135,7 @@ public class OrderHandler {
      * Отправляет сообщение с заказами за месяц
      */
     public SendMessage handleMonthOrders(String chatId) {
+        log.info("Обработка запроса на показ заказов за месяц для администратора {}", chatId);
         LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         List<Order> allOrders = adminBotService.getOrdersByStatus(null);
         
@@ -128,9 +144,11 @@ public class OrderHandler {
                 .toList();
         
         if (monthOrders.isEmpty()) {
+            log.info("Заказы за месяц не найдены для администратора {}", chatId);
             return createMessage(chatId, "Заказов за месяц не найдено.", AdminKeyboards.createOrderFiltersKeyboard());
         }
         
+        log.info("Отправка списка заказов за месяц ({}) администратору {}", monthOrders.size(), chatId);
         return createMessage(
             chatId, 
             formatOrdersList(monthOrders, "Заказы за месяц (" + monthOrders.size() + "):"), 
@@ -306,51 +324,56 @@ public class OrderHandler {
      * Отправляет инструкции по поиску заказа
      */
     public SendMessage handleOrderSearchRequest(String chatId) {
-        String text = """
-                *🔍 Поиск заказа*
-                
-                Введите номер заказа, email или телефон клиента для поиска.
-                
-                Например: `/order_search #ORD-12345678`
-                Или: `/order_search email@example.com`
-                Или: `/order_search +79123456789`
-                """;
+        String text = "*🔍 Поиск заказа*\n\n" +
+                "Введите номер заказа, email или телефон клиента.\n\n" +
+                "Примеры:\n" +
+                "- `#123456` - поиск по номеру заказа\n" +
+                "- `user@example.com` - поиск по email\n" +
+                "- `+79001234567` - поиск по телефону";
         
-        return createMessage(chatId, text, AdminKeyboards.createBackKeyboard("orders:all"));
+        return createMessage(chatId, text, AdminKeyboards.createBackKeyboard("filter:all"));
     }
     
     /**
-     * Выполняет поиск заказов по запросу
+     * Обрабатывает поиск заказа
      */
     public SendMessage handleOrderSearch(String chatId, String query) {
-        List<Order> foundOrders = new ArrayList<>();
-        
-        // Очищаем от символа #, если он есть в начале запроса
-        String cleanQuery = query.startsWith("#") ? query.substring(1) : query;
-        
-        // Проверяем, является ли запрос email
-        if (cleanQuery.contains("@")) {
-            foundOrders = adminBotService.searchOrdersByEmail(cleanQuery);
-        } 
-        // Проверяем, является ли запрос телефоном
-        else if (cleanQuery.matches(".*\\d{5,}.*")) {
-            foundOrders = adminBotService.searchOrdersByPhone(cleanQuery);
-        } 
-        // По умолчанию ищем по номеру заказа
-        else {
-            foundOrders = adminBotService.searchOrdersByOrderNumber(cleanQuery);
+        log.info("Обработка поиска заказа с запросом: {}", query);
+        query = query.trim().toLowerCase();
+        List<Order> orders = new ArrayList<>();
+
+        if (query.startsWith("#")) {
+            String orderNumber = query.substring(1);
+            orders = adminBotService.searchOrdersByOrderNumber(orderNumber);
+        } else if (query.contains("@")) {
+            // Поиск по email
+            orders = adminBotService.searchOrdersByEmail(query);
+        } else if (query.startsWith("+")) {
+            // Поиск по телефону
+            orders = adminBotService.searchOrdersByPhone(query);
+        } else {
+            try {
+                long orderId = Long.parseLong(query);
+                Order order = adminBotService.getOrderById(orderId);
+                if (order != null) {
+                    orders = List.of(order);
+                }
+            } catch (NumberFormatException e) {
+                // Если не распознали как число, возвращаем пустой список
+                // Метода getOrdersByCustomerName нет в AdminBotService
+                log.info("Не удалось преобразовать запрос в orderId: {}", query);
+            }
         }
-        
-        if (foundOrders.isEmpty()) {
-            return createMessage(chatId, "*🔍 Поиск заказов*\n\nЗаказы по запросу \"" + query + "\" не найдены.", 
-                    AdminKeyboards.createBackKeyboard("orders:all"));
+
+        if (orders.isEmpty()) {
+            return createMessage(chatId, "⚠️ Заказы не найдены", AdminKeyboards.createBackKeyboard("filter:all"));
         }
-        
-        return createMessage(
-            chatId, 
-            formatOrdersList(foundOrders, "Результаты поиска по запросу \"" + query + "\" (" + foundOrders.size() + "):"), 
-            AdminKeyboards.createBackKeyboard("orders:all")
-        );
+
+        String title = "🔍 Найдено заказов: " + orders.size();
+        String formattedOrders = formatOrdersList(orders, title);
+
+        InlineKeyboardMarkup keyboard = AdminKeyboards.createBackKeyboard("filter:all");
+        return createMessage(chatId, formattedOrders, keyboard);
     }
     
     /**
@@ -423,6 +446,7 @@ public class OrderHandler {
      * Создаёт объект сообщения
      */
     private SendMessage createMessage(String chatId, String text) {
+        log.debug("Создание простого сообщения для администратора {}", chatId);
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
@@ -433,9 +457,27 @@ public class OrderHandler {
     /**
      * Создаёт объект сообщения с клавиатурой
      */
-    private SendMessage createMessage(String chatId, String text, org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard keyboard) {
+    private SendMessage createMessage(String chatId, String text, org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup keyboard) {
+        log.debug("Создание сообщения с клавиатурой для администратора {}", chatId);
         SendMessage message = createMessage(chatId, text);
         message.setReplyMarkup(keyboard);
+        
+        // Логируем структуру клавиатуры
+        if (keyboard != null && keyboard.getKeyboard() != null) {
+            StringBuilder keyboardInfo = new StringBuilder("Клавиатура: ");
+            for (List<InlineKeyboardButton> row : keyboard.getKeyboard()) {
+                for (InlineKeyboardButton button : row) {
+                    keyboardInfo.append("[")
+                            .append(button.getText())
+                            .append(" -> ")
+                            .append(button.getCallbackData())
+                            .append("] ");
+                }
+                keyboardInfo.append("\n");
+            }
+            log.debug(keyboardInfo.toString());
+        }
+        
         return message;
     }
     

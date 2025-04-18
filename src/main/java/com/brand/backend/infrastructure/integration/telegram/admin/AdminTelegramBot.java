@@ -28,6 +28,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import jakarta.annotation.PostConstruct;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +43,15 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     private final PromoCodeHandler promoCodeHandler;
     private final ProductHandler productHandler;
 
+    // Состояния пользователей (chatId -> UserState)
+    private final Map<String, UserState> userStates = new ConcurrentHashMap<>();
+    
+    // Возможные состояния пользователя
+    private enum UserState {
+        NONE,               // Обычный режим
+        WAITING_ORDER_SEARCH // Ожидание ввода запроса для поиска заказа
+    }
+
     @Value("${admin.bot.username}")
     private String botUsername;
 
@@ -55,9 +65,9 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     private Set<String> allowedAdminIds;
     
     // Регулярное выражение для обработки команд вида /order_123
-    private static final Pattern ORDER_COMMAND_PATTERN = Pattern.compile("/order_(\\d+)");
+    private static final Pattern ORDER_COMMAND_PATTERN = Pattern.compile("/order(?:s)?\\s*(\\d*)");
     // Регулярное выражение для обработки команд вида /promo_123
-    private static final Pattern PROMO_COMMAND_PATTERN = Pattern.compile("/promo_(\\d+)");
+    private static final Pattern PROMO_COMMAND_PATTERN = Pattern.compile("/promo(?:s)?(?:_(\\d+))?");
     // Регулярное выражение для обработки команд вида /product_123
     private static final Pattern PRODUCT_COMMAND_PATTERN = Pattern.compile("/product_(\\d+)");
     // Регулярное выражение для обработки команд вида /product_search query
@@ -69,17 +79,25 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     // Регулярное выражение для обработки команд вида /product_create ProductName 1000.50 10 20 30
     private static final Pattern PRODUCT_CREATE_PATTERN = Pattern.compile("/product_create\\s+(.+)");
     // Регулярное выражение для обработки команд вида /order_search query
-    private static final Pattern ORDER_SEARCH_PATTERN = Pattern.compile("/order_search\\s+(.+)$");
+    private static final Pattern ORDER_SEARCH_PATTERN = Pattern.compile("/order_search\\s+(.+)");
     // Регулярное выражение для обработки команд вида /promo_create CODE 15% 100 Description
     private static final Pattern PROMO_CREATE_PATTERN = Pattern.compile("^/promo_create\\s+(\\S+)\\s+(\\d+)%\\s+(\\d+)(?:\\s+(.+))?$");
     // Регулярное выражение для обработки команд вида /promo_edit_123 CODE 15% 100 Description
     private static final Pattern PROMO_EDIT_PATTERN = Pattern.compile("^/promo_edit_(\\d+)\\s+([A-Z0-9]+)\\s+(\\d+)%\\s+(\\d+)\\s+(.+)$");
     // Регулярное выражение для обработки команд вида /user_search query
-    private static final Pattern USER_SEARCH_PATTERN = Pattern.compile("^/user_search\\s+(.+)$");
+    private static final Pattern USER_SEARCH_PATTERN = Pattern.compile("^/user_search (.+)$");
     // Регулярное выражение для обработки команд вида /usersearch query (альтернативная форма)
-    private static final Pattern USER_SEARCH_ALT_PATTERN = Pattern.compile("^/usersearch\\s+(.+)$");
+    private static final Pattern USER_SEARCH_ALT_PATTERN = Pattern.compile("^/usersearch (.+)$");
     // Регулярное выражение для обработки команд вида /user_123
-    private static final Pattern USER_COMMAND_PATTERN = Pattern.compile("/user_(\\d+)");
+    private static final Pattern USER_COMMAND_PATTERN = Pattern.compile("/user(?:s)?\\s*(\\d*)");
+    // Регулярное выражение для обработки команд вида /name Имя пользователя
+    private static final Pattern USER_NAME_SEARCH_PATTERN = Pattern.compile("^/name (.+)$");
+    // Регулярное выражение для обработки команд вида /search_user Имя пользователя
+    private static final Pattern USER_SEARCH_NAME_PATTERN = Pattern.compile("^/search_user (.+)$");
+    // Регулярное выражение для обработки команд вида /email адрес@почты.com
+    private static final Pattern USER_EMAIL_SEARCH_PATTERN = Pattern.compile("^/email (.+)$");
+    // Регулярное выражение для обработки команд вида /phone +79991234567
+    private static final Pattern USER_PHONE_SEARCH_PATTERN = Pattern.compile("^/phone (.+)$");
 
     // Конструктор с инициализацией всех необходимых полей
     public AdminTelegramBot(
@@ -150,6 +168,18 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         }
         
         String text = message.getText();
+        
+        // Проверяем, находится ли пользователь в режиме поиска заказа
+        if (getUserState(chatId) == UserState.WAITING_ORDER_SEARCH) {
+            // Обрабатываем поисковый запрос
+            log.info("Обработка поискового запроса заказа от админа {}: {}", chatId, text);
+            BotApiMethod<?> response = orderHandler.handleOrderSearch(chatId, text);
+            executeMethod(response);
+            // Сбрасываем состояние после выполнения поиска
+            setUserState(chatId, UserState.NONE);
+            return;
+        }
+        
         BotApiMethod<?> response = null;
         
         // Проверяем, соответствует ли текст команде для просмотра заказа
@@ -166,159 +196,255 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         Matcher userSearchMatcher = USER_SEARCH_PATTERN.matcher(text);
         Matcher userSearchAltMatcher = USER_SEARCH_ALT_PATTERN.matcher(text);
         Matcher userMatcher = USER_COMMAND_PATTERN.matcher(text);
+        Matcher userNameSearchMatcher = USER_NAME_SEARCH_PATTERN.matcher(text);
+        Matcher userSearchNameMatcher = USER_SEARCH_NAME_PATTERN.matcher(text);
+        Matcher userEmailSearchMatcher = USER_EMAIL_SEARCH_PATTERN.matcher(text);
+        Matcher userPhoneSearchMatcher = USER_PHONE_SEARCH_PATTERN.matcher(text);
         
         if (orderMatcher.matches()) {
-            Long orderId = Long.parseLong(orderMatcher.group(1));
-            response = orderHandler.handleOrderDetails(chatId, orderId);
+            response = handleOrderCommand(chatId, orderMatcher);
         } else if (promoMatcher.matches()) {
-            Long promoId = Long.parseLong(promoMatcher.group(1));
-            response = promoCodeHandler.handlePromoCodeDetails(chatId, promoId);
+            response = handlePromoCommand(chatId, promoMatcher);
         } else if (productMatcher.matches()) {
-            Long productId = Long.parseLong(productMatcher.group(1));
-            response = productHandler.handleProductDetails(chatId, productId);
+            response = handleProductCommand(chatId, productMatcher);
         } else if (productSearchMatcher.matches()) {
-            String query = productSearchMatcher.group(1);
-            response = productHandler.handleProductSearch(chatId, query);
+            response = handleProductSearchCommand(chatId, productSearchMatcher);
         } else if (productPriceMatcher.matches()) {
-            Long productId = Long.parseLong(productPriceMatcher.group(1));
-            String price = productPriceMatcher.group(2);
-            response = productHandler.handleUpdatePrice(chatId, productId, price);
+            response = handleProductPriceCommand(chatId, productPriceMatcher);
         } else if (productStockMatcher.matches()) {
-            Long productId = Long.parseLong(productStockMatcher.group(1));
-            String stock = productStockMatcher.group(2);
-            response = productHandler.handleUpdateStock(chatId, productId, stock);
+            response = handleProductStockCommand(chatId, productStockMatcher);
         } else if (productCreateMatcher.matches()) {
-            String productData = productCreateMatcher.group(1);
-            response = productHandler.handleCreateProduct(chatId, productData);
+            response = handleProductCreateCommand(chatId, productCreateMatcher);
         } else if (orderSearchMatcher.matches()) {
-            Matcher matcher = ORDER_SEARCH_PATTERN.matcher(text);
-            if (matcher.find()) {
-                response = orderHandler.handleOrderSearch(chatId, matcher.group(1));
-            }
+            response = handleOrderSearchCommand(chatId, orderSearchMatcher);
         } else if (promoCreateMatcher.matches()) {
-            String promoData = promoCreateMatcher.group(0).substring("/promo_create ".length());
-            response = promoCodeHandler.handleCreatePromoCode(chatId, promoData);
+            response = handlePromoCreateCommand(chatId, promoCreateMatcher);
         } else if (promoEditMatcher.matches()) {
-            Matcher matcher = PROMO_EDIT_PATTERN.matcher(text);
-            if (matcher.find()) {
-                Long promoId = Long.parseLong(matcher.group(1));
-                String code = matcher.group(2);
-                int discount = Integer.parseInt(matcher.group(3));
-                int maxUses = Integer.parseInt(matcher.group(4));
-                String description = matcher.group(5);
-                response = promoCodeHandler.handleUpdatePromoCode(chatId, promoId, code, discount, maxUses, description);
-            }
-        } else if (userSearchMatcher.matches()) {
-            Matcher matcher = USER_SEARCH_PATTERN.matcher(text);
-            if (matcher.find()) {
-                response = userHandler.handleUserSearch(chatId, matcher.group(1));
-            }
-        } else if (userSearchAltMatcher.matches()) {
-            Matcher matcher = USER_SEARCH_ALT_PATTERN.matcher(text);
-            if (matcher.find()) {
-                log.info("Получен запрос на поиск пользователя (альт): {}", matcher.group(1));
-                response = userHandler.handleUserSearch(chatId, matcher.group(1));
-            }
-        } else if (userMatcher.matches()) {
-            Long userId = Long.parseLong(userMatcher.group(1));
-            response = userHandler.handleUserDetails(chatId, userId);
+            response = handlePromoEditCommand(chatId, promoEditMatcher);
+        } else if (userSearchMatcher.find() || userSearchAltMatcher.find()) {
+            String query = userSearchMatcher.find() ? userSearchMatcher.group(1) : userSearchAltMatcher.group(1);
+            handleUserSearchCommand(chatId, message, "all", query);
+        } else if (userNameSearchMatcher.find()) {
+            handleUserSearchCommand(chatId, message, "name", userNameSearchMatcher.group(1));
+        } else if (userSearchNameMatcher.find()) {
+            handleUserSearchCommand(chatId, message, "name", userSearchNameMatcher.group(1));
+        } else if (userEmailSearchMatcher.find()) {
+            handleUserSearchCommand(chatId, message, "email", userEmailSearchMatcher.group(1));
+        } else if (userPhoneSearchMatcher.find()) {
+            handleUserSearchCommand(chatId, message, "phone", userPhoneSearchMatcher.group(1));
+        } else if (userMatcher.find()) {
+            handleUserDetailCommand(chatId, userMatcher);
         } else {
             // Обрабатываем стандартные команды
-            response = switch (text) {
-                case "/start", "/help" -> createWelcomeMessage(chatId);
-                case "/orders", "📋 Все заказы" -> orderHandler.handleAllOrders(chatId);
-                case "/stats", "📊 Статистика" -> orderHandler.handleOrderStatistics(chatId);
-                case "/users", "👤 Пользователи" -> userHandler.handleUserList(chatId);
-                case "/menu" -> createMainMenuMessage(chatId);
-                case "🔍 Поиск заказа" -> orderHandler.handleOrderSearchRequest(chatId);
-                case "🎨 NFT" -> createNFTMenuMessage(chatId);
-                case "⚙️ Настройки" -> createSettingsMessage(chatId);
-                case "/promo", "🔖 Промокоды" -> promoCodeHandler.handleAllPromoCodes(chatId);
-                case "/products", "👕 Товары" -> productHandler.handleAllProducts(chatId);
-                default -> createUnknownCommandMessage(chatId);
-            };
+            response = handleStandardCommand(chatId, text);
         }
         
-        executeMethod(response);
+        if (response != null) {
+            executeMethod(response);
+        }
+    }
+
+    private BotApiMethod<?> handleOrderCommand(String chatId, Matcher orderMatcher) {
+        Long orderId = Long.parseLong(orderMatcher.group(1));
+        log.info("Admin {} requested order details: {}", chatId, orderId);
+        return orderHandler.handleOrderDetails(chatId, orderId);
+    }
+
+    private BotApiMethod<?> handlePromoCommand(String chatId, Matcher promoMatcher) {
+        if (promoMatcher.group(1) != null && !promoMatcher.group(1).isEmpty()) {
+            Long promoId = Long.parseLong(promoMatcher.group(1));
+            log.info("Admin {} requested promo code details: {}", chatId, promoId);
+            return promoCodeHandler.handlePromoCodeDetails(chatId, promoId);
+        } else {
+            log.info("Admin {} requested all promo codes", chatId);
+            return promoCodeHandler.handleAllPromoCodes(chatId);
+        }
+    }
+
+    private BotApiMethod<?> handleProductCommand(String chatId, Matcher productMatcher) {
+        Long productId = Long.parseLong(productMatcher.group(1));
+        log.info("Admin {} requested product details: {}", chatId, productId);
+        return productHandler.handleProductDetails(chatId, productId);
+    }
+
+    private BotApiMethod<?> handleProductSearchCommand(String chatId, Matcher productSearchMatcher) {
+        String query = productSearchMatcher.group(1);
+        log.info("Admin {} requested product search: {}", chatId, query);
+        return productHandler.handleProductSearch(chatId, query);
+    }
+
+    private BotApiMethod<?> handleProductPriceCommand(String chatId, Matcher productPriceMatcher) {
+        Long productId = Long.parseLong(productPriceMatcher.group(1));
+        String price = productPriceMatcher.group(2);
+        log.info("Admin {} requested product price update: {} to {}", chatId, productId, price);
+        return productHandler.handleUpdatePrice(chatId, productId, price);
+    }
+
+    private BotApiMethod<?> handleProductStockCommand(String chatId, Matcher productStockMatcher) {
+        Long productId = Long.parseLong(productStockMatcher.group(1));
+        String stock = productStockMatcher.group(2);
+        log.info("Admin {} requested product stock update: {} to {}", chatId, productId, stock);
+        return productHandler.handleUpdateStock(chatId, productId, stock);
+    }
+
+    private BotApiMethod<?> handleProductCreateCommand(String chatId, Matcher productCreateMatcher) {
+        String productData = productCreateMatcher.group(1);
+        log.info("Admin {} requested product creation: {}", chatId, productData);
+        return productHandler.handleCreateProduct(chatId, productData);
+    }
+
+    private BotApiMethod<?> handleOrderSearchCommand(String chatId, Matcher orderSearchMatcher) {
+        if (orderSearchMatcher.find()) {
+            String query = orderSearchMatcher.group(1);
+            log.info("Admin {} requested order search: {}", chatId, query);
+            return orderHandler.handleOrderSearch(chatId, query);
+        }
+        log.info("Admin {} requested order search form", chatId);
+        return orderHandler.handleOrderSearchRequest(chatId);
+    }
+
+    private BotApiMethod<?> handlePromoCreateCommand(String chatId, Matcher promoCreateMatcher) {
+        String promoData = promoCreateMatcher.group(0).substring("/promo_create ".length());
+        log.info("Admin {} requested promo code creation: {}", chatId, promoData);
+        return promoCodeHandler.handleCreatePromoCode(chatId, promoData);
+    }
+
+    private BotApiMethod<?> handlePromoEditCommand(String chatId, Matcher promoEditMatcher) {
+        if (promoEditMatcher.find()) {
+            Long promoId = Long.parseLong(promoEditMatcher.group(1));
+            String code = promoEditMatcher.group(2);
+            int discount = Integer.parseInt(promoEditMatcher.group(3));
+            int maxUses = Integer.parseInt(promoEditMatcher.group(4));
+            String description = promoEditMatcher.group(5);
+            log.info("Admin {} requested promo code update: {}", chatId, promoId);
+            return promoCodeHandler.handleUpdatePromoCode(chatId, promoId, code, discount, maxUses, description);
+        }
+        return null;
+    }
+
+    private void handleUserDetailCommand(String chatId, Matcher userMatcher) {
+        if (!userMatcher.group(1).isEmpty()) {
+            Long userId = Long.parseLong(userMatcher.group(1));
+            log.info("Admin {} requested user details: {}", chatId, userId);
+            SendMessage sendMessage = userHandler.handleUserDetails(chatId, userId);
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error("Ошибка отправки сообщения: {}", e.getMessage());
+            }
+        } else {
+            log.info("Admin {} requested users list", chatId);
+            SendMessage sendMessage = userHandler.handleUserList(chatId);
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error("Ошибка отправки сообщения: {}", e.getMessage());
+            }
+        }
+    }
+
+    private BotApiMethod<?> handleStandardCommand(String chatId, String text) {
+        log.info("Admin {} sent command: {}", chatId, text);
+        return switch (text) {
+            case "/start", "/help" -> createWelcomeMessage(chatId);
+            case "/orders", "📋 Все заказы" -> orderHandler.handleAllOrders(chatId);
+            case "/stats", "📊 Статистика" -> orderHandler.handleOrderStatistics(chatId);
+            case "/users", "👤 Пользователи" -> userHandler.handleUserList(chatId);
+            case "/menu" -> createMainMenuMessage(chatId);
+            case "🔍 Поиск заказа" -> {
+                // Устанавливаем состояние ожидания ввода поискового запроса
+                setUserState(chatId, UserState.WAITING_ORDER_SEARCH);
+                // Отправляем инструкции для поиска
+                yield orderHandler.handleOrderSearchRequest(chatId);
+            }
+            case "🎨 NFT" -> createNFTMenuMessage(chatId);
+            case "⚙️ Настройки" -> createSettingsMessage(chatId);
+            case "/promo", "🔖 Промокоды" -> promoCodeHandler.handleAllPromoCodes(chatId);
+            case "/products", "👕 Товары" -> productHandler.handleAllProducts(chatId);
+            default -> createUnknownCommandMessage(chatId);
+        };
     }
 
     /**
      * Обработка callback-запросов (нажатие inline-кнопок)
      */
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
-        String chatId = callbackQuery.getMessage().getChatId().toString();
-        Integer messageId = callbackQuery.getMessage().getMessageId();
+        String chatId = callbackQuery.getFrom().getId().toString();
         
-        // Проверяем, что отправитель - администратор
         if (!isAdmin(chatId)) {
-            sendCallbackAnswer(callbackQuery.getId(), "Доступ запрещен.", true);
+            sendCallbackAnswer(callbackQuery.getId(), "Доступ запрещен. Вы не являетесь администратором.", true);
             return;
         }
         
-        String callbackData = callbackQuery.getData();
-        log.debug("Received callback query: {}", callbackData);
+        String data = callbackQuery.getData();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        
+        log.info("Получен callback-запрос от администратора {}: {}", chatId, data);
         
         BotApiMethod<?> response = null;
         
         try {
-            if (callbackData.startsWith("filter:")) {
-                response = handleOrdersFilterCallback(chatId, callbackData.substring(7), messageId);
-            } else if (callbackData.startsWith("updateOrder:")) {
-                String[] parts = callbackData.substring(12).split(":");
-                if (parts.length >= 2) {
-                    Long orderId = Long.parseLong(parts[0]);
-                    OrderStatus newStatus = OrderStatus.valueOf(parts[1]);
-                    response = orderHandler.handleUpdateOrderStatus(chatId, orderId, newStatus, messageId);
+            if (data.startsWith("filter:")) {
+                String filter = data.substring(7);
+                log.info("Обработка фильтра заказов (filter:): {}", filter);
+                response = handleOrdersFilterCallback(chatId, filter, messageId);
+            } else if (data.startsWith("orders:")) {
+                String filter = data.substring(7);
+                log.info("Обработка фильтра заказов (orders:): {}", filter);
+                response = handleOrdersFilterCallback(chatId, filter, messageId);
+            } else if (data.startsWith("stats:")) {
+                String statType = data.substring(6);
+                response = handleStatsCallback(chatId, statType, messageId);
+            } else if (data.startsWith("menu:")) {
+                String menuItem = data.substring(5);
+                response = handleMenuCallback(chatId, menuItem);
+            } else if (data.startsWith("updateOrder:")) {
+                String[] parts = data.split(":");
+                if (parts.length == 3) {
+                    response = orderHandler.handleUpdateOrderStatus(
+                        chatId, 
+                        Long.parseLong(parts[1]), 
+                        OrderStatus.valueOf(parts[2]), 
+                        messageId
+                    );
                 }
-            } else if (callbackData.startsWith("viewUser:")) {
-                Long userId = Long.parseLong(callbackData.substring(9));
+            } else if (data.startsWith("viewUser:")) {
+                Long userId = Long.parseLong(data.substring(9));
                 response = userHandler.handleUserDetails(chatId, userId);
-            } else if (callbackData.startsWith("userOrders:")) {
-                Long userId = Long.parseLong(callbackData.substring(11));
+            } else if (data.startsWith("userOrders:")) {
+                Long userId = Long.parseLong(data.substring(11));
                 response = orderHandler.handleUserOrders(chatId, userId);
-            } else if (callbackData.startsWith("userNFTs:")) {
-                Long userId = Long.parseLong(callbackData.substring(9));
-                response = handleUserNFTs(chatId, userId);
-            } else if (callbackData.startsWith("toggleUserStatus:")) {
-                Long userId = Long.parseLong(callbackData.substring(17));
-                response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
-            } else if (callbackData.startsWith("stats:")) {
-                response = handleStatsCallback(chatId, callbackData.substring(6), messageId);
-            } else if (callbackData.startsWith("nft:")) {
-                response = handleNftCallback(chatId, callbackData.substring(4), messageId);
-            } else if (callbackData.startsWith("promo:")) {
-                response = handlePromoCallback(chatId, callbackData.substring(6), messageId);
-            } else if (callbackData.startsWith("product:")) {
-                response = handleProductCallback(chatId, callbackData.substring(8), messageId);
-            } else if (callbackData.startsWith("menu:")) {
-                response = handleMenuCallback(chatId, callbackData.substring(5));
-            } else if (callbackData.startsWith("user:")) {
-                String[] parts = callbackData.substring(5).split(":");
-                if (parts.length >= 2) {
-                    Long userId = Long.parseLong(parts[1]);
-                    if (parts[0].equals("activate") || parts[0].equals("deactivate")) {
-                        response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
-                    }
-                }
-            } else if (callbackData.equals("searchUser")) {
-                response = userHandler.handleSearchUserForm(chatId);
-            } else if (callbackData.equals("listUsers")) {
+            } else if (data.startsWith("nft:")) {
+                String nftCommand = data.substring(4);
+                response = handleNftCallback(chatId, nftCommand, messageId);
+            } else if (data.startsWith("promo:")) {
+                String promoCommand = data.substring(6);
+                response = handlePromoCallback(chatId, promoCommand, messageId);
+            } else if (data.startsWith("product:")) {
+                String productCommand = data.substring(8);
+                response = handleProductCallback(chatId, productCommand, messageId);
+            } else if (data.equals("listUsers")) {
                 response = userHandler.handleUserList(chatId);
+            } else if (data.equals("searchUser")) {
+                handleUserSearchByName(chatId);
+            } else if (data.equals("searchUserByName")) {
+                handleUserSearchByName(chatId);
+            } else if (data.equals("searchUserByEmail")) {
+                handleUserSearchByEmail(chatId);
+            } else if (data.equals("searchUserByPhone")) {
+                handleUserSearchByPhone(chatId);
+            } else if (data.startsWith("toggleUser:")) {
+                Long userId = Long.parseLong(data.substring(11));
+                response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
             }
             
             if (response != null) {
-                execute(response);
+                executeMethod(response);
+                sendCallbackAnswer(callbackQuery.getId(), "Выполнено", false);
             }
-            
-            sendCallbackAnswer(callbackQuery.getId(), "✓", false);
-            
         } catch (Exception e) {
-            log.error("Error handling callback query: ", e);
-            try {
-                sendCallbackAnswer(callbackQuery.getId(), "❌ Ошибка: " + e.getMessage(), true);
-            } catch (Exception ex) {
-                log.error("Error sending callback answer: {}", ex.getMessage(), ex);
-            }
+            log.error("Ошибка при обработке callback-запроса: {}", e.getMessage(), e);
+            sendCallbackAnswer(callbackQuery.getId(), "Ошибка: " + e.getMessage(), true);
         }
     }
 
@@ -336,7 +462,11 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
             case "today" -> orderHandler.handleTodayOrders(chatId);
             case "week" -> orderHandler.handleWeekOrders(chatId);
             case "month" -> orderHandler.handleMonthOrders(chatId);
-            case "search" -> orderHandler.handleOrderSearchRequest(chatId);
+            case "search" -> {
+                // Устанавливаем состояние ожидания ввода поискового запроса
+                setUserState(chatId, UserState.WAITING_ORDER_SEARCH);
+                yield orderHandler.handleOrderSearchRequest(chatId);
+            }
             default -> createMainMenuMessage(chatId);
         };
     }
@@ -636,14 +766,16 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
      * Отправляет ответ на callback-запрос
      */
     private void sendCallbackAnswer(String callbackId, String text, boolean isError) {
+        log.info("Отправка ответа на callback {}: {}, isError: {}", callbackId, text, isError);
         AnswerCallbackQuery answer = new AnswerCallbackQuery();
         answer.setCallbackQueryId(callbackId);
         answer.setText(text);
         answer.setShowAlert(isError);
         try {
             execute(answer);
+            log.info("Ответ на callback успешно отправлен");
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки ответа на callback: {}", e.getMessage());
+            log.error("Ошибка отправки ответа на callback: {}", e.getMessage(), e);
         }
     }
 
@@ -652,13 +784,16 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
      */
     private void executeMethod(BotApiMethod<?> method) {
         if (method == null) {
+            log.warn("Попытка выполнить null-метод API бота");
             return;
         }
         
         try {
+            log.info("Выполнение метода API бота: {}", method.getClass().getSimpleName());
             execute(method);
+            log.info("Метод API бота успешно выполнен");
         } catch (TelegramApiException e) {
-            log.error("Ошибка выполнения метода API бота: {}", e.getMessage());
+            log.error("Ошибка выполнения метода API бота: {}", e.getMessage(), e);
         }
     }
 
@@ -723,5 +858,143 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         SendMessage message = createMessage(chatId, text);
         message.setReplyMarkup(keyboard);
         return message;
+    }
+
+    /**
+     * Обрабатывает запрос поиска пользователя по имени
+     *
+     * @param chatId ID чата
+     */
+    private void handleUserSearchByName(String chatId) {
+        log.info("Запрос на поиск пользователя по имени, chatId: {}", chatId);
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("🔍 *Поиск пользователя по имени*\n\n" +
+                        "Введите или скопируйте команду ниже и добавьте имя пользователя:\n\n" +
+                        "`/search_user имя_пользователя`\n\n" +
+                        "💡 Команду можно скопировать, нажав на неё.");
+        message.setParseMode("Markdown");
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Обрабатывает запрос поиска пользователя по email
+     *
+     * @param chatId ID чата
+     */
+    private void handleUserSearchByEmail(String chatId) {
+        log.info("Запрос на поиск пользователя по email, chatId: {}", chatId);
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("📧 *Поиск пользователя по email*\n\n" +
+                        "Введите или скопируйте команду ниже и добавьте email:\n\n" +
+                        "`/email адрес@почты.com`\n\n" +
+                        "💡 Команду можно скопировать, нажав на неё.");
+        message.setParseMode("Markdown");
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Обрабатывает запрос поиска пользователя по телефону
+     *
+     * @param chatId ID чата
+     */
+    private void handleUserSearchByPhone(String chatId) {
+        log.info("Запрос на поиск пользователя по телефону, chatId: {}", chatId);
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("📱 *Поиск пользователя по телефону*\n\n" +
+                        "Введите или скопируйте команду ниже и добавьте номер телефона:\n\n" +
+                        "`/phone +79991234567`\n\n" +
+                        "💡 Команду можно скопировать, нажав на неё.");
+        message.setParseMode("Markdown");
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
+        }
+    }
+
+    private void createUsersMenuMessage(String chatId) {
+        log.info("Создание меню управления пользователями, chatId: {}", chatId);
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("👥 *Управление пользователями*\n\nВыберите действие из меню ниже:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createUsersMenu());
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
+        }
+    }
+
+    private void handleUserSearchCommand(String chatId, Message message, String searchType, String query) {
+        log.info("Админ {} запросил поиск пользователей по {}: {}", chatId, searchType, query);
+        
+        String searchTypeEmoji = switch(searchType) {
+            case "name" -> "👤";
+            case "email" -> "📧";
+            case "phone" -> "📱";
+            default -> "🔍";
+        };
+        
+        SendMessage sendMessage = userHandler.handleUserSearch(chatId, query, searchType);
+        
+        // Добавим информацию о поиске в текст сообщения
+        String originalText = sendMessage.getText();
+        String searchInfo = searchTypeEmoji + " *Результаты поиска пользователей*" +
+                           "\nКритерий: " + switch(searchType) {
+                               case "name" -> "имя";
+                               case "email" -> "email";
+                               case "phone" -> "телефон";
+                               default -> "все поля";
+                           } +
+                           "\nЗапрос: `" + query + "`\n\n";
+        
+        sendMessage.setText(searchInfo + originalText);
+        sendMessage.setParseMode("Markdown");
+        
+        try {
+            execute(sendMessage);
+            log.info("Результаты поиска пользователей успешно отправлены");
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Возвращает текущее состояние пользователя
+     */
+    private UserState getUserState(String chatId) {
+        return userStates.getOrDefault(chatId, UserState.NONE);
+    }
+    
+    /**
+     * Устанавливает состояние пользователя
+     */
+    private void setUserState(String chatId, UserState state) {
+        log.info("Установка состояния для админа {}: {}", chatId, state);
+        if (state == UserState.NONE) {
+            userStates.remove(chatId);
+        } else {
+            userStates.put(chatId, state);
+        }
     }
 }

@@ -60,28 +60,28 @@ public class AdminKeyboards {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
         List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(createButton("🔄 Все", "orders:all"));
-        row1.add(createButton("🆕 Новые", "orders:NEW"));
+        row1.add(createButton("🔄 Все", "filter:all"));
+        row1.add(createButton("🆕 Новые", "filter:NEW"));
         rows.add(row1);
         
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(createButton("⏳ В обработке", "orders:PROCESSING"));
-        row2.add(createButton("📦 Отправленные", "orders:DISPATCHED"));
+        row2.add(createButton("⏳ В обработке", "filter:PROCESSING"));
+        row2.add(createButton("📦 Отправленные", "filter:DISPATCHED"));
         rows.add(row2);
         
         List<InlineKeyboardButton> row3 = new ArrayList<>();
-        row3.add(createButton("✅ Выполненные", "orders:COMPLETED"));
-        row3.add(createButton("❌ Отмененные", "orders:CANCELLED"));
+        row3.add(createButton("✅ Выполненные", "filter:COMPLETED"));
+        row3.add(createButton("❌ Отмененные", "filter:CANCELLED"));
         rows.add(row3);
         
         List<InlineKeyboardButton> row4 = new ArrayList<>();
-        row4.add(createButton("📆 За сегодня", "orders:today"));
-        row4.add(createButton("📅 За неделю", "orders:week"));
-        row4.add(createButton("📅 За месяц", "orders:month"));
+        row4.add(createButton("📆 За сегодня", "filter:today"));
+        row4.add(createButton("📅 За неделю", "filter:week"));
+        row4.add(createButton("📅 За месяц", "filter:month"));
         rows.add(row4);
         
         List<InlineKeyboardButton> row5 = new ArrayList<>();
-        row5.add(createButton("🔍 Поиск заказа", "orders:search"));
+        row5.add(createButton("🔍 Поиск заказа", "filter:search"));
         rows.add(row5);
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -253,6 +253,41 @@ public class AdminKeyboards {
     }
     
     /**
+     * Создаёт клавиатуру для управления пользователями
+     */
+    public static InlineKeyboardMarkup createUsersMenu() {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("👥 Список пользователей", "listUsers"));
+        rows.add(row1);
+        
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("🔍 Поиск по строке", "searchUser"));
+        rows.add(row2);
+        
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        row3.add(createButton("👤 Поиск по имени", "searchUserByName"));
+        rows.add(row3);
+        
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
+        row4.add(createButton("✉️ Поиск по email", "searchUserByEmail"));
+        rows.add(row4);
+        
+        List<InlineKeyboardButton> row5 = new ArrayList<>();
+        row5.add(createButton("📱 Поиск по телефону", "searchUserByPhone"));
+        rows.add(row5);
+        
+        List<InlineKeyboardButton> row6 = new ArrayList<>();
+        row6.add(createButton("◀️ Главное меню", "menu"));
+        rows.add(row6);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
+    }
+    
+    /**
      * Создаёт клавиатуру с кнопками назад
      */
     public static InlineKeyboardMarkup createBackKeyboard(String callback) {
@@ -304,5 +339,26 @@ public class AdminKeyboards {
             case COMPLETED -> "✅";
             case CANCELLED -> "❌";
         };
+    }
+
+    /**
+     * Создаёт клавиатуру для поиска пользователей
+     */
+    public static InlineKeyboardMarkup createUserSearchKeyboard() {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("🔍 Поиск по имени", "user:searchByName"));
+        row1.add(createButton("📧 Поиск по email", "user:searchByEmail"));
+        rows.add(row1);
+        
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("📱 Поиск по телефону", "user:searchByPhone"));
+        row2.add(createButton("👥 Все пользователи", "menu:users"));
+        rows.add(row2);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
     }
 } 
