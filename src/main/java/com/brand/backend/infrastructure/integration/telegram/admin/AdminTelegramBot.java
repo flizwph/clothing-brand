@@ -8,6 +8,8 @@ import com.brand.backend.infrastructure.integration.telegram.admin.keyboards.Adm
 import com.brand.backend.infrastructure.integration.telegram.admin.service.AdminBotService;
 import com.brand.backend.domain.order.model.OrderStatus;
 import com.brand.backend.domain.order.repository.OrderRepository;
+import com.brand.backend.domain.user.model.User;
+import com.brand.backend.domain.nft.model.NFT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,8 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import jakarta.annotation.PostConstruct;
 
@@ -29,7 +33,6 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AdminTelegramBot extends TelegramLongPollingBot {
 
     private final OrderRepository orderRepository;
@@ -66,11 +69,35 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     // Регулярное выражение для обработки команд вида /product_create ProductName 1000.50 10 20 30
     private static final Pattern PRODUCT_CREATE_PATTERN = Pattern.compile("/product_create\\s+(.+)");
     // Регулярное выражение для обработки команд вида /order_search query
-    private static final Pattern ORDER_SEARCH_PATTERN = Pattern.compile("/order_search\\s+(.+)");
+    private static final Pattern ORDER_SEARCH_PATTERN = Pattern.compile("/order_search\\s+(.+)$");
     // Регулярное выражение для обработки команд вида /promo_create CODE 15% 100 Description
-    private static final Pattern PROMO_CREATE_PATTERN = Pattern.compile("/promo_create\\s+(.+)");
+    private static final Pattern PROMO_CREATE_PATTERN = Pattern.compile("^/promo_create\\s+(\\S+)\\s+(\\d+)%\\s+(\\d+)(?:\\s+(.+))?$");
     // Регулярное выражение для обработки команд вида /promo_edit_123 CODE 15% 100 Description
-    private static final Pattern PROMO_EDIT_PATTERN = Pattern.compile("/promo_edit_(\\d+)\\s+(.+)");
+    private static final Pattern PROMO_EDIT_PATTERN = Pattern.compile("^/promo_edit_(\\d+)\\s+([A-Z0-9]+)\\s+(\\d+)%\\s+(\\d+)\\s+(.+)$");
+    // Регулярное выражение для обработки команд вида /user_search query
+    private static final Pattern USER_SEARCH_PATTERN = Pattern.compile("^/user_search\\s+(.+)$");
+    // Регулярное выражение для обработки команд вида /usersearch query (альтернативная форма)
+    private static final Pattern USER_SEARCH_ALT_PATTERN = Pattern.compile("^/usersearch\\s+(.+)$");
+    // Регулярное выражение для обработки команд вида /user_123
+    private static final Pattern USER_COMMAND_PATTERN = Pattern.compile("/user_(\\d+)");
+
+    // Конструктор с инициализацией всех необходимых полей
+    public AdminTelegramBot(
+            @Value("${admin.bot.token}") String botToken,
+            OrderRepository orderRepository,
+            OrderHandler orderHandler,
+            UserHandler userHandler,
+            AdminBotService adminBotService,
+            PromoCodeHandler promoCodeHandler,
+            ProductHandler productHandler) {
+        super(botToken);
+        this.orderRepository = orderRepository;
+        this.orderHandler = orderHandler;
+        this.userHandler = userHandler;
+        this.adminBotService = adminBotService;
+        this.promoCodeHandler = promoCodeHandler;
+        this.productHandler = productHandler;
+    }
 
     @PostConstruct
     public void init() {
@@ -92,10 +119,6 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         return botUsername;
-    }
-    @Override
-    public String getBotToken() {
-        return botToken;
     }
 
     @Override
@@ -140,6 +163,9 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         Matcher orderSearchMatcher = ORDER_SEARCH_PATTERN.matcher(text);
         Matcher promoCreateMatcher = PROMO_CREATE_PATTERN.matcher(text);
         Matcher promoEditMatcher = PROMO_EDIT_PATTERN.matcher(text);
+        Matcher userSearchMatcher = USER_SEARCH_PATTERN.matcher(text);
+        Matcher userSearchAltMatcher = USER_SEARCH_ALT_PATTERN.matcher(text);
+        Matcher userMatcher = USER_COMMAND_PATTERN.matcher(text);
         
         if (orderMatcher.matches()) {
             Long orderId = Long.parseLong(orderMatcher.group(1));
@@ -165,19 +191,37 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
             String productData = productCreateMatcher.group(1);
             response = productHandler.handleCreateProduct(chatId, productData);
         } else if (orderSearchMatcher.matches()) {
-            String query = orderSearchMatcher.group(1);
-            response = orderHandler.handleOrderSearch(chatId, query);
+            Matcher matcher = ORDER_SEARCH_PATTERN.matcher(text);
+            if (matcher.find()) {
+                response = orderHandler.handleOrderSearch(chatId, matcher.group(1));
+            }
         } else if (promoCreateMatcher.matches()) {
-            log.info("Обработка команды создания промокода: {}", text);
-            String promoData = promoCreateMatcher.group(1);
-            log.info("Данные промокода: {}", promoData);
+            String promoData = promoCreateMatcher.group(0).substring("/promo_create ".length());
             response = promoCodeHandler.handleCreatePromoCode(chatId, promoData);
         } else if (promoEditMatcher.matches()) {
-            log.info("Обработка команды редактирования промокода: {}", text);
-            Long promoId = Long.parseLong(promoEditMatcher.group(1));
-            String promoData = promoEditMatcher.group(2);
-            log.info("ID промокода: {}, новые данные: {}", promoId, promoData);
-            response = promoCodeHandler.handleUpdatePromoCode(chatId, promoId, promoData);
+            Matcher matcher = PROMO_EDIT_PATTERN.matcher(text);
+            if (matcher.find()) {
+                Long promoId = Long.parseLong(matcher.group(1));
+                String code = matcher.group(2);
+                int discount = Integer.parseInt(matcher.group(3));
+                int maxUses = Integer.parseInt(matcher.group(4));
+                String description = matcher.group(5);
+                response = promoCodeHandler.handleUpdatePromoCode(chatId, promoId, code, discount, maxUses, description);
+            }
+        } else if (userSearchMatcher.matches()) {
+            Matcher matcher = USER_SEARCH_PATTERN.matcher(text);
+            if (matcher.find()) {
+                response = userHandler.handleUserSearch(chatId, matcher.group(1));
+            }
+        } else if (userSearchAltMatcher.matches()) {
+            Matcher matcher = USER_SEARCH_ALT_PATTERN.matcher(text);
+            if (matcher.find()) {
+                log.info("Получен запрос на поиск пользователя (альт): {}", matcher.group(1));
+                response = userHandler.handleUserSearch(chatId, matcher.group(1));
+            }
+        } else if (userMatcher.matches()) {
+            Long userId = Long.parseLong(userMatcher.group(1));
+            response = userHandler.handleUserDetails(chatId, userId);
         } else {
             // Обрабатываем стандартные команды
             response = switch (text) {
@@ -204,65 +248,84 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
         String chatId = callbackQuery.getMessage().getChatId().toString();
         Integer messageId = callbackQuery.getMessage().getMessageId();
-        String data = callbackQuery.getData();
         
         // Проверяем, что отправитель - администратор
         if (!isAdmin(chatId)) {
-            sendCallbackAnswer(callbackQuery.getId(), "Доступ запрещен.");
+            sendCallbackAnswer(callbackQuery.getId(), "Доступ запрещен.", true);
             return;
         }
         
+        String callbackData = callbackQuery.getData();
+        log.debug("Received callback query: {}", callbackData);
+        
         BotApiMethod<?> response = null;
         
-        // Разбираем callback данные
-        if (data.startsWith("orders:")) {
-            // Обработка фильтрации заказов
-            String filter = data.substring(7);
-            response = handleOrdersFilterCallback(chatId, filter);
-        } else if (data.startsWith("updateOrder:")) {
-            // Обработка обновления статуса заказа
-            String[] parts = data.split(":");
-            Long orderId = Long.parseLong(parts[1]);
-            OrderStatus newStatus = OrderStatus.valueOf(parts[2]);
-            response = handleUpdateOrderStatusCallback(chatId, messageId, orderId, newStatus);
-        } else if (data.startsWith("viewUser:")) {
-            // Просмотр информации о пользователе
-            Long userId = Long.parseLong(data.substring(9));
-            response = userHandler.handleUserDetails(chatId, userId);
-        } else if (data.startsWith("userOrders:")) {
-            // Просмотр заказов пользователя
-            Long userId = Long.parseLong(data.substring(11));
-            response = orderHandler.handleUserOrders(chatId, userId);
-        } else if (data.startsWith("stats:")) {
-            // Обработка статистики
-            String statType = data.substring(6);
-            response = handleStatsCallback(chatId, messageId, statType);
-        } else if (data.startsWith("nft:")) {
-            // Обработка команд NFT
-            String nftCommand = data.substring(4);
-            response = handleNFTCallback(chatId, messageId, nftCommand);
-        } else if (data.startsWith("promo:")) {
-            // Обработка команд промокодов
-            String promoCommand = data.substring(6);
-            response = handlePromoCallback(chatId, messageId, promoCommand);
-        } else if (data.startsWith("product:")) {
-            // Обработка команд товаров
-            String productCommand = data.substring(8);
-            response = handleProductCallback(chatId, messageId, productCommand);
+        try {
+            if (callbackData.startsWith("filter:")) {
+                response = handleOrdersFilterCallback(chatId, callbackData.substring(7), messageId);
+            } else if (callbackData.startsWith("updateOrder:")) {
+                String[] parts = callbackData.substring(12).split(":");
+                if (parts.length >= 2) {
+                    Long orderId = Long.parseLong(parts[0]);
+                    OrderStatus newStatus = OrderStatus.valueOf(parts[1]);
+                    response = orderHandler.handleUpdateOrderStatus(chatId, orderId, newStatus, messageId);
+                }
+            } else if (callbackData.startsWith("viewUser:")) {
+                Long userId = Long.parseLong(callbackData.substring(9));
+                response = userHandler.handleUserDetails(chatId, userId);
+            } else if (callbackData.startsWith("userOrders:")) {
+                Long userId = Long.parseLong(callbackData.substring(11));
+                response = orderHandler.handleUserOrders(chatId, userId);
+            } else if (callbackData.startsWith("userNFTs:")) {
+                Long userId = Long.parseLong(callbackData.substring(9));
+                response = handleUserNFTs(chatId, userId);
+            } else if (callbackData.startsWith("toggleUserStatus:")) {
+                Long userId = Long.parseLong(callbackData.substring(17));
+                response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
+            } else if (callbackData.startsWith("stats:")) {
+                response = handleStatsCallback(chatId, callbackData.substring(6), messageId);
+            } else if (callbackData.startsWith("nft:")) {
+                response = handleNftCallback(chatId, callbackData.substring(4), messageId);
+            } else if (callbackData.startsWith("promo:")) {
+                response = handlePromoCallback(chatId, callbackData.substring(6), messageId);
+            } else if (callbackData.startsWith("product:")) {
+                response = handleProductCallback(chatId, callbackData.substring(8), messageId);
+            } else if (callbackData.startsWith("menu:")) {
+                response = handleMenuCallback(chatId, callbackData.substring(5));
+            } else if (callbackData.startsWith("user:")) {
+                String[] parts = callbackData.substring(5).split(":");
+                if (parts.length >= 2) {
+                    Long userId = Long.parseLong(parts[1]);
+                    if (parts[0].equals("activate") || parts[0].equals("deactivate")) {
+                        response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
+                    }
+                }
+            } else if (callbackData.equals("searchUser")) {
+                response = userHandler.handleSearchUserForm(chatId);
+            } else if (callbackData.equals("listUsers")) {
+                response = userHandler.handleUserList(chatId);
+            }
+            
+            if (response != null) {
+                execute(response);
+            }
+            
+            sendCallbackAnswer(callbackQuery.getId(), "✓", false);
+            
+        } catch (Exception e) {
+            log.error("Error handling callback query: ", e);
+            try {
+                sendCallbackAnswer(callbackQuery.getId(), "❌ Ошибка: " + e.getMessage(), true);
+            } catch (Exception ex) {
+                log.error("Error sending callback answer: {}", ex.getMessage(), ex);
+            }
         }
-        
-        if (response != null) {
-            executeMethod(response);
-        }
-        
-        // Отправляем ответ на callback запрос
-        sendCallbackAnswer(callbackQuery.getId(), "✅");
     }
 
     /**
      * Обработка callback фильтрации заказов
      */
-    private BotApiMethod<?> handleOrdersFilterCallback(String chatId, String filter) {
+    private BotApiMethod<?> handleOrdersFilterCallback(String chatId, String filter, Integer messageId) {
         return switch (filter) {
             case "all" -> orderHandler.handleAllOrders(chatId);
             case "NEW" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.NEW);
@@ -279,21 +342,9 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     }
 
     /**
-     * Обработка callback обновления статуса заказа
-     */
-    private BotApiMethod<?> handleUpdateOrderStatusCallback(String chatId, Integer messageId, Long orderId, OrderStatus newStatus) {
-        try {
-            return orderHandler.handleUpdateOrderStatus(chatId, orderId, newStatus, messageId);
-        } catch (Exception e) {
-            log.error("Ошибка при обновлении статуса заказа: {}", e.getMessage());
-        }
-        return createMessage(chatId, "Ошибка при обновлении статуса заказа.");
-    }
-
-    /**
      * Обработка callback статистики
      */
-    private BotApiMethod<?> handleStatsCallback(String chatId, Integer messageId, String statType) {
+    private BotApiMethod<?> handleStatsCallback(String chatId, String statType, Integer messageId) {
         return switch (statType) {
             case "general" -> orderHandler.handleOrderStatistics(chatId);
             case "daily" -> orderHandler.handleDailyStatistics(chatId);
@@ -309,6 +360,7 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     private BotApiMethod<?> handleMenuCallback(String chatId, String menuItem) {
         return switch (menuItem) {
             case "main" -> createMainMenuMessage(chatId);
+            case "users" -> userHandler.handleUserList(chatId);
             default -> createMainMenuMessage(chatId);
         };
     }
@@ -316,7 +368,7 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     /**
      * Обработка callback NFT
      */
-    private BotApiMethod<?> handleNFTCallback(String chatId, Integer messageId, String nftCommand) {
+    private BotApiMethod<?> handleNftCallback(String chatId, String nftCommand, Integer messageId) {
         return switch (nftCommand) {
             case "all" -> createAllNFTsMessage(chatId);
             case "unrevealed" -> createUnrevealedNFTsMessage(chatId);
@@ -328,7 +380,7 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     /**
      * Обрабатывает callback-запросы для промокодов
      */
-    private BotApiMethod<?> handlePromoCallback(String chatId, Integer messageId, String command) {
+    private BotApiMethod<?> handlePromoCallback(String chatId, String command, Integer messageId) {
         if (command.equals("all")) {
             return promoCodeHandler.handleAllPromoCodes(chatId);
         } else if (command.equals("active")) {
@@ -361,7 +413,7 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     /**
      * Обрабатывает callback-запросы для товаров
      */
-    private BotApiMethod<?> handleProductCallback(String chatId, Integer messageId, String command) {
+    private BotApiMethod<?> handleProductCallback(String chatId, String command, Integer messageId) {
         if (command.equals("all")) {
             return productHandler.handleAllProducts(chatId);
         } else if (command.equals("search")) {
@@ -583,10 +635,11 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     /**
      * Отправляет ответ на callback-запрос
      */
-    private void sendCallbackAnswer(String callbackId, String text) {
+    private void sendCallbackAnswer(String callbackId, String text, boolean isError) {
         AnswerCallbackQuery answer = new AnswerCallbackQuery();
         answer.setCallbackQueryId(callbackId);
         answer.setText(text);
+        answer.setShowAlert(isError);
         try {
             execute(answer);
         } catch (TelegramApiException e) {
@@ -607,5 +660,68 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error("Ошибка выполнения метода API бота: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр NFT пользователя
+     */
+    private SendMessage handleUserNFTs(String chatId, Long userId) {
+        User user = adminBotService.getUserById(userId);
+        
+        if (user == null) {
+            return createMessage(chatId, "Пользователь не найден.");
+        }
+        
+        List<NFT> userNFTs = adminBotService.getNFTsByUser(user);
+        
+        if (userNFTs.isEmpty()) {
+            return createMessage(chatId, "У пользователя " + user.getUsername() + " нет NFT.");
+        }
+        
+        StringBuilder message = new StringBuilder("🎨 NFT пользователя " + user.getUsername() + ":\n\n");
+        
+        for (int i = 0; i < userNFTs.size(); i++) {
+            NFT nft = userNFTs.get(i);
+            message.append(i + 1).append(". ID: ").append(nft.getId()).append("\n");
+            message.append("   Placeholder URI: ").append(nft.getPlaceholderUri()).append("\n");
+            message.append("   Раскрыт: ").append(nft.isRevealed() ? "✅" : "❌").append("\n");
+            if (nft.isRevealed() && nft.getRevealedUri() != null) {
+                message.append("   Revealed URI: ").append(nft.getRevealedUri()).append("\n");
+            }
+            if (nft.getRarity() != null) {
+                message.append("   Редкость: ").append(nft.getRarity()).append("\n");
+            }
+            message.append("\n");
+        }
+        
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(createButton("◀️ Назад к пользователю", "viewUser:" + userId));
+        rows.add(row);
+        
+        keyboard.setKeyboard(rows);
+        
+        return createMessage(chatId, message.toString(), keyboard);
+    }
+
+    /**
+     * Создаёт кнопку с текстом и callback-данными
+     */
+    private InlineKeyboardButton createButton(String text, String callbackData) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText(text);
+        button.setCallbackData(callbackData);
+        return button;
+    }
+    
+    /**
+     * Создаёт объект сообщения с клавиатурой
+     */
+    private SendMessage createMessage(String chatId, String text, org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard keyboard) {
+        SendMessage message = createMessage(chatId, text);
+        message.setReplyMarkup(keyboard);
+        return message;
     }
 }
