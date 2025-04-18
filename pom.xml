@@ -18,11 +18,19 @@
     <description>clothing-brand</description>
 
     <properties>
+<<<<<<< HEAD
         <java.version>17</java.version>
     </properties>
 
     <dependencies>
         <!-- Spring Boot -->
+=======
+        <java.version>17</java.version> <!-- Убедитесь, что версия Java поддерживается -->
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Dependencies -->
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -44,33 +52,55 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+<<<<<<< HEAD
         <!-- Database (PostgreSQL) -->
+=======
+        <!-- Database Driver -->
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
+<<<<<<< HEAD
         <!-- Telegram Bot -->
+=======
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots</artifactId>
             <version>6.6.0</version>
+<<<<<<< HEAD
         </dependency>
 
         <!-- Validation -->
+=======
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                    <artifactId>jackson-module-jaxb-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.0.2</version>
         </dependency>
+<<<<<<< HEAD
 
         <!-- JPA API -->
+=======
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+<<<<<<< HEAD
 
         <!-- JWT (JSON Web Token) -->
         <dependency>
@@ -92,6 +122,15 @@
         </dependency>
 
         <!-- JAXB (для Jackson и Hibernate) -->
+=======
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.18.2</version>
+        </dependency>
+
+
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
@@ -103,6 +142,7 @@
             <version>4.0.5</version>
         </dependency>
 
+<<<<<<< HEAD
         <!-- Lombok -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
@@ -121,10 +161,33 @@
         </dependency>
 
         <!-- Тестирование -->
+=======
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+<<<<<<< HEAD
+=======
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -132,12 +195,16 @@
             <scope>test</scope>
         </dependency>
 
+<<<<<<< HEAD
         <!-- Apache Commons -->
+=======
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+<<<<<<< HEAD
         <!-- Hibernate -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
@@ -148,6 +215,12 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.0</version>
+=======
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.5.3.Final</version>
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
         </dependency>
     </dependencies>
 
@@ -156,6 +229,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+<<<<<<< HEAD
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -172,6 +246,8 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+=======
+>>>>>>> c507d206f5d54b29213e6c61e4709cef43ca4ee7
             </plugin>
         </plugins>
     </build>
