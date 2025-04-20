@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Сервис для управления NFT
+ */
 @Service
 @RequiredArgsConstructor
 public class NFTService {
@@ -22,12 +25,12 @@ public class NFTService {
     private final ApplicationEventPublisher eventPublisher;
 
     /**
-     * Создает запись NFT для заказа.
-     *
-     * @param order Заказ, по которому выдаётся NFT.
-     * @param placeholderUri URI для placeholder NFT (до раскрытия)
-     * @param rarity Параметры NFT (например, редкость)
-     * @return созданный объект NFT.
+     * Создает новый NFT для заказа
+     * 
+     * @param order заказ
+     * @param placeholderUri URI placeholder-изображения
+     * @param rarity редкость
+     * @return созданный NFT
      */
     @Transactional
     public NFT createNFTForOrder(Order order, String placeholderUri, String rarity) {

@@ -1,10 +1,10 @@
 package com.brand.backend.application.nft.handler;
 
-import com.brand.backend.infrastructure.integration.telegram.user.TelegramBotService;
+import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.domain.nft.event.NFTEvent;
 import com.brand.backend.domain.nft.model.NFT;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -16,12 +16,20 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+/**
+ * Обработчик событий, связанных с NFT
+ */
 @Component
-@RequiredArgsConstructor
 public class NFTEventHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(NFTEventHandler.class);
+    
     private final TelegramBotService telegramBotService;
+    
+    @org.springframework.beans.factory.annotation.Autowired
+    public NFTEventHandler(TelegramBotService telegramBotService) {
+        this.telegramBotService = telegramBotService;
+    }
 
     @Async("eventExecutor")
     @EventListener

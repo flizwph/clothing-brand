@@ -21,6 +21,9 @@ public class Product {
     @Column(name = "price", nullable = false)
     private double price;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_sizes", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "size")
@@ -43,6 +46,12 @@ public class Product {
         product.setAvailableQuantityS(quantityS);
         product.setAvailableQuantityM(quantityM);
         product.setAvailableQuantityL(quantityL);
+        return product;
+    }
+
+    public static Product createProduct(String name, double price, String imageUrl, int quantityS, int quantityM, int quantityL) {
+        Product product = createProduct(name, price, quantityS, quantityM, quantityL);
+        product.setImageUrl(imageUrl);
         return product;
     }
 }

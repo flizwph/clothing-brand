@@ -1,6 +1,6 @@
 package com.brand.backend.application.order.handler;
 
-import com.brand.backend.infrastructure.integration.telegram.user.TelegramBotService;
+import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot;
 import com.brand.backend.domain.order.event.OrderEvent;
 import com.brand.backend.domain.nft.model.NFT;
@@ -8,17 +8,22 @@ import com.brand.backend.domain.order.model.Order;
 import com.brand.backend.domain.order.model.OrderStatus;
 import com.brand.backend.application.nft.service.NFTService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-@Slf4j
+/**
+ * Обработчик событий, связанных с заказами
+ */
 @Component
 @RequiredArgsConstructor
 public class OrderEventHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderEventHandler.class);
 
     private final TelegramBotService telegramBotService;
     private final AdminTelegramBot adminTelegramBot;

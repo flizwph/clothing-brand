@@ -1,20 +1,25 @@
 package com.brand.backend.application.user.handler;
 
-import com.brand.backend.infrastructure.integration.telegram.user.TelegramBotService;
+import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.domain.user.event.UserEvent;
 import com.brand.backend.domain.user.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-@Slf4j
+/**
+ * Обработчик событий, связанных с пользователями
+ */
 @Component
 @RequiredArgsConstructor
 public class UserEventHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(UserEventHandler.class);
 
     private final TelegramBotService telegramBotService;
 

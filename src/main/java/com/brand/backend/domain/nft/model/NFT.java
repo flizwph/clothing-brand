@@ -2,46 +2,48 @@ package com.brand.backend.domain.nft.model;
 
 import com.brand.backend.domain.order.model.Order;
 import com.brand.backend.domain.user.model.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+/**
+ * Модель NFT-токена
+ */
 @Entity
 @Table(name = "nfts")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NFT {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // Связь с заказом (опционально, если нужно хранить связь с заказом)
-    @OneToOne
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    
+    @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
-
-    // Пользователь, которому принадлежит NFT
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    // URI с изображением или метаданными NFT
-    @Column(name = "placeholder_uri", nullable = false)
+    
+    private String tokenId;
+    
     private String placeholderUri;
-
-    // URI после раскрытия (если NFT открыт)
-    @Column(name = "revealed_uri")
+    
     private String revealedUri;
-
-    // Флаг, что NFT раскрыт
-    @Column(name = "revealed", nullable = false)
-    private boolean revealed = false;
-
-    // Дополнительные параметры, например редкость, supply и т.д.
-    @Column(name = "rarity")
+    
     private String rarity;
-
-    @Column(name = "created_at", nullable = false)
+    
+    private boolean revealed;
+    
+    private boolean transferred;
+    
     private LocalDateTime createdAt;
 }
