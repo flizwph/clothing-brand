@@ -1,6 +1,8 @@
 package com.brand.backend.infrastructure.integration.telegram.user.handler;
 
+import com.brand.backend.domain.subscription.model.SubscriptionLevel;
 import com.brand.backend.infrastructure.integration.telegram.user.command.CartCommand;
+import com.brand.backend.infrastructure.integration.telegram.user.handlers.SubscriptionHandler;
 import com.brand.backend.infrastructure.integration.telegram.user.service.CartService;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramProductService;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
@@ -30,6 +32,7 @@ public class CallbackHandler {
     private final CartService cartService;
     private final UserSessionService userSessionService;
     private final CartCommand cartCommand;
+    private final SubscriptionHandler subscriptionHandler;
 
     /**
      * Обрабатывает callback-запрос и возвращает ответ для выполнения
@@ -108,6 +111,12 @@ public class CallbackHandler {
             handleCartDecreaseCallback(callbackData, chatId, bot);
         } else if (callbackData.startsWith("cart_remove_")) {
             handleCartRemoveCallback(callbackData, chatId, bot);
+        } else if (callbackData.equals("subscription_new")) {
+            handleNewSubscriptionCallback(chatId, bot);
+        } else if (callbackData.startsWith("subscription_select_")) {
+            handleSubscriptionLevelCallback(callbackData, chatId, bot);
+        } else if (callbackData.equals("subscription_activate")) {
+            handleSubscriptionActivateCallback(chatId, bot);
         } else {
             log.warn("Unknown callback data: {}", callbackData);
             bot.sendMessage(stringChatId, "Неизвестная команда. Используйте /help для просмотра доступных команд.");
@@ -318,12 +327,54 @@ public class CallbackHandler {
     }
     
     /**
+     * Обрабатывает callback для создания новой подписки
+     * @param chatId ID чата
+     * @param bot экземпляр бота
+     */
+    private void handleNewSubscriptionCallback(Long chatId, TelegramBotService bot) {
+        SendMessage response = subscriptionHandler.createSubscriptionSelectionMenu(chatId);
+        bot.executeMethod(response);
+    }
+    
+    /**
+     * Обрабатывает callback для выбора уровня подписки
+     * @param callbackData данные callback
+     * @param chatId ID чата
+     * @param bot экземпляр бота
+     */
+    private void handleSubscriptionLevelCallback(String callbackData, Long chatId, TelegramBotService bot) {
+        String level = callbackData.substring("subscription_select_".length());
+        SubscriptionLevel subscriptionLevel = SubscriptionLevel.valueOf(level);
+        
+        SendMessage response = subscriptionHandler.handleSubscriptionLevelSelected(chatId, subscriptionLevel);
+        bot.executeMethod(response);
+    }
+    
+    /**
+     * Обрабатывает callback для активации подписки
+     * @param chatId ID чата
+     * @param bot экземпляр бота
+     */
+    private void handleSubscriptionActivateCallback(Long chatId, TelegramBotService bot) {
+        // Устанавливаем состояние ожидания кода активации
+        userSessionService.setUserState(chatId.toString(), "waitingForActivationCode");
+        
+        String message = """
+                Пожалуйста, введите код активации для вашей подписки.
+                
+                Если вы не знаете свой код активации, вы можете получить его с помощью команды /subscription
+                """;
+                
+        bot.sendMessage(chatId.toString(), message);
+    }
+    
+    /**
      * Адаптер для TelegramBotService, который не выполняет никаких действий
      * Используется для обработки callback в методе handle
      */
     private static class TelegramBotServiceAdapter extends TelegramBotService {
         public TelegramBotServiceAdapter() {
-            super(null, null, null, null, true);
+            super(null, null, null, null, null, true);
         }
         
         @Override

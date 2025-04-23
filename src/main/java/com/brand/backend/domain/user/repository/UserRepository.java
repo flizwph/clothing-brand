@@ -12,4 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByVerificationCode(String verificationCode);
     Optional<User> findByUsername(String username);
     Optional<User> findByDiscordId(Long discordId);
+    Optional<User> findByVkUsername(String vkUsername);
 }

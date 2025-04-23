@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -74,5 +75,28 @@ public class UserSessionService {
      */
     public void setUserState(Long userId, String state) {
         userSessions.put(userId.toString(), state);
+    }
+    
+    /**
+     * Устанавливает состояние пользователя c использованием строкового ID
+     * 
+     * @param userId строковый ID пользователя
+     * @param state новое состояние
+     */
+    public void setUserState(String userId, String state) {
+        userSessions.put(userId, state);
+    }
+    
+    /**
+     * Находит первого пользователя в указанном состоянии
+     * 
+     * @param state состояние для поиска
+     * @return Optional с ID пользователя или пустой Optional, если пользователь не найден
+     */
+    public Optional<String> findUserByState(String state) {
+        return userSessions.entrySet().stream()
+                .filter(entry -> state.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .findFirst();
     }
 } 

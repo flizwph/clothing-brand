@@ -2,8 +2,11 @@ package com.brand.backend.infrastructure.integration.telegram.user.handler;
 
 import com.brand.backend.infrastructure.integration.telegram.user.command.Command;
 import com.brand.backend.infrastructure.integration.telegram.user.command.CommandFactory;
+import com.brand.backend.infrastructure.integration.telegram.user.handlers.SubscriptionHandler;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.infrastructure.integration.telegram.user.service.UserSessionService;
+import com.brand.backend.application.subscription.service.SubscriptionService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,6 +24,8 @@ public class MessageHandler {
 
     private final CommandFactory commandFactory;
     private final UserSessionService userSessionService;
+    private final SubscriptionHandler subscriptionHandler;
+    private final SubscriptionService subscriptionService;
     
     /**
      * Обрабатывает входящее сообщение и возвращает ответ для выполнения
@@ -38,13 +43,12 @@ public class MessageHandler {
         
         log.info("Получено сообщение от пользователя {}: {}", chatId, text);
         
-        TelegramBotService dummyBot = new TelegramBotServiceAdapter();
+        TelegramBotService dummyBot = new TelegramBotServiceAdapter(subscriptionService);
         
         // Проверяем, находится ли пользователь в особом состоянии
         String state = userSessionService.getUserState(String.valueOf(message.getChatId()));
         if (state != null) {
-            handleStateBasedMessage(message, state, dummyBot);
-            return null;
+            return handleStateBasedMessage(message, state, dummyBot);
         }
         
         // Обрабатываем команды
@@ -120,9 +124,19 @@ public class MessageHandler {
      * @param state состояние пользователя
      * @param bot экземпляр бота
      */
-    private void handleStateBasedMessage(Message message, String state, TelegramBotService bot) {
+    private BotApiMethod<?> handleStateBasedMessage(Message message, String state, TelegramBotService bot) {
         Long chatId = message.getChatId();
         String text = message.getText();
+        
+        // Проверяем, не является ли сообщение командой
+        if (text.startsWith("/")) {
+            Command command = commandFactory.getCommand(text);
+            if (command != null) {
+                log.info("Выполняется команда в состоянии {}: {}", state, text);
+                command.execute(message, bot);
+                return null;
+            }
+        }
         
         switch (state) {
             case "linkTelegram":
@@ -134,11 +148,17 @@ public class MessageHandler {
             case "searchOrder":
                 handleSearchOrderState(message, bot);
                 break;
+            case "waitingForActivationCode":
+                SendMessage response = subscriptionHandler.handleActivationCodeInput(chatId, text);
+                bot.executeMethod(response);
+                break;
             default:
                 log.warn("Неизвестное состояние пользователя {}: {}", chatId, state);
                 userSessionService.clearSession(String.valueOf(chatId));
                 bot.sendMessage(String.valueOf(chatId), "Произошла ошибка. Пожалуйста, начните снова.");
         }
+        
+        return null;
     }
     
     /**
@@ -227,8 +247,11 @@ public class MessageHandler {
      * Используется для обработки сообщений в методе handle
      */
     private static class TelegramBotServiceAdapter extends TelegramBotService {
-        public TelegramBotServiceAdapter() {
-            super(null, null, null, null, true);
+        private SubscriptionService subscriptionService;
+        
+        public TelegramBotServiceAdapter(SubscriptionService subscriptionService) {
+            super(null, null, null, null, subscriptionService, true);
+            this.subscriptionService = subscriptionService;
         }
         
         @Override
