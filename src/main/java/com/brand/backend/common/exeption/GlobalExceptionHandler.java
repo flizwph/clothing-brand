@@ -3,6 +3,7 @@ package com.brand.backend.common.exeption;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -153,6 +154,37 @@ public class GlobalExceptionHandler {
         
         log.warn("User not found: {}", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    // Обработка нарушений целостности данных (уникальность, внешние ключи и т.д.)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex, WebRequest request) {
+        
+        String message = "Ошибка целостности данных";
+        String path = request.getDescription(false);
+        HttpStatus status = HttpStatus.CONFLICT;
+        
+        // Анализ сообщения об ошибке для более точного ответа
+        String exMessage = ex.getMessage();
+        if (exMessage != null) {
+            if (exMessage.contains("refresh_tokens_user_id_key")) {
+                message = "Уже существует активная сессия. Повторите попытку входа.";
+                status = HttpStatus.TOO_MANY_REQUESTS; // 429
+                log.warn("Конфликт refresh token: {}", path);
+            } else if (exMessage.contains("users_username_key")) {
+                message = "Пользователь с таким именем уже существует";
+                log.warn("Попытка создания дубликата пользователя: {}", path);
+            } else if (exMessage.contains("unique constraint") || exMessage.contains("уникальности")) {
+                message = "Указанные данные уже используются в системе";
+                log.warn("Нарушение ограничения уникальности: {}", path);
+            } else {
+                log.error("Ошибка целостности данных: {} - {}", path, exMessage);
+            }
+        }
+        
+        ApiError error = new ApiError(status, message, path);
+        return new ResponseEntity<>(error, status);
     }
 
     // Обработка любых других исключений (500)

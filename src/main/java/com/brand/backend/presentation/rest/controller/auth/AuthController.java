@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -61,57 +62,110 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody @Valid UserLoginRequest request) {
-
-        log.info("📥 [LOGIN] Получен запрос на вход: {}", request.getUsername());
-
-        Optional<User> userOptional = authService.authenticateUser(request.getUsername(), request.getPassword());
-        Map<String, String> response = new HashMap<>();
-
-        if (userOptional.isEmpty()) {
+        try {
             log.info("📥 [LOGIN] Получен запрос на вход: {}", request.getUsername());
-            response.put("message", "Invalid credentials");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+
+            Optional<User> userOptional = authService.authenticateUser(request.getUsername(), request.getPassword());
+            Map<String, String> response = new HashMap<>();
+
+            if (userOptional.isEmpty()) {
+                log.info("❌ [LOGIN] Неверные учетные данные: {}", request.getUsername());
+                response.put("message", "Invalid credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            User user = userOptional.get();
+            log.info("✅ [USER FOUND] Пользователь {} найден в базе", request.getUsername());
+
+            if (!user.isVerified()) {
+                log.warn("⚠️ [LOGIN BLOCKED] Аккаунт {} не верифицирован!", request.getUsername());
+                response.put("message", "Account not verified. Use this code in Telegram bot:");
+                response.put("verificationCode", user.getVerificationCode());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            log.info("🔑 [JWT] Генерация токена для {}", request.getUsername());
+            String accessToken = jwtUtil.generateAccessToken(user.getUsername());
+            String refreshToken = authService.generateRefreshToken(user);
+
+            response.put("message", "Login successful");
+            response.put("accessToken", accessToken);
+            response.put("refreshToken", refreshToken);
+            
+            user.setLastLogin(LocalDateTime.now());
+            userRepository.save(user);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                    .body(response);
+        } catch (Exception e) {
+            log.error("🔥 [LOGIN ERROR] Ошибка входа для пользователя {}: {}", 
+                    request.getUsername(), e.getMessage());
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred during login");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-
-        User user = userOptional.get();
-        log.info("✅ [USER FOUND] Пользователь {} найден в базе", request.getUsername());
-
-        if (!user.isVerified()) {
-            log.warn("⚠️ [LOGIN BLOCKED] Аккаунт {} не верифицирован!", request.getUsername());
-            response.put("message", "Account not verified. Use this code in Telegram bot:");
-            response.put("verificationCode", user.getVerificationCode());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
-
-        log.info("🔑 [JWT] Генерация токена для {}", request.getUsername());
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername());
-        String refreshToken = authService.generateRefreshToken(user);
-
-        response.put("message", "Login successful");
-        response.put("accessToken", accessToken);
-        response.put("refreshToken", refreshToken);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .body(response);
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshAccessToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-        String username = authService.refreshAccessToken(refreshToken);
-        String newAccessToken = jwtUtil.generateAccessToken(username);
+        try {
+            String refreshToken = request.get("refreshToken");
+            
+            if (refreshToken == null || refreshToken.isBlank()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Refresh token is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            String username = authService.refreshAccessToken(refreshToken);
+            String newAccessToken = jwtUtil.generateAccessToken(username);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("accessToken", newAccessToken);
-        return ResponseEntity.ok(response);
+            Map<String, String> response = new HashMap<>();
+            response.put("accessToken", newAccessToken);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            log.warn("❌ [REFRESH ERROR] {}", e.getMessage());
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        } catch (Exception e) {
+            log.error("🔥 [REFRESH ERROR] Unexpected error: {}", e.getMessage());
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred during token refresh");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        User user = userRepository.findByUsername(username).orElseThrow();
-        authService.logout(user);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+        try {
+            String username = request.get("username");
+            
+            if (username == null || username.isBlank()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Username is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            authService.logout(userOptional.get());
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("🔥 [LOGOUT ERROR] Ошибка при выходе: {}", e.getMessage());
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred during logout");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }
