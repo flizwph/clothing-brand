@@ -82,7 +82,8 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginCo
         // Успешный вход
         loginAttemptService.loginSucceeded(command.getUsername());
         
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername());
+        // Передаем версию токена при генерации
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getTokenVersion());
         String refreshToken = generateRefreshToken(user);
 
         // Асинхронное обновление lastLogin можно добавить позже
