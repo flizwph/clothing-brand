@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.Optional;
 
+@Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     /**
      * Находит токен обновления по значению токена
@@ -47,14 +49,19 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     /**
      * Атомарно обновляет токен и срок его действия
      * Этот метод гарантирует отсутствие race condition при высокой конкурентности
-     * @param tokenValue новое значение токена
+     * @param token новое значение токена
      * @param expiryDate новая дата истечения срока
      * @param userId идентификатор пользователя
      * @return количество обновленных записей
      */
     @Modifying
     @Transactional
-    @Query("UPDATE RefreshToken r SET r.token = :tokenValue, r.expiryDate = :expiryDate WHERE r.user.id = :userId")
-    int updateTokenForUser(@Param("tokenValue") String tokenValue, @Param("expiryDate") Instant expiryDate, @Param("userId") Long userId);
+    @Query("UPDATE RefreshToken r SET r.token = :token, r.expiryDate = :expiryDate WHERE r.user.id = :userId")
+    int updateTokenForUser(@Param("token") String token, @Param("expiryDate") Instant expiryDate, @Param("userId") Long userId);
+    
+    @Modifying
+    @Query(value = "INSERT INTO refresh_tokens(user_id, token, expiry_date) VALUES (:userId, :token, :expiryDate)", 
+           nativeQuery = true)
+    void insertToken(@Param("userId") Long userId, @Param("token") String token, @Param("expiryDate") Instant expiryDate);
 }
 

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -92,8 +93,16 @@ public class AuthController {
             response.put("accessToken", accessToken);
             response.put("refreshToken", refreshToken);
             
-            user.setLastLogin(LocalDateTime.now());
-            userRepository.save(user);
+            // Асинхронное обновление lastLogin
+            CompletableFuture.runAsync(() -> {
+                try {
+                    user.setLastLogin(LocalDateTime.now());
+                    userRepository.save(user);
+                    log.debug("🕒 Асинхронно обновлен lastLogin для {}", user.getUsername());
+                } catch (Exception e) {
+                    log.warn("⚠️ Не удалось обновить lastLogin: {}", e.getMessage());
+                }
+            });
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)

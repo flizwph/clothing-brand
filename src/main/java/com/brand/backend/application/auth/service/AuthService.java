@@ -54,7 +54,7 @@ public class AuthService {
     public Optional<User> authenticateUser(String username, String password) {
         log.info("Попытка входа в систему: {}", username);
 
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        Optional<User> userOptional = userRepository.findUserForAuth(username);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -78,50 +78,25 @@ public class AuthService {
     @Transactional
     public String generateRefreshToken(User user) {
         try {
-            String newTokenValue = UUID.randomUUID().toString();
+            String token = UUID.randomUUID().toString();
             Instant expiryDate = Instant.now().plusMillis(604800000); // 7 дней
             
-            // Попытка атомарно обновить существующий токен
-            int updatedCount = refreshTokenRepository.updateTokenForUser(newTokenValue, expiryDate, user.getId());
+            // Пробуем обновить существующий токен
+            int updated = refreshTokenRepository.updateTokenForUser(token, expiryDate, user.getId());
             
-            if (updatedCount > 0) {
-                // Токен существовал и был обновлен
-                log.debug("Атомарно обновлен refresh token для пользователя ID={}", user.getId());
-                return newTokenValue;
-            }
-            
-            // Если токен не существовал, создаем новый с повторными попытками
-            for (int attempt = 0; attempt < 3; attempt++) {
+            // Если не обновили (не существует), создаем новый
+            if (updated == 0) {
                 try {
-                    // Для надежности проверяем и удаляем, если что-то есть (на случай race condition)
-                    refreshTokenRepository.deleteByUserId(user.getId());
-                    
-                    // Создаем новый refresh token
-                    RefreshToken refreshToken = RefreshToken.builder()
-                            .user(user)
-                            .token(newTokenValue)
-                            .expiryDate(expiryDate)
-                            .build();
-                    
-                    refreshTokenRepository.save(refreshToken);
-                    log.debug("Создан новый refresh token для пользователя ID={} (попытка {})", user.getId(), attempt + 1);
-                    return newTokenValue;
+                    refreshTokenRepository.insertToken(user.getId(), token, expiryDate);
+                    log.debug("Создан новый refresh token для пользователя ID={}", user.getId());
                 } catch (Exception e) {
-                    if (attempt == 2) {
-                        throw e; // Пробрасываем на третьей попытке
-                    }
-                    log.warn("Попытка {} создания refresh token не удалась для пользователя ID={}: {}", 
-                            attempt + 1, user.getId(), e.getMessage());
-                    try {
-                        Thread.sleep(50 * (attempt + 1)); // Прогрессивное ожидание между попытками
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
+                    log.warn("Ошибка при создании refresh-токена: {}", e.getMessage());
                 }
+            } else {
+                log.debug("Обновлен существующий refresh token для пользователя ID={}", user.getId());
             }
             
-            // Этот код не должен выполняться, но для компилятора добавим
-            return newTokenValue;
+            return token;
         } catch (Exception e) {
             log.error("Критическая ошибка при генерации refresh token для пользователя ID={}: {}", 
                     user.getId(), e.getMessage(), e);
