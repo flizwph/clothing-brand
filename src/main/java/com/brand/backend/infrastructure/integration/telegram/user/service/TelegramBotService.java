@@ -558,6 +558,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
         User user = verificationService.verifyCode(text);
         if (user != null) {
+            // Проверка существования пользователя с таким Telegram ID
             Optional<User> existingUser = userRepository.findByTelegramId(message.getChatId());
             if (existingUser.isPresent() && !existingUser.get().equals(user)) {
                 String censoredUsername = TelegramMiscMetods.censorUsername(existingUser.get().getUsername());
@@ -565,12 +566,20 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 return;
             }
 
-            user.setTelegramId(message.getChatId());
-            // Добавляем парсинг обычного имени пользователя (telegram_username)
+            // Проверка существования пользователя с таким Telegram Username
             String telegramUsername = message.getFrom().getUserName();
             if (telegramUsername != null && !telegramUsername.isBlank()) {
+                Optional<User> existingUserByUsername = userRepository.findByTelegramUsername(telegramUsername);
+                if (existingUserByUsername.isPresent() && !existingUserByUsername.get().equals(user)) {
+                    String censoredUsername = TelegramMiscMetods.censorUsername(existingUserByUsername.get().getUsername());
+                    sendMessage(chatId, "Этот Telegram username (@" + telegramUsername + ") уже привязан к пользователю: " + censoredUsername + 
+                        ". Пожалуйста, обратитесь в поддержку для помощи.");
+                    return;
+                }
                 user.setTelegramUsername(telegramUsername);
             }
+
+            user.setTelegramId(message.getChatId());
             user.setVerified(true);
             userRepository.save(user);
             sendMessage(chatId, "Аккаунт привязан успешно, теперь делать покупки можно прямо здесь!!!");

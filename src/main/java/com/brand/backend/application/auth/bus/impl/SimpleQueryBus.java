@@ -1,8 +1,8 @@
 package com.brand.backend.application.auth.bus.impl;
 
 import com.brand.backend.application.auth.bus.QueryBus;
-import com.brand.backend.application.auth.mediator.Mediator;
-import com.brand.backend.application.auth.query.Query;
+import com.brand.backend.application.auth.infra.mediator.Mediator;
+import com.brand.backend.application.auth.cqrs.query.base.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

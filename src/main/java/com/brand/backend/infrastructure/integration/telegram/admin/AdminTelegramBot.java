@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -1008,5 +1009,12 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
         } else {
             userStates.put(chatId, state);
         }
+    }
+    
+    /**
+     * Возвращает список разрешенных ID администраторов
+     */
+    public Set<String> getAllowedAdminIds() {
+        return Collections.unmodifiableSet(allowedAdminIds);
     }
 }

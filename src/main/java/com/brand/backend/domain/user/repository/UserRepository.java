@@ -7,11 +7,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.cache.annotation.Cacheable;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByTelegramId(Long telegramId);
+    Optional<User> findByTelegramUsername(String telegramUsername);
     Optional<User> findByVerificationCode(String verificationCode);
     Optional<User> findByUsername(String username);
     Optional<User> findByDiscordId(Long discordId);
@@ -21,4 +24,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Cacheable(value = "userAuthCache", key = "#username")
     @Query("SELECT u FROM User u WHERE u.username = :username")
     Optional<User> findUserForAuth(@Param("username") String username);
+    
+    /**
+     * Поиск пользователей с указанным статусом активности и последним входом до указанной даты
+     */
+    List<User> findByIsActiveAndLastLoginBefore(boolean isActive, LocalDateTime lastLoginBefore);
+    
+    /**
+     * Поиск всех активных пользователей
+     */
+    List<User> findByIsActiveTrue();
+    
+    /**
+     * Поиск пользователей с указанным статусом верификации
+     */
+    List<User> findByVerified(boolean verified);
 }

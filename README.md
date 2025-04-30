@@ -59,6 +59,60 @@
                         └─────────────────────────────┘
 ```
 
+## Архитектура системы аутентификации
+
+Система аутентификации построена на принципах CQRS (Command Query Responsibility Segregation) с использованием паттерна Mediator для обработки команд и запросов.
+
+### Структура системы аутентификации
+
+```
+application/auth/
+├── core/                        - Основные компоненты и исключения
+│   └── exception/               - Базовые исключения авторизации
+│
+├── cqrs/                        - Реализация CQRS
+│   ├── command/                 - Определения команд
+│   │   ├── user/                - Команды для пользовательских операций
+│   │   └── password/            - Команды для управления паролями
+│   │
+│   ├── query/                   - Определения запросов
+│   │   └── user/                - Запросы о пользователях
+│   │
+│   ├── handler/                 - Обработчики команд и запросов
+│   │   ├── user/                - Обработчики пользовательских команд
+│   │   └── password/            - Обработчики команд паролей
+│   │
+│   └── result/                  - Результаты выполнения команд
+│
+├── service/                     - Сервисный слой
+│   ├── token/                   - Управление токенами
+│   ├── notification/            - Уведомления (сброс пароля и др.)
+│   ├── security/                - Безопасность (попытки входа и т.д.)
+│   └── facade/                  - Сервисы-фасады для доступа к функциональности
+│
+├── infra/                       - Инфраструктурные компоненты
+│   ├── mediator/                - Реализация паттерна Mediator
+│   └── repository/              - Репозитории для сброса пароля и др.
+│
+└── bus/                         - Реализация шин команд и запросов
+```
+
+### Поток данных при аутентификации
+
+1. HTTP-запрос поступает в контроллер (`AuthController` или `PasswordResetController`)
+2. Контроллер создает команду или запрос и отправляет в сервис-фасад (`AuthServiceCQRS`)
+3. Сервис использует Mediator для маршрутизации команды к соответствующему обработчику
+4. Обработчик выполняет бизнес-логику и возвращает результат
+5. Контроллер формирует HTTP-ответ на основе результата
+
+### Механизмы безопасности
+
+- **Блокировка аккаунта**: После нескольких неудачных попыток входа (`LoginAttemptService`)
+- **Верификация**: Двухэтапная верификация через Telegram-бот
+- **Управление токенами**: Разделение access и refresh токенов с инвалидацией
+- **Сброс пароля**: Безопасный механизм сброса с кодом подтверждения
+- **Защита от известных атак**: Обработка ошибок без раскрытия чувствительной информации
+
 ## Логика взаимодействия между сервисами
 
 ### 1. Покупка товара
@@ -112,7 +166,199 @@ mvn spring-boot:run
 - Формат данных: JSON
 - Авторизация: JWT Bearer токен в заголовке `Authorization: Bearer {token}`
 
-### Аутентификация
+### Аутентификация (v2)
+
+#### Регистрация пользователя
+- **URL**: `/auth/v2/register`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username",
+  "password": "password"
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "message": "User registered successfully",
+  "verificationCode": "AB12CD34"
+}
+```
+- **Пример ответа** (409 Conflict):
+```json
+{
+  "error": "Username already exists",
+  "message": "Этот логин уже занят."
+}
+```
+
+#### Вход пользователя
+- **URL**: `/auth/v2/login`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username",
+  "password": "password"
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "message": "Login successful",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+- **Пример ответа** (403 Forbidden - для неверифицированных аккаунтов):
+```json
+{
+  "message": "Account not verified. Use this code in Telegram bot:",
+  "verificationCode": "AB12CD34"
+}
+```
+- **Пример ответа** (429 Too Many Requests - для заблокированных аккаунтов):
+```json
+{
+  "error": "User blocked",
+  "message": "Account temporarily blocked due to multiple failed login attempts",
+  "minutesLeft": "10"
+}
+```
+
+#### Обновление токена
+- **URL**: `/auth/v2/refresh`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "message": "Token refreshed successfully"
+}
+```
+
+#### Выход пользователя
+- **URL**: `/auth/v2/logout`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username"
+}
+```
+- **Пример ответа**: 204 No Content
+
+#### Изменение пароля
+- **URL**: `/auth/v2/change-password`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username",
+  "currentPassword": "currentPassword",
+  "newPassword": "newPassword"
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "message": "Password changed successfully. Please login again with your new password."
+}
+```
+- **Пример ответа** (400 Bad Request):
+```json
+{
+  "error": "Invalid credentials",
+  "message": "Current password is incorrect"
+}
+```
+
+#### Валидация токена
+- **URL**: `/auth/v2/validate-token`
+- **Метод**: `GET`
+- **Заголовки**: `Authorization: Bearer {accessToken}`
+- **Пример ответа** (200 OK):
+```json
+{
+  "valid": true,
+  "username": "username"
+}
+```
+- **Пример ответа** (401 Unauthorized):
+```json
+{
+  "valid": false,
+  "message": "Invalid or expired token"
+}
+```
+
+### Сброс пароля
+
+#### Инициация сброса пароля
+- **URL**: `/auth/v2/password-reset/initiate`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username"
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "message": "Password reset initiated. Check your notification channel for reset code."
+}
+```
+- **Пример ответа** (404 Not Found):
+```json
+{
+  "error": "UserNotFoundException",
+  "message": "User not found: username"
+}
+```
+- **Пример ответа** (409 Conflict):
+```json
+{
+  "error": "PasswordResetException",
+  "message": "An active password reset request already exists."
+}
+```
+
+#### Завершение сброса пароля
+- **URL**: `/auth/v2/password-reset/complete`
+- **Метод**: `POST`
+- **Тело запроса**:
+```json
+{
+  "username": "username",
+  "resetCode": "ABC123",
+  "newPassword": "newPassword"
+}
+```
+- **Пример ответа** (200 OK):
+```json
+{
+  "message": "Password has been reset successfully. Please login with your new password."
+}
+```
+- **Пример ответа** (401 Unauthorized):
+```json
+{
+  "error": "PasswordResetException",
+  "message": "Invalid reset code."
+}
+```
+
+### Аутентификация (Устаревшая версия)
+
+Для совместимости с существующими клиентами поддерживаются устаревшие эндпоинты:
 
 #### Регистрация пользователя
 - **URL**: `/auth/register`

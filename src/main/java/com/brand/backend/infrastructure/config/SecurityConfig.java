@@ -1,6 +1,7 @@
 package com.brand.backend.infrastructure.config;
 
 import com.brand.backend.infrastructure.security.jwt.JwtRequestFilter;
+import com.brand.backend.infrastructure.security.jwt.TokenAuthenticationFilter;
 import com.brand.backend.infrastructure.security.filter.ApiKeyAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
     private final UserDetailsService userDetailsService;
     private final ApiKeyAuthFilter apiKeyAuthFilter;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
     @Value("${api.discord.secret-key}")
     private String discordApiSecretKey;
@@ -54,6 +56,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/token/validate").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/discord/verify").permitAll()
                         .requestMatchers("/api/discord/check-status").permitAll()
@@ -61,8 +64,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(apiKeyAuthFilter, JwtRequestFilter.class);
+                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(apiKeyAuthFilter, TokenAuthenticationFilter.class);
 
         return http.build();
     }

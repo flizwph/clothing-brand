@@ -1,6 +1,6 @@
 package com.brand.backend.application.auth.bus;
 
-import com.brand.backend.application.auth.query.Query;
+import com.brand.backend.application.auth.cqrs.query.base.Query;
 
 /**
  * Шина запросов для диспетчеризации запросов соответствующим обработчикам

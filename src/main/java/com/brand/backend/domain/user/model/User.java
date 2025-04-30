@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -73,6 +74,16 @@ public class User {
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
-    @Column(name = "token_version", nullable = false)
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Transient
     private Integer tokenVersion = 1;
+
+    @Column(name = "telegram_chat_id")
+    private String telegramChatId;
+
+    public Integer getTokenVersion() {
+        return tokenVersion != null ? tokenVersion : 1;
+    }
 }

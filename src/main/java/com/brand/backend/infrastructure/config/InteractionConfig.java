@@ -1,6 +1,6 @@
 package com.brand.backend.infrastructure.config;
 
-import com.brand.backend.application.auth.service.AuthService;
+import com.brand.backend.application.auth.service.facade.AuthService;
 import com.brand.backend.application.order.service.OrderService;
 import com.brand.backend.application.product.service.ProductService;
 import com.brand.backend.application.nft.service.NFTService;

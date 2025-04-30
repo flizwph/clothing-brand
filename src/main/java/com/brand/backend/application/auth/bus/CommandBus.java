@@ -1,6 +1,6 @@
 package com.brand.backend.application.auth.bus;
 
-import com.brand.backend.application.auth.command.Command;
+import com.brand.backend.application.auth.cqrs.command.base.Command;
 
 /**
  * Шина команд для диспетчеризации команд соответствующим обработчикам
