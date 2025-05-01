@@ -356,4 +356,109 @@ public class UserHandler {
         
         return createMessage(chatId, text, false);
     }
+
+    /**
+     * Обрабатывает запрос на получение списка пользователей
+     */
+    public SendMessage handleListUsers(String chatId) {
+        log.info(">> Обработка запроса на получение списка пользователей");
+        try {
+            List<User> users = adminBotService.getAllUsers();
+            return createUsersListMessage(chatId, users, "Список пользователей");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка пользователей: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на получение списка пользователей");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на поиск пользователя
+     */
+    public SendMessage handleSearchUser(String chatId) {
+        log.info(">> Обработка запроса на поиск пользователя");
+        try {
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText("🔍 *Поиск пользователя*\n\n" +
+                    "Введите или скопируйте команду ниже и добавьте параметры поиска:\n\n" +
+                    "`/search_user параметры`\n\n" +
+                    "💡 Команду можно скопировать, нажав на неё.");
+            message.setParseMode("Markdown");
+            return message;
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на поиск пользователя: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на поиск пользователя");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на поиск пользователя по email
+     */
+    public SendMessage handleSearchUserByEmail(String chatId) {
+        log.info(">> Обработка запроса на поиск пользователя по email");
+        try {
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText("📧 *Поиск пользователя по email*\n\n" +
+                    "Введите или скопируйте команду ниже и добавьте email:\n\n" +
+                    "`/email адрес@почты.com`\n\n" +
+                    "💡 Команду можно скопировать, нажав на неё.");
+            message.setParseMode("Markdown");
+            return message;
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на поиск пользователя по email: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на поиск пользователя по email");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на поиск пользователя по телефону
+     */
+    public SendMessage handleSearchUserByPhone(String chatId) {
+        log.info(">> Обработка запроса на поиск пользователя по телефону");
+        try {
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText("📱 *Поиск пользователя по телефону*\n\n" +
+                    "Введите или скопируйте команду ниже и добавьте номер телефона:\n\n" +
+                    "`/phone +79991234567`\n\n" +
+                    "💡 Команду можно скопировать, нажав на неё.");
+            message.setParseMode("Markdown");
+            return message;
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на поиск пользователя по телефону: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на поиск пользователя по телефону");
+        }
+    }
+
+    /**
+     * Формирует сообщение со списком пользователей
+     */
+    private SendMessage createUsersListMessage(String chatId, List<User> users, String title) {
+        if (users == null || users.isEmpty()) {
+            return createMessage(chatId, "*" + title + "*\n\nНет пользователей для отображения.");
+        }
+        StringBuilder message = new StringBuilder();
+        message.append("*" + title + "*\n\n");
+        for (int i = 0; i < Math.min(20, users.size()); i++) {
+            User user = users.get(i);
+            message.append(i + 1).append(". *").append(user.getUsername()).append("*\n");
+            message.append("ID: ").append(user.getId()).append("\n");
+            if (user.getEmail() != null) message.append("Email: ").append(user.getEmail()).append("\n");
+            if (user.getPhoneNumber() != null) message.append("Телефон: ").append(user.getPhoneNumber()).append("\n");
+            message.append("/user_").append(user.getId()).append(" - подробная информация\n\n");
+        }
+        if (users.size() > 20) {
+            message.append("...и еще ").append(users.size() - 20).append(" пользователей.\n");
+        }
+        return createMessage(chatId, message.toString());
+    }
 } 

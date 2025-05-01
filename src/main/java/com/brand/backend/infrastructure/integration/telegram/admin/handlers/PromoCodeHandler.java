@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -418,5 +419,44 @@ public class PromoCodeHandler {
         String newDescription = matcher.group(4) != null ? matcher.group(4) : "";
         
         return handleUpdatePromoCode(chatId, promoId, newCode, newDiscountPercent, newMaxUses, newDescription);
+    }
+
+    /**
+     * Формирует сообщение со списком промокодов
+     */
+    private SendMessage createPromoCodesListMessage(String chatId, List<PromoCode> promoCodes, String title) {
+        if (promoCodes == null || promoCodes.isEmpty()) {
+            return createMessage(chatId, "*" + title + "*\n\nНет промокодов для отображения.");
+        }
+        StringBuilder message = new StringBuilder();
+        message.append("*" + title + "*\n\n");
+        for (PromoCode promo : promoCodes) {
+            message.append(formatPromoCodeShort(promo)).append("\n\n");
+        }
+        return createMessage(chatId, message.toString(), AdminKeyboards.createPromoCodesKeyboard());
+    }
+
+    /**
+     * Обрабатывает запрос на получение списка истекших промокодов
+     */
+    public SendMessage handleExpiredPromoCodes(String chatId) {
+        log.info(">> Обработка запроса на получение списка истекших промокодов");
+        try {
+            List<PromoCode> promoCodes = promoCodeService.getAllPromoCodes();
+            List<PromoCode> expired = promoCodes.stream().filter(p -> !p.isActive()).toList();
+            return createPromoCodesListMessage(chatId, expired, "Истекшие промокоды");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка истекших промокодов: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на получение списка истекших промокодов");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на создание промокода (запрос формы)
+     */
+    public SendMessage handleCreatePromoCode(String chatId) {
+        return handleCreatePromoCodeRequest(chatId);
     }
 } 

@@ -22,35 +22,35 @@ public class AdminKeyboards {
     /**
      * Создаёт главное меню бота
      */
-    public static ReplyKeyboardMarkup createMainMenu() {
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        keyboardMarkup.setResizeKeyboard(true);
-        keyboardMarkup.setSelective(true);
+    public static InlineKeyboardMarkup createMainMenu() {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
-        List<KeyboardRow> keyboard = new ArrayList<>();
+        // Первый ряд
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("📦 Заказы", "menu:orders"));
+        row1.add(createButton("👥 Пользователи", "menu:users"));
+        rows.add(row1);
         
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("📋 Все заказы"));
-        row1.add(new KeyboardButton("📊 Статистика"));
-        keyboard.add(row1);
+        // Второй ряд
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("🎟 Промокоды", "menu:promocodes"));
+        row2.add(createButton("🛍 Товары", "menu:products"));
+        rows.add(row2);
         
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("🔍 Поиск заказа"));
-        row2.add(new KeyboardButton("👤 Пользователи"));
-        keyboard.add(row2);
+        // Третий ряд
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        row3.add(createButton("💰 Пополнения", "menu:deposits"));
+        row3.add(createButton("🔍 Поиск заказа", "menu:search"));
+        rows.add(row3);
         
-        KeyboardRow row3 = new KeyboardRow();
-        row3.add(new KeyboardButton("🎨 NFT"));
-        row3.add(new KeyboardButton("🔖 Промокоды"));
-        keyboard.add(row3);
+        // Четвертый ряд
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
+        row4.add(createButton("⚙️ Настройки", "menu:settings"));
+        rows.add(row4);
         
-        KeyboardRow row4 = new KeyboardRow();
-        row4.add(new KeyboardButton("👕 Товары"));
-        row4.add(new KeyboardButton("⚙️ Настройки"));
-        keyboard.add(row4);
-        
-        keyboardMarkup.setKeyboard(keyboard);
-        return keyboardMarkup;
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
     }
 
     /**
@@ -356,6 +356,48 @@ public class AdminKeyboards {
         row2.add(createButton("📱 Поиск по телефону", "user:searchByPhone"));
         row2.add(createButton("👥 Все пользователи", "menu:users"));
         rows.add(row2);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
+    }
+
+    /**
+     * Создаёт клавиатуру для управления пополнениями
+     */
+    public static InlineKeyboardMarkup createDepositsKeyboard() {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("⏳ Ожидающие", "deposits:pending"));
+        row1.add(createButton("✅ Завершенные", "deposits:completed"));
+        row1.add(createButton("❌ Отклоненные", "deposits:rejected"));
+        rows.add(row1);
+        
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("📆 За сегодня", "deposits:today"));
+        row2.add(createButton("📅 За неделю", "deposits:week"));
+        row2.add(createButton("📅 За месяц", "deposits:month"));
+        rows.add(row2);
+        
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        row3.add(createButton("◀️ Назад в меню", "menu:main"));
+        rows.add(row3);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
+    }
+
+    /**
+     * Создаёт клавиатуру для настроек
+     */
+    public static InlineKeyboardMarkup createSettingsKeyboard() {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("◀️ Назад в меню", "menu:main"));
+        rows.add(row1);
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(rows);

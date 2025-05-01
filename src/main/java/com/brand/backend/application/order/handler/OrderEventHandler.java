@@ -172,10 +172,13 @@ public class OrderEventHandler {
     
     private void sendAdminTelegramMessage(String text) {
         try {
-            SendMessage message = new SendMessage();
-            message.setChatId("825885701"); // ID из application.properties
-            message.setText(text);
-            adminTelegramBot.execute(message);
+            for (String chatId : adminTelegramBot.getAllowedAdminIds()) {
+                SendMessage message = new SendMessage();
+                message.setChatId(chatId);
+                message.setText(text);
+                adminTelegramBot.execute(message);
+                log.debug("Отправлено сообщение администратору с ID {}", chatId);
+            }
         } catch (TelegramApiException e) {
             log.error("Ошибка отправки сообщения администратору: {}", e.getMessage());
         }

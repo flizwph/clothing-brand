@@ -19,11 +19,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.brand.backend.application.user.service.VerificationService;
 import com.brand.backend.domain.subscription.model.Subscription;
 import com.brand.backend.application.subscription.service.SubscriptionService;
+import com.brand.backend.domain.payment.model.Transaction;
+import com.brand.backend.domain.payment.model.TransactionStatus;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentHashMap;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -1429,6 +1432,64 @@ public class TelegramBotService extends TelegramLongPollingBot {
         markup.setKeyboard(rows);
         
         sendMessage(stringChatId, message, markup);
+    }
+
+    /**
+     * Отправить уведомление пользователю о статусе транзакции
+     */
+    public void sendTransactionStatusNotification(User user, Transaction transaction) {
+        if (user.getTelegramId() == null) {
+            log.debug("Невозможно отправить уведомление: пользователь {} не привязал Telegram", user.getUsername());
+            return;
+        }
+        
+        String statusEmoji;
+        switch(transaction.getStatus()) {
+            case COMPLETED:
+                statusEmoji = "✅";
+                break;
+            case REJECTED:
+                statusEmoji = "❌";
+                break;
+            case CANCELLED:
+                statusEmoji = "🚫";
+                break;
+            case PENDING:
+                statusEmoji = "⏳";
+                break;
+            default:
+                statusEmoji = "❓";
+                break;
+        }
+        
+        String message = String.format(
+            "%s Транзакция #%d обновлена\n\n" +
+            "Тип: %s\n" +
+            "Сумма: %.2f ₽\n" +
+            "Новый статус: %s\n" +
+            "Дата обновления: %s",
+            statusEmoji,
+            transaction.getId(),
+            transaction.getType(),
+            transaction.getAmount(),
+            transaction.getStatus(),
+            transaction.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+        );
+        
+        if (transaction.getAdminComment() != null && !transaction.getAdminComment().isEmpty()) {
+            message += "\nКомментарий: " + transaction.getAdminComment();
+        }
+        
+        try {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(user.getTelegramId().toString());
+            sendMessage.setText(message);
+            execute(sendMessage);
+            log.debug("Отправлено уведомление пользователю {} о статусе транзакции {}", 
+                     user.getUsername(), transaction.getId());
+        } catch (TelegramApiException e) {
+            log.error("Ошибка при отправке уведомления в Telegram: {}", e.getMessage(), e);
+        }
     }
 
 }

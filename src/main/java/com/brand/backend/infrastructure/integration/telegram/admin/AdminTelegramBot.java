@@ -10,10 +10,15 @@ import com.brand.backend.domain.order.model.OrderStatus;
 import com.brand.backend.domain.order.repository.OrderRepository;
 import com.brand.backend.domain.user.model.User;
 import com.brand.backend.domain.nft.model.NFT;
+import com.brand.backend.domain.payment.model.Transaction;
+import com.brand.backend.domain.payment.model.TransactionStatus;
+import com.brand.backend.domain.payment.repository.TransactionRepository;
+import com.brand.backend.application.payment.service.BalanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -32,6 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Collections;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -43,6 +51,9 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
     private final AdminBotService adminBotService;
     private final PromoCodeHandler promoCodeHandler;
     private final ProductHandler productHandler;
+    private final TransactionRepository transactionRepository;
+    private final BalanceService balanceService;
+    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AdminTelegramBot.class);
 
     // Состояния пользователей (chatId -> UserState)
     private final Map<String, UserState> userStates = new ConcurrentHashMap<>();
@@ -55,9 +66,6 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
 
     @Value("${admin.bot.username}")
     private String botUsername;
-
-    @Value("${admin.bot.token}")
-    private String botToken;
 
     // Список разрешенных Telegram ID, заданный в конфигурационном файле (через запятую)
     @Value("${admin.bot.adminIds}")
@@ -104,24 +112,29 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
 
     // Конструктор с инициализацией всех необходимых полей
     public AdminTelegramBot(
-            @Value("${admin.bot.token}") String botToken,
             OrderRepository orderRepository,
             OrderHandler orderHandler,
             UserHandler userHandler,
             AdminBotService adminBotService,
             PromoCodeHandler promoCodeHandler,
-            ProductHandler productHandler) {
-        super(botToken);
+            ProductHandler productHandler,
+            TransactionRepository transactionRepository,
+            BalanceService balanceService,
+            @Value("${admin.bot.token}") String botToken) {
+        super(botToken); // Передаем токен в конструктор суперкласса
         this.orderRepository = orderRepository;
         this.orderHandler = orderHandler;
         this.userHandler = userHandler;
         this.adminBotService = adminBotService;
         this.promoCodeHandler = promoCodeHandler;
         this.productHandler = productHandler;
+        this.transactionRepository = transactionRepository;
+        this.balanceService = balanceService;
     }
 
     @PostConstruct
     public void init() {
+        // Инициализация списка администраторов
         String[] adminIdsArray = adminIds.split(",");
         Set<String> adminIdSet = new HashSet<>();
         
@@ -358,6 +371,14 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
 
     private BotApiMethod<?> handleStandardCommand(String chatId, String text) {
         log.info("Admin {} sent command: {}", chatId, text);
+        
+        // Проверяем состояние пользователя
+        UserState currentState = getUserState(chatId);
+        if (currentState == UserState.WAITING_ORDER_SEARCH) {
+            // Если пользователь в состоянии поиска заказа, обрабатываем как поиск
+            return orderHandler.handleOrderSearch(chatId, text);
+        }
+        
         return switch (text) {
             case "/start", "/help" -> createWelcomeMessage(chatId);
             case "📋 Все заказы" -> orderHandler.handleAllOrders(chatId);
@@ -365,15 +386,21 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
             case "/users", "👤 Пользователи" -> userHandler.handleUserList(chatId);
             case "/menu" -> createMainMenuMessage(chatId);
             case "🔍 Поиск заказа" -> {
-                // Устанавливаем состояние ожидания ввода поискового запроса
                 setUserState(chatId, UserState.WAITING_ORDER_SEARCH);
-                // Отправляем инструкции для поиска
                 yield orderHandler.handleOrderSearchRequest(chatId);
             }
             case "🎨 NFT" -> createNFTMenuMessage(chatId);
             case "⚙️ Настройки" -> createSettingsMessage(chatId);
             case "/promo", "🔖 Промокоды" -> promoCodeHandler.handleAllPromoCodes(chatId);
             case "/products", "👕 Товары" -> productHandler.handleAllProducts(chatId);
+            case "💰 Пополнения" -> {
+                SendMessage message = new SendMessage();
+                message.setChatId(chatId);
+                message.setText("💰 *Управление пополнениями*\n\nВыберите фильтр:");
+                message.setParseMode("Markdown");
+                message.setReplyMarkup(AdminKeyboards.createDepositsKeyboard());
+                yield message;
+            }
             default -> createUnknownCommandMessage(chatId);
         };
     }
@@ -382,205 +409,443 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
      * Обработка callback-запросов (нажатие inline-кнопок)
      */
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
-        String chatId = callbackQuery.getFrom().getId().toString();
-        
-        if (!isAdmin(chatId)) {
-            sendCallbackAnswer(callbackQuery.getId(), "Доступ запрещен. Вы не являетесь администратором.", true);
-            return;
-        }
-        
+        String chatId = callbackQuery.getMessage().getChatId().toString();
         String data = callbackQuery.getData();
+        String callbackId = callbackQuery.getId();
         Integer messageId = callbackQuery.getMessage().getMessageId();
-        
-        log.info("Получен callback-запрос от администратора {}: {}", chatId, data);
-        
-        BotApiMethod<?> response = null;
-        
+
+        log.info("Обработка callback-запроса: {}", data);
+
         try {
-            if (data.startsWith("filter:")) {
-                String filter = data.substring(7);
-                log.info("Обработка фильтра заказов (filter:): {}", filter);
-                response = handleOrdersFilterCallback(chatId, filter, messageId);
-            } else if (data.startsWith("orders:")) {
-                String filter = data.substring(7);
-                log.info("Обработка фильтра заказов (orders:): {}", filter);
-                response = handleOrdersFilterCallback(chatId, filter, messageId);
-            } else if (data.startsWith("stats:")) {
-                String statType = data.substring(6);
-                response = handleStatsCallback(chatId, statType, messageId);
-            } else if (data.startsWith("menu:")) {
-                String menuItem = data.substring(5);
-                response = handleMenuCallback(chatId, menuItem);
-            } else if (data.startsWith("updateOrder:")) {
-                String[] parts = data.split(":");
-                if (parts.length == 3) {
-                    response = orderHandler.handleUpdateOrderStatus(
-                        chatId, 
-                        Long.parseLong(parts[1]), 
-                        OrderStatus.valueOf(parts[2]), 
-                        messageId
-                    );
-                }
-            } else if (data.startsWith("viewUser:")) {
-                Long userId = Long.parseLong(data.substring(9));
-                response = userHandler.handleUserDetails(chatId, userId);
-            } else if (data.startsWith("userOrders:")) {
-                Long userId = Long.parseLong(data.substring(11));
-                response = orderHandler.handleUserOrders(chatId, userId);
-            } else if (data.startsWith("nft:")) {
-                String nftCommand = data.substring(4);
-                response = handleNftCallback(chatId, nftCommand, messageId);
+            if (data.startsWith("menu:")) {
+                handleMenuCallback(chatId, data, messageId);
+            } else if (data.startsWith("filter:")) {
+                handleFilterCallback(chatId, data, messageId);
             } else if (data.startsWith("promo:")) {
-                String promoCommand = data.substring(6);
-                response = handlePromoCallback(chatId, promoCommand, messageId);
-            } else if (data.startsWith("product:")) {
-                String productCommand = data.substring(8);
-                response = handleProductCallback(chatId, productCommand, messageId);
+                handlePromoCallback(chatId, data, messageId);
+            } else if (data.startsWith("deposit_confirm_")) {
+                handleDepositConfirmCallback(chatId, callbackId, data, messageId);
+            } else if (data.startsWith("deposit_reject_")) {
+                handleDepositRejectCallback(chatId, callbackId, data, messageId);
+            } else if (data.startsWith("deposit_details_")) {
+                handleDepositDetailsCallback(chatId, callbackId, data, messageId);
+            } else if (data.startsWith("deposits:")) {
+                BotApiMethod<?> response = handleDepositsFilterCallback(chatId, callbackId, data, messageId);
+                if (response != null) {
+                    executeMethod(response);
+                }
             } else if (data.equals("listUsers")) {
-                response = userHandler.handleUserList(chatId);
+                executeMethod(userHandler.handleListUsers(chatId));
             } else if (data.equals("searchUser")) {
-                handleUserSearchByName(chatId);
+                executeMethod(userHandler.handleSearchUser(chatId));
             } else if (data.equals("searchUserByName")) {
                 handleUserSearchByName(chatId);
             } else if (data.equals("searchUserByEmail")) {
-                handleUserSearchByEmail(chatId);
+                executeMethod(userHandler.handleSearchUserByEmail(chatId));
             } else if (data.equals("searchUserByPhone")) {
-                handleUserSearchByPhone(chatId);
-            } else if (data.startsWith("toggleUser:")) {
-                Long userId = Long.parseLong(data.substring(11));
-                response = userHandler.handleToggleUserStatus(chatId, userId, messageId);
+                executeMethod(userHandler.handleSearchUserByPhone(chatId));
             }
             
-            if (response != null) {
-                executeMethod(response);
-                sendCallbackAnswer(callbackQuery.getId(), "Выполнено", false);
-            }
+            // Отправляем пустой ответ на callback, чтобы убрать "часики" на кнопке
+            sendCallbackAnswer(callbackId, "", false);
         } catch (Exception e) {
             log.error("Ошибка при обработке callback-запроса: {}", e.getMessage(), e);
-            sendCallbackAnswer(callbackQuery.getId(), "Ошибка: " + e.getMessage(), true);
+            sendCallbackAnswer(callbackId, "❌ Произошла ошибка: " + e.getMessage(), true);
         }
     }
 
-    /**
-     * Обработка callback фильтрации заказов
-     */
-    private BotApiMethod<?> handleOrdersFilterCallback(String chatId, String filter, Integer messageId) {
-        return switch (filter) {
-            case "all" -> orderHandler.handleAllOrders(chatId);
-            case "NEW" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.NEW);
-            case "PROCESSING" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.PROCESSING);
-            case "DISPATCHED" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.DISPATCHED);
-            case "COMPLETED" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.COMPLETED);
-            case "CANCELLED" -> orderHandler.handleOrdersByStatus(chatId, OrderStatus.CANCELLED);
-            case "today" -> orderHandler.handleTodayOrders(chatId);
-            case "week" -> orderHandler.handleWeekOrders(chatId);
-            case "month" -> orderHandler.handleMonthOrders(chatId);
-            case "search" -> {
-                // Устанавливаем состояние ожидания ввода поискового запроса
+    private void handleFilterCallback(String chatId, String data, Integer messageId) {
+        String filter = data.substring("filter:".length());
+        switch (filter) {
+            case "all":
+                executeMethod(orderHandler.handleAllOrders(chatId));
+                break;
+            case "today":
+                executeMethod(orderHandler.handleTodayOrders(chatId));
+                break;
+            case "week":
+                executeMethod(orderHandler.handleWeekOrders(chatId));
+                break;
+            case "month":
+                executeMethod(orderHandler.handleMonthOrders(chatId));
+                break;
+            case "search":
                 setUserState(chatId, UserState.WAITING_ORDER_SEARCH);
-                yield orderHandler.handleOrderSearchRequest(chatId);
-            }
-            default -> createMainMenuMessage(chatId);
-        };
-    }
-
-    /**
-     * Обработка callback статистики
-     */
-    private BotApiMethod<?> handleStatsCallback(String chatId, String statType, Integer messageId) {
-        return switch (statType) {
-            case "general" -> orderHandler.handleOrderStatistics(chatId);
-            case "daily" -> orderHandler.handleDailyStatistics(chatId);
-            case "topUsers" -> orderHandler.handleTopUsers(chatId);
-            case "topProducts" -> createTopProductsMessage(chatId);
-            default -> orderHandler.handleOrderStatistics(chatId);
-        };
-    }
-
-    /**
-     * Обработка callback меню
-     */
-    private BotApiMethod<?> handleMenuCallback(String chatId, String menuItem) {
-        return switch (menuItem) {
-            case "main" -> createMainMenuMessage(chatId);
-            case "users" -> userHandler.handleUserList(chatId);
-            default -> createMainMenuMessage(chatId);
-        };
-    }
-
-    /**
-     * Обработка callback NFT
-     */
-    private BotApiMethod<?> handleNftCallback(String chatId, String nftCommand, Integer messageId) {
-        return switch (nftCommand) {
-            case "all" -> createAllNFTsMessage(chatId);
-            case "unrevealed" -> createUnrevealedNFTsMessage(chatId);
-            case "searchByUser" -> createNFTSearchMessage(chatId);
-            default -> createNFTMenuMessage(chatId);
-        };
-    }
-
-    /**
-     * Обрабатывает callback-запросы для промокодов
-     */
-    private BotApiMethod<?> handlePromoCallback(String chatId, String command, Integer messageId) {
-        if (command.equals("all")) {
-            return promoCodeHandler.handleAllPromoCodes(chatId);
-        } else if (command.equals("active")) {
-            return promoCodeHandler.handleActivePromoCodes(chatId);
-        } else if (command.equals("create")) {
-            return promoCodeHandler.handleCreatePromoCodeRequest(chatId);
-        } else if (command.startsWith("activate:")) {
-            Long promoId = Long.parseLong(command.substring(9));
-            return promoCodeHandler.handleActivatePromoCode(chatId, messageId, promoId);
-        } else if (command.startsWith("deactivate:")) {
-            Long promoId = Long.parseLong(command.substring(11));
-            return promoCodeHandler.handleDeactivatePromoCode(chatId, messageId, promoId);
-        } else if (command.startsWith("delete:")) {
-            Long promoId = Long.parseLong(command.substring(7));
-            return promoCodeHandler.handleDeletePromoCode(chatId, messageId, promoId);
-        } else if (command.startsWith("edit:")) {
-            Long promoId = Long.parseLong(command.substring(5));
-            return promoCodeHandler.handleEditPromoCodeRequest(chatId, promoId);
-        } else if (command.startsWith("details:")) {
-            Long promoId = Long.parseLong(command.substring(8));
-            return promoCodeHandler.handlePromoCodeDetails(chatId, promoId);
-        } else if (command.equals("cancel")) {
-            // Отмена действия, возвращаем к списку промокодов
-            return promoCodeHandler.handleAllPromoCodes(chatId);
+                executeMethod(orderHandler.handleOrderSearchRequest(chatId));
+                break;
+            case "NEW":
+                executeMethod(orderHandler.handleOrdersByStatus(chatId, OrderStatus.NEW));
+                break;
+            case "PROCESSING":
+                executeMethod(orderHandler.handleOrdersByStatus(chatId, OrderStatus.PROCESSING));
+                break;
+            case "DISPATCHED":
+                executeMethod(orderHandler.handleOrdersByStatus(chatId, OrderStatus.DISPATCHED));
+                break;
+            case "COMPLETED":
+                executeMethod(orderHandler.handleOrdersByStatus(chatId, OrderStatus.COMPLETED));
+                break;
+            case "CANCELLED":
+                executeMethod(orderHandler.handleOrdersByStatus(chatId, OrderStatus.CANCELLED));
+                break;
         }
+    }
+
+    private void handlePromoCallback(String chatId, String data, Integer messageId) {
+        String action = data.substring("promo:".length());
+        switch (action) {
+            case "active":
+                executeMethod(promoCodeHandler.handleActivePromoCodes(chatId));
+                break;
+            case "expired":
+                executeMethod(promoCodeHandler.handleExpiredPromoCodes(chatId));
+                break;
+            case "create":
+                executeMethod(promoCodeHandler.handleCreatePromoCode(chatId));
+                break;
+        }
+    }
+
+    private void handleMenuCallback(String chatId, String data, Integer messageId) {
+        String menu = data.substring("menu:".length());
         
-        return createUnknownCommandMessage(chatId);
+        switch (menu) {
+            case "main":
+                showMainMenu(chatId);
+                break;
+            case "orders":
+                showOrdersMenu(chatId);
+                break;
+            case "users":
+                showUsersMenu(chatId);
+                break;
+            case "promocodes":
+                showPromoCodesMenu(chatId);
+                break;
+            case "products":
+                showProductsMenu(chatId);
+                break;
+            case "deposits":
+                handleDepositsFilterCallback(chatId, null, "deposits:all", messageId);
+                break;
+            case "search":
+                setUserState(chatId, UserState.WAITING_ORDER_SEARCH);
+                executeMethod(orderHandler.handleOrderSearchRequest(chatId));
+                break;
+            case "settings":
+                showSettingsMenu(chatId);
+                break;
+            default:
+                showMainMenu(chatId);
+        }
+    }
+
+    private void showMainMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("📋 *Главное меню*\n\nВыберите раздел:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createMainMenu());
+        executeMethod(message);
+    }
+
+    private void showOrdersMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("📦 *Управление заказами*\n\nВыберите действие:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createOrderFiltersKeyboard());
+        executeMethod(message);
+    }
+
+    private void showUsersMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("👥 *Управление пользователями*\n\nВыберите действие:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createUsersMenu());
+        executeMethod(message);
+    }
+
+    private void showPromoCodesMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("🎟 *Управление промокодами*\n\nВыберите действие:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createPromoCodesKeyboard());
+        executeMethod(message);
+    }
+
+    private void showProductsMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("🛍 *Управление товарами*\n\nВыберите действие:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createProductsKeyboard());
+        executeMethod(message);
+    }
+
+    private void showSettingsMenu(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("⚙️ *Настройки*\n\nВыберите действие:");
+        message.setParseMode("Markdown");
+        message.setReplyMarkup(AdminKeyboards.createSettingsKeyboard());
+        executeMethod(message);
+    }
+
+    /**
+     * Обрабатывает запрос на подтверждение пополнения
+     */
+    @Transactional
+    private void handleDepositConfirmCallback(String chatId, String callbackId, String data, Integer messageId) {
+        log.info(">> Обработка callback-запроса на подтверждение пополнения: {}", data);
+        try {
+            Long transactionId = Long.parseLong(data.substring("deposit_confirm_".length()));
+            
+            // Проверяем статус транзакции перед подтверждением
+            Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
+            if (transactionOpt.isPresent() && transactionOpt.get().getStatus() != TransactionStatus.PENDING) {
+                log.warn("Попытка подтвердить транзакцию в статусе {}: {}", 
+                        transactionOpt.get().getStatus(), transactionOpt.get().getTransactionCode());
+                sendCallbackAnswer(callbackId, "❌ Невозможно подтвердить транзакцию в статусе " + transactionOpt.get().getStatus(), true);
+                return;
+            }
+            
+            log.info("Вызов метода подтверждения для транзакции ID: {}", transactionId);
+            BotApiMethod<?> response = handleDepositConfirm(chatId, transactionId);
+            
+            if (response != null) {
+                log.info("Отправка ответного сообщения пользователю");
+                executeMethod(response);
+                sendCallbackAnswer(callbackId, "Транзакция подтверждена", false);
+            } else {
+                log.warn("Метод handleDepositConfirm вернул null для транзакции ID: {}", transactionId);
+                sendCallbackAnswer(callbackId, "Ошибка при обработке запроса", true);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при обработке callback-запроса на подтверждение: {}", e.getMessage(), e);
+            sendCallbackAnswer(callbackId, "Ошибка: " + e.getMessage(), true);
+            
+            try {
+                // Отправим сообщение об ошибке
+                SendMessage errorMessage = new SendMessage();
+                errorMessage.setChatId(chatId);
+                errorMessage.setText("❌ Ошибка при подтверждении транзакции: " + e.getMessage());
+                execute(errorMessage);
+            } catch (Exception ex) {
+                log.error("Не удалось отправить сообщение об ошибке: {}", ex.getMessage());
+            }
+        } finally {
+            log.info("<< Завершение обработки callback-запроса на подтверждение: {}", data);
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на отклонение пополнения
+     */
+    @Transactional
+    private void handleDepositRejectCallback(String chatId, String callbackId, String data, Integer messageId) {
+        log.info(">> Обработка callback-запроса на отклонение пополнения: {}", data);
+        try {
+            Long transactionId = Long.parseLong(data.substring("deposit_reject_".length()));
+            
+            // Проверяем статус транзакции перед отклонением
+            Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
+            if (transactionOpt.isPresent() && transactionOpt.get().getStatus() != TransactionStatus.PENDING) {
+                log.warn("Попытка отклонить транзакцию в статусе {}: {}", 
+                        transactionOpt.get().getStatus(), transactionOpt.get().getTransactionCode());
+                sendCallbackAnswer(callbackId, "❌ Невозможно отклонить транзакцию в статусе " + transactionOpt.get().getStatus(), true);
+                return;
+            }
+            
+            log.info("Вызов метода отклонения для транзакции ID: {}", transactionId);
+            BotApiMethod<?> response = handleDepositReject(chatId, transactionId);
+            
+            if (response != null) {
+                log.info("Отправка ответного сообщения пользователю");
+                executeMethod(response);
+                sendCallbackAnswer(callbackId, "Транзакция отклонена", false);
+            } else {
+                log.warn("Метод handleDepositReject вернул null для транзакции ID: {}", transactionId);
+                sendCallbackAnswer(callbackId, "Ошибка при обработке запроса", true);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при обработке callback-запроса на отклонение: {}", e.getMessage(), e);
+            sendCallbackAnswer(callbackId, "Ошибка: " + e.getMessage(), true);
+            
+            try {
+                // Отправим сообщение об ошибке
+                SendMessage errorMessage = new SendMessage();
+                errorMessage.setChatId(chatId);
+                errorMessage.setText("❌ Ошибка при отклонении транзакции: " + e.getMessage());
+                execute(errorMessage);
+            } catch (Exception ex) {
+                log.error("Не удалось отправить сообщение об ошибке: {}", ex.getMessage());
+            }
+        } finally {
+            log.info("<< Завершение обработки callback-запроса на отклонение: {}", data);
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр деталей пополнения
+     */
+    @Transactional
+    private void handleDepositDetailsCallback(String chatId, String callbackId, String data, Integer messageId) {
+        log.info(">> Обработка callback-запроса на просмотр деталей пополнения: {}", data);
+        try {
+            Long transactionId = Long.parseLong(data.substring("deposit_details_".length()));
+            
+            log.info("Вызов метода просмотра деталей для транзакции ID: {}", transactionId);
+            BotApiMethod<?> response = handleDepositDetails(chatId, transactionId);
+            
+            if (response != null) {
+                log.info("Отправка ответного сообщения пользователю");
+                executeMethod(response);
+                sendCallbackAnswer(callbackId, "Детали транзакции", false);
+            } else {
+                log.warn("Метод handleDepositDetails вернул null для транзакции ID: {}", transactionId);
+                sendCallbackAnswer(callbackId, "Ошибка при обработке запроса", true);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при обработке callback-запроса на просмотр деталей: {}", e.getMessage(), e);
+            sendCallbackAnswer(callbackId, "Ошибка: " + e.getMessage(), true);
+            
+            try {
+                // Отправим сообщение об ошибке
+                SendMessage errorMessage = new SendMessage();
+                errorMessage.setChatId(chatId);
+                errorMessage.setText("❌ Ошибка при просмотре деталей транзакции: " + e.getMessage());
+                execute(errorMessage);
+            } catch (Exception ex) {
+                log.error("Не удалось отправить сообщение об ошибке: {}", ex.getMessage());
+            }
+        } finally {
+            log.info("<< Завершение обработки callback-запроса на просмотр деталей: {}", data);
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на подтверждение пополнения
+     */
+    @Transactional
+    protected BotApiMethod<?> handleDepositConfirm(String chatId, Long transactionId) {
+        log.info(">> Начинаем обработку запроса на подтверждение транзакции ID: {}", transactionId);
+        try {
+            // Используем метод с жадной загрузкой пользователя
+            Optional<Transaction> transactionOpt = transactionRepository.findByIdWithUser(transactionId);
+            if (transactionOpt.isEmpty()) {
+                log.warn("Транзакция с ID {} не найдена в базе данных", transactionId);
+                return createMessage(chatId, "❌ Транзакция не найдена.");
+            }
+            
+            Transaction transaction = transactionOpt.get();
+            // Теперь мы можем безопасно получить пользователя, так как он загружен жадно
+            String username = transaction.getUser().getUsername();
+            log.info("Найдена транзакция: ID={}, статус={}, пользователь={}, сумма={}", 
+                    transaction.getId(), transaction.getStatus(), username, transaction.getAmount());
+            
+            if (transaction.getStatus() != TransactionStatus.PENDING) {
+                log.warn("Невозможно подтвердить транзакцию в статусе {}: {}", 
+                       transaction.getStatus(), transaction.getTransactionCode());
+                return createMessage(chatId, "❌ Невозможно подтвердить транзакцию в статусе " + transaction.getStatus());
+            }
+            
+            log.info("Вызываем метод подтверждения транзакции в BalanceService");
+            // Подтверждаем транзакцию через сервис
+            Transaction confirmedTransaction = balanceService.confirmDeposit(transaction.getTransactionCode(), "Admin: " + chatId);
+            
+            log.info("Транзакция успешно подтверждена: ID={}, новый статус={}", 
+                    confirmedTransaction.getId(), confirmedTransaction.getStatus());
+            
+            return createMessage(chatId, "✅ Транзакция #" + transactionId + " успешно подтверждена. Баланс пользователя пополнен.");
+        } catch (Exception e) {
+            log.error("Исключение при подтверждении транзакции {}: {}", transactionId, e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на подтверждение транзакции ID: {}", transactionId);
+        }
     }
     
     /**
-     * Обрабатывает callback-запросы для товаров
+     * Обрабатывает запрос на отклонение пополнения
      */
-    private BotApiMethod<?> handleProductCallback(String chatId, String command, Integer messageId) {
-        if (command.equals("all")) {
-            return productHandler.handleAllProducts(chatId);
-        } else if (command.equals("search")) {
-            return productHandler.handleProductSearchRequest(chatId);
-        } else if (command.equals("create")) {
-            return productHandler.handleCreateProductRequest(chatId);
-        } else if (command.startsWith("details:")) {
-            Long productId = Long.parseLong(command.substring(8));
-            return productHandler.handleProductDetails(chatId, productId);
-        } else if (command.startsWith("price:")) {
-            Long productId = Long.parseLong(command.substring(6));
-            return productHandler.handleUpdatePriceRequest(chatId, productId);
-        } else if (command.startsWith("stock:")) {
-            Long productId = Long.parseLong(command.substring(6));
-            return productHandler.handleUpdateStockRequest(chatId, productId);
-        } else if (command.startsWith("delete:")) {
-            Long productId = Long.parseLong(command.substring(7));
-            return productHandler.handleDeleteProductRequest(chatId, productId);
-        } else if (command.startsWith("confirmDelete:")) {
-            Long productId = Long.parseLong(command.substring(14));
-            return productHandler.handleDeleteProduct(chatId, productId);
+    @Transactional
+    protected BotApiMethod<?> handleDepositReject(String chatId, Long transactionId) {
+        log.info(">> Начинаем обработку запроса на отклонение транзакции ID: {}", transactionId);
+        try {
+            // Используем метод с жадной загрузкой пользователя
+            Optional<Transaction> transactionOpt = transactionRepository.findByIdWithUser(transactionId);
+            if (transactionOpt.isEmpty()) {
+                log.warn("Транзакция с ID {} не найдена в базе данных", transactionId);
+                return createMessage(chatId, "❌ Транзакция не найдена.");
+            }
+            
+            Transaction transaction = transactionOpt.get();
+            // Теперь мы можем безопасно получить пользователя, так как он загружен жадно
+            String username = transaction.getUser().getUsername();
+            log.info("Найдена транзакция: ID={}, статус={}, пользователь={}, сумма={}", 
+                    transaction.getId(), transaction.getStatus(), username, transaction.getAmount());
+            
+            if (transaction.getStatus() != TransactionStatus.PENDING) {
+                log.warn("Невозможно отклонить транзакцию в статусе {}: {}", 
+                       transaction.getStatus(), transaction.getTransactionCode());
+                return createMessage(chatId, "❌ Невозможно отклонить транзакцию в статусе " + transaction.getStatus());
+            }
+            
+            log.info("Вызываем метод отклонения транзакции в BalanceService");
+            // Отклоняем транзакцию через сервис
+            Transaction rejectedTransaction = balanceService.rejectDeposit(
+                transaction.getTransactionCode(), 
+                "Отклонено администратором", 
+                "Admin: " + chatId
+            );
+            
+            log.info("Транзакция успешно отклонена: ID={}, новый статус={}", 
+                    rejectedTransaction.getId(), rejectedTransaction.getStatus());
+            
+            return createMessage(chatId, "❌ Транзакция #" + transactionId + " отклонена.");
+        } catch (Exception e) {
+            log.error("Исключение при отклонении транзакции {}: {}", transactionId, e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на отклонение транзакции ID: {}", transactionId);
         }
-        
-        return createUnknownCommandMessage(chatId);
+    }
+    
+    /**
+     * Форматирует дату и время в читаемый вид
+     */
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+        return dateTime.format(formatter);
+    }
+    
+    /**
+     * Возвращает эмодзи для статуса транзакции
+     */
+    private String getStatusEmoji(TransactionStatus status) {
+        String emoji;
+        switch (status) {
+            case PENDING:
+                emoji = "⏳";
+                break;
+            case COMPLETED:
+                emoji = "✅";
+                break;
+            case REJECTED:
+                emoji = "❌";
+                break;
+            case CANCELLED:
+                emoji = "🚫";
+                break;
+            default:
+                emoji = "";
+                break;
+        }
+        return emoji;
     }
 
     /**
@@ -1016,5 +1281,224 @@ public class AdminTelegramBot extends TelegramLongPollingBot {
      */
     public Set<String> getAllowedAdminIds() {
         return Collections.unmodifiableSet(allowedAdminIds);
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр деталей пополнения
+     */
+    @Transactional
+    protected BotApiMethod<?> handleDepositDetails(String chatId, Long transactionId) {
+        try {
+            // Используем метод с жадной загрузкой пользователя
+            Optional<Transaction> transactionOpt = transactionRepository.findByIdWithUser(transactionId);
+            if (transactionOpt.isEmpty()) {
+                return createMessage(chatId, "❌ Транзакция не найдена.");
+            }
+
+            Transaction transaction = transactionOpt.get();
+            // Теперь мы можем безопасно получить данные пользователя, так как он загружен жадно
+            String username = transaction.getUser().getUsername();
+            String email = transaction.getUser().getEmail();
+            
+            StringBuilder message = new StringBuilder();
+            message.append("*📋 ДЕТАЛИ ПОПОЛНЕНИЯ #").append(transactionId).append("*\n\n");
+            message.append("*Пользователь:* ").append(username).append("\n");
+            message.append("*Email:* ").append(email != null ? email : "-").append("\n");
+            message.append("*ID пользователя:* ").append(transaction.getUser().getId()).append("\n");
+            message.append("*Сумма:* ").append(transaction.getAmount()).append(" ₽\n");
+            message.append("*Статус:* ").append(getStatusEmoji(transaction.getStatus())).append(" ").append(transaction.getStatus()).append("\n");
+            message.append("*Код транзакции:* `").append(transaction.getTransactionCode()).append("`\n");
+            message.append("*Тип:* ").append(transaction.getType()).append("\n");
+            message.append("*Создана:* ").append(formatDateTime(transaction.getCreatedAt())).append("\n");
+            
+            if (transaction.getUpdatedAt() != null) {
+                message.append("*Обновлена:* ").append(formatDateTime(transaction.getUpdatedAt())).append("\n");
+            }
+            
+            if (transaction.getAdminComment() != null && !transaction.getAdminComment().isEmpty()) {
+                message.append("*Комментарий админа:* ").append(transaction.getAdminComment()).append("\n");
+            }
+
+            // Создаем клавиатуру с кнопками действий
+            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+            
+            // Кнопки подтверждения/отклонения в зависимости от статуса
+            if (transaction.getStatus() == TransactionStatus.PENDING) {
+                List<InlineKeyboardButton> row = new ArrayList<>();
+                
+                InlineKeyboardButton confirmButton = new InlineKeyboardButton();
+                confirmButton.setText("✅ Подтвердить");
+                confirmButton.setCallbackData("deposit_confirm_" + transactionId);
+                row.add(confirmButton);
+                
+                InlineKeyboardButton rejectButton = new InlineKeyboardButton();
+                rejectButton.setText("❌ Отклонить");
+                rejectButton.setCallbackData("deposit_reject_" + transactionId);
+                row.add(rejectButton);
+                
+                keyboard.add(row);
+            }
+            
+            // Кнопка возврата к меню
+            List<InlineKeyboardButton> row2 = new ArrayList<>();
+            InlineKeyboardButton backButton = new InlineKeyboardButton();
+            backButton.setText("◀️ Назад к меню");
+            backButton.setCallbackData("menu:main");
+            row2.add(backButton);
+            keyboard.add(row2);
+            
+            keyboardMarkup.setKeyboard(keyboard);
+            
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(message.toString());
+            sendMessage.setParseMode("Markdown");
+            sendMessage.setReplyMarkup(keyboardMarkup);
+            
+            return sendMessage;
+        } catch (Exception e) {
+            log.error("Ошибка при получении деталей транзакции: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на фильтрацию пополнений
+     */
+    private BotApiMethod<?> handleDepositsFilterCallback(String chatId, String callbackId, String data, Integer messageId) {
+        log.info(">> Обработка callback-запроса на фильтрацию пополнений: {}", data);
+        try {
+            String filter = data.substring("deposits:".length());
+            switch (filter) {
+                case "all":
+                    return handleAllDeposits(chatId);
+                case "pending":
+                    return handlePendingDeposits(chatId);
+                case "completed":
+                    return handleCompletedDeposits(chatId);
+                case "rejected":
+                    return handleRejectedDeposits(chatId);
+                default:
+                    return createMessage(chatId, "❌ Неизвестный фильтр: " + filter);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при обработке фильтра пополнений: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки callback-запроса на фильтрацию пополнений: {}", data);
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр всех пополнений
+     */
+    private BotApiMethod<?> handleAllDeposits(String chatId) {
+        log.info(">> Обработка запроса на просмотр всех пополнений");
+        try {
+            List<Transaction> transactions = transactionRepository.findAll();
+            return createDepositsListMessage(chatId, transactions, "Все пополнения");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка пополнений: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на просмотр всех пополнений");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр ожидающих пополнений
+     */
+    private BotApiMethod<?> handlePendingDeposits(String chatId) {
+        log.info(">> Обработка запроса на просмотр ожидающих пополнений");
+        try {
+            List<Transaction> transactions = transactionRepository.findByStatus(TransactionStatus.PENDING);
+            return createDepositsListMessage(chatId, transactions, "Ожидающие пополнения");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка ожидающих пополнений: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на просмотр ожидающих пополнений");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр завершенных пополнений
+     */
+    private BotApiMethod<?> handleCompletedDeposits(String chatId) {
+        log.info(">> Обработка запроса на просмотр завершенных пополнений");
+        try {
+            List<Transaction> transactions = transactionRepository.findByStatus(TransactionStatus.COMPLETED);
+            return createDepositsListMessage(chatId, transactions, "Завершенные пополнения");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка завершенных пополнений: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на просмотр завершенных пополнений");
+        }
+    }
+
+    /**
+     * Обрабатывает запрос на просмотр отклоненных пополнений
+     */
+    private BotApiMethod<?> handleRejectedDeposits(String chatId) {
+        log.info(">> Обработка запроса на просмотр отклоненных пополнений");
+        try {
+            List<Transaction> transactions = transactionRepository.findByStatus(TransactionStatus.REJECTED);
+            return createDepositsListMessage(chatId, transactions, "Отклоненные пополнения");
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка отклоненных пополнений: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        } finally {
+            log.info("<< Завершение обработки запроса на просмотр отклоненных пополнений");
+        }
+    }
+
+    /**
+     * Создает сообщение со списком пополнений
+     */
+    private BotApiMethod<?> createDepositsListMessage(String chatId, List<Transaction> transactions, String title) {
+        if (transactions.isEmpty()) {
+            return createMessage(chatId, "📋 *" + title + "*\n\nНет пополнений для отображения.");
+        }
+
+        StringBuilder message = new StringBuilder();
+        message.append("📋 *").append(title).append("*\n\n");
+
+        for (Transaction transaction : transactions) {
+            message.append("ID: ").append(transaction.getId()).append("\n");
+            message.append("Пользователь: ").append(transaction.getUser().getUsername()).append("\n");
+            message.append("Сумма: ").append(transaction.getAmount()).append(" ₽\n");
+            message.append("Статус: ").append(getStatusEmoji(transaction.getStatus())).append(" ").append(transaction.getStatus()).append("\n");
+            message.append("Дата: ").append(formatDateTime(transaction.getCreatedAt())).append("\n");
+            message.append("Код: `").append(transaction.getTransactionCode()).append("`\n");
+            message.append("-------------------\n");
+        }
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        // Кнопки фильтров
+        List<InlineKeyboardButton> filterRow = new ArrayList<>();
+        filterRow.add(createButton("Все", "deposits:all"));
+        filterRow.add(createButton("Ожидают", "deposits:pending"));
+        filterRow.add(createButton("Завершены", "deposits:completed"));
+        filterRow.add(createButton("Отклонены", "deposits:rejected"));
+        keyboard.add(filterRow);
+
+        // Кнопка возврата
+        List<InlineKeyboardButton> backRow = new ArrayList<>();
+        backRow.add(createButton("◀️ Назад", "menu:main"));
+        keyboard.add(backRow);
+
+        keyboardMarkup.setKeyboard(keyboard);
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message.toString());
+        sendMessage.setParseMode("Markdown");
+        sendMessage.setReplyMarkup(keyboardMarkup);
+
+        return sendMessage;
     }
 }
