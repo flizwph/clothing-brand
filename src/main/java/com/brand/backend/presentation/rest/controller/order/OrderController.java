@@ -4,6 +4,7 @@ import com.brand.backend.presentation.dto.request.OrderDto;
 import com.brand.backend.presentation.dto.response.OrderResponseDto;
 import com.brand.backend.common.exeption.ResourceNotFoundException;
 import com.brand.backend.application.order.service.OrderService;
+import com.brand.backend.domain.user.model.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,8 +45,26 @@ public class OrderController {
             @Parameter(description = "Данные нового заказа") @Valid @RequestBody OrderDto orderDto,
             Authentication authentication) {
         
-        OrderResponseDto createdOrder = orderService.createOrder(authentication.getName(), orderDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+        String username;
+        if (authentication.getPrincipal() instanceof User) {
+            username = ((User) authentication.getPrincipal()).getUsername();
+        } else {
+            username = authentication.getName();
+        }
+        
+        log.info("Получен запрос на создание заказа от пользователя: {}", username);
+        
+        try {
+            OrderResponseDto createdOrder = orderService.createOrder(username, orderDto);
+            log.info("Заказ успешно создан для пользователя: {}", username);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+        } catch (UsernameNotFoundException e) {
+            log.error("Ошибка при создании заказа: пользователь не найден: {}", username, e);
+            throw new ResourceNotFoundException("Пользователь", "username", username);
+        } catch (Exception e) {
+            log.error("Ошибка при создании заказа для пользователя {}: {}", username, e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Operation(summary = "Получение заказа по ID", description = "Возвращает данные заказа по его идентификатору")
@@ -70,7 +90,14 @@ public class OrderController {
     })
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getUserOrders(Authentication authentication) {
-        List<OrderResponseDto> orders = orderService.getUserOrders(authentication.getName());
+        String username;
+        if (authentication.getPrincipal() instanceof User) {
+            username = ((User) authentication.getPrincipal()).getUsername();
+        } else {
+            username = authentication.getName();
+        }
+        
+        List<OrderResponseDto> orders = orderService.getUserOrders(username);
         return ResponseEntity.ok(orders);
     }
 
@@ -86,7 +113,14 @@ public class OrderController {
             @Parameter(description = "ID заказа") @PathVariable Long id,
             Authentication authentication) {
         
-        orderService.cancelOrder(id, authentication.getName());
+        String username;
+        if (authentication.getPrincipal() instanceof User) {
+            username = ((User) authentication.getPrincipal()).getUsername();
+        } else {
+            username = authentication.getName();
+        }
+        
+        orderService.cancelOrder(id, username);
         return ResponseEntity.noContent().build();
     }
 }

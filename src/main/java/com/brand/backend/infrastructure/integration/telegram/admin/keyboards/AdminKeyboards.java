@@ -268,19 +268,16 @@ public class AdminKeyboards {
         
         List<InlineKeyboardButton> row3 = new ArrayList<>();
         row3.add(createButton("👤 Поиск по имени", "searchUserByName"));
+        row3.add(createButton("📧 Поиск по email", "searchUserByEmail"));
         rows.add(row3);
         
         List<InlineKeyboardButton> row4 = new ArrayList<>();
-        row4.add(createButton("✉️ Поиск по email", "searchUserByEmail"));
+        row4.add(createButton("📱 Поиск по телефону", "searchUserByPhone"));
         rows.add(row4);
         
         List<InlineKeyboardButton> row5 = new ArrayList<>();
-        row5.add(createButton("📱 Поиск по телефону", "searchUserByPhone"));
+        row5.add(createButton("◀️ Главное меню", "menu:main"));
         rows.add(row5);
-        
-        List<InlineKeyboardButton> row6 = new ArrayList<>();
-        row6.add(createButton("◀️ Главное меню", "menu"));
-        rows.add(row6);
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(rows);
@@ -348,14 +345,18 @@ public class AdminKeyboards {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
         List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(createButton("🔍 Поиск по имени", "user:searchByName"));
-        row1.add(createButton("📧 Поиск по email", "user:searchByEmail"));
+        row1.add(createButton("👤 Поиск по имени", "searchUserByName"));
+        row1.add(createButton("📧 Поиск по email", "searchUserByEmail"));
         rows.add(row1);
         
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(createButton("📱 Поиск по телефону", "user:searchByPhone"));
-        row2.add(createButton("👥 Все пользователи", "menu:users"));
+        row2.add(createButton("📱 Поиск по телефону", "searchUserByPhone"));
+        row2.add(createButton("👥 Все пользователи", "listUsers"));
         rows.add(row2);
+        
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        row3.add(createButton("◀️ Назад в меню", "menu:main"));
+        rows.add(row3);
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(rows);
@@ -398,6 +399,65 @@ public class AdminKeyboards {
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(createButton("◀️ Назад в меню", "menu:main"));
         rows.add(row1);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
+    }
+
+    /**
+     * Создаёт клавиатуру для профиля пользователя
+     */
+    public static InlineKeyboardMarkup createUserProfileKeyboard(Long userId) {
+        return createUserProfileKeyboard(userId, true);
+    }
+
+    /**
+     * Создаёт клавиатуру для профиля пользователя с учетом статуса
+     */
+    public static InlineKeyboardMarkup createUserProfileKeyboard(Long userId, boolean isActive) {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("📦 Заказы пользователя", "userOrders:" + userId));
+        rows.add(row1);
+        
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("🎨 NFT пользователя", "userNFTs:" + userId));
+        rows.add(row2);
+        
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        if (isActive) {
+            row3.add(createButton("❌ Деактивировать", "user:deactivate:" + userId));
+        } else {
+            row3.add(createButton("✅ Активировать", "user:activate:" + userId));
+        }
+        rows.add(row3);
+        
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
+        row4.add(createButton("◀️ Назад", "menu:users"));
+        rows.add(row4);
+        
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(rows);
+        return markup;
+    }
+    
+    /**
+     * Создаёт клавиатуру для деталей заказа
+     */
+    public static InlineKeyboardMarkup createOrderDetailsKeyboard(Long orderId) {
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        
+        // Кнопки изменения статуса
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(createButton("🔄 Изменить статус", "viewOrder:" + orderId));
+        rows.add(row1);
+        
+        // Кнопка возврата
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(createButton("◀️ Назад", "filter:all"));
+        rows.add(row2);
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(rows);

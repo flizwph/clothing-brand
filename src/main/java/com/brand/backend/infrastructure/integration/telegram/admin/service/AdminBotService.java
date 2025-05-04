@@ -301,4 +301,13 @@ public class AdminBotService {
                 .filter(order -> order.getEmail().contains(email))
                 .collect(Collectors.toList());
     }
+    
+    /**
+     * Поиск пользователей по имени
+     */
+    public List<User> findUsersByUsername(String username) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getUsername().toLowerCase().contains(username.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 } 

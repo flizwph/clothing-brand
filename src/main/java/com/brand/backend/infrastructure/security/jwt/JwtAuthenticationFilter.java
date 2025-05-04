@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import org.slf4j.MDC;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -28,9 +30,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
+        String requestId = MDC.get("requestId");
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString();
+            MDC.put("requestId", requestId);
+        }
+        
+        String requestURI = request.getRequestURI();
+        log.debug("[{}] JwtAuthenticationFilter обрабатывает запрос к URI: {}", requestId, requestURI);
+        
         final String authHeader = request.getHeader("Authorization");
-        log.debug("Обработка запроса на URI: {}", request.getRequestURI());
+        log.debug("Обработка запроса на URI: {}", requestURI);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.debug("Отсутствует или неверный формат заголовка Authorization");
@@ -57,26 +67,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // ✅ Загружаем пользователя из базы, а не передаем `String`
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                log.debug("Пытаемся загрузить пользователя: {}", username);
+                log.debug("[{}] Начало проверки валидности токена для пользователя: {}", requestId, username);
+                log.debug("[{}] Пытаемся загрузить пользователя: {}", requestId, username);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                log.debug("Пользователь {} успешно загружен", username);
+                log.debug("[{}] UserDetails успешно загружен для пользователя: {}", requestId, username);
 
                 if (jwtUtil.isTokenValid(token, userDetails)) {
-                    log.debug("Токен для пользователя {} действителен, создаем аутентификацию", username);
+                    log.debug("[{}] Токен действителен для пользователя: {}", requestId, username);
+                    log.debug("[{}] Токен для пользователя {} действителен, создаем аутентификацию", requestId, username);
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Аутентификация успешно установлена в контексте безопасности");
+                    log.debug("[{}] Аутентификация успешно установлена для пользователя: {}", requestId, username);
                 } else {
-                    log.warn("Токен недействителен для пользователя: {}", username);
+                    log.warn("[{}] Недействительный токен для пользователя: {}", requestId, username);
                 }
             } catch (Exception e) {
-                log.error("❌ Ошибка при загрузке пользователя {}: {}", username, e.getMessage());
+                log.error("[{}] Ошибка при загрузке пользователя {}: {}", requestId, username, e.getMessage(), e);
             }
         }
 
+        log.debug("[{}] Продолжение цепочки фильтров для URI: {}", requestId, requestURI);
         filterChain.doFilter(request, response);
     }
 }

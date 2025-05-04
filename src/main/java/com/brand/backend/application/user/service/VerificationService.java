@@ -90,6 +90,6 @@ public class VerificationService {
      * @return случайный код
      */
     private String generateVerificationCode() {
-        return UUID.randomUUID().toString().substring(0, 8);
+        return UUID.randomUUID().toString().replace("-", "");
     }
 } 

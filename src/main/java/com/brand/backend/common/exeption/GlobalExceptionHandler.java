@@ -16,10 +16,15 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import com.brand.backend.application.auth.core.exception.UserNotVerifiedException;
+import org.slf4j.MDC;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final String REQUEST_ID_HEADER = "X-Request-ID";
 
     // Структура ответа с ошибкой
     private static class ApiError {
@@ -199,5 +204,25 @@ public class GlobalExceptionHandler {
         
         log.error("Uncaught exception", ex);
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(UserNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotVerifiedException(UserNotVerifiedException ex, WebRequest request) {
+        log.warn("User not verified exception: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .message(ex.getMessage())
+                .path(request.getDescription(false))
+                .timestamp(ZonedDateTime.now())
+                .requestId(MDC.get(REQUEST_ID_HEADER))
+                .build();
+        
+        errorResponse.addAdditionalInfo("error", "User not verified");
+        errorResponse.addAdditionalInfo("verificationCode", ex.getVerificationCode());
+        errorResponse.addAdditionalInfo("status", "not_verified");
+        errorResponse.addAdditionalInfo("message", "Your account is not verified. Please verify your account with Telegram bot using the provided code.");
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 }

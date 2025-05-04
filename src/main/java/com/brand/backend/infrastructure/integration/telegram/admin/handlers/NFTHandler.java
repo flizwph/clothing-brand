@@ -6,14 +6,10 @@ import com.brand.backend.domain.nft.model.NFT;
 import com.brand.backend.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,30 +19,10 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class NFTHandler extends TelegramLongPollingBot {
+@RequiredArgsConstructor
+public class NFTHandler {
 
     private final AdminBotService adminBotService;
-    
-    @Value("${admin.bot.token}")
-    private String botToken;
-    
-    @Value("${admin.bot.username}")
-    private String botUsername;
-    
-    public NFTHandler(AdminBotService adminBotService, @Value("${admin.bot.token}") String botToken) {
-        super(botToken);
-        this.adminBotService = adminBotService;
-    }
-    
-    @Override
-    public String getBotUsername() {
-        return botUsername;
-    }
-    
-    @Override
-    public void onUpdateReceived(Update update) {
-        // Не используется, так как обработка обновлений происходит в AdminTelegramBot
-    }
 
     /**
      * Обрабатывает различные команды для NFT
@@ -55,10 +31,10 @@ public class NFTHandler extends TelegramLongPollingBot {
         log.debug("Обработка NFT callback для команды: {}", command);
         
         switch (command) {
-            case "all" -> executeWithErrorHandling(handleAllNFTs(chatId));
-            case "unrevealed" -> executeWithErrorHandling(handleUnrevealedNFTs(chatId));
-            case "searchByUser" -> executeWithErrorHandling(handleNFTSearchForm(chatId));
-            default -> executeWithErrorHandling(handleNFTMenu(chatId));
+            case "all" -> handleAllNFTs(chatId);
+            case "unrevealed" -> handleUnrevealedNFTs(chatId);
+            case "searchByUser" -> handleNFTSearchForm(chatId);
+            default -> handleNFTMenu(chatId);
         }
     }
     
@@ -208,13 +184,54 @@ public class NFTHandler extends TelegramLongPollingBot {
     }
     
     /**
-     * Вспомогательный метод для выполнения SendMessage с обработкой ошибок
+     * Обрабатывает запрос на просмотр NFT пользователя
      */
-    private void executeWithErrorHandling(SendMessage message) {
+    public SendMessage handleUserNFTs(String chatId, Long userId) {
+        log.info(">> Обработка запроса на просмотр NFT пользователя: {}", userId);
         try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Ошибка при отправке сообщения: {}", e.getMessage(), e);
+            User user = adminBotService.getUserById(userId);
+            
+            if (user == null) {
+                log.warn("Пользователь с ID {} не найден", userId);
+                return createMessage(chatId, "❌ Пользователь не найден.");
+            }
+            
+            List<NFT> userNFTs = adminBotService.getNFTsByUser(user);
+            
+            if (userNFTs.isEmpty()) {
+                log.info("У пользователя {} нет NFT", user.getUsername());
+                return createMessage(
+                    chatId, 
+                    "У пользователя " + user.getUsername() + " нет NFT.", 
+                    AdminKeyboards.createBackKeyboard("viewUser:" + userId)
+                );
+            }
+            
+            StringBuilder message = new StringBuilder();
+            message.append("🎨 *NFT пользователя ").append(user.getUsername()).append("*\n\n");
+            
+            for (int i = 0; i < userNFTs.size(); i++) {
+                NFT nft = userNFTs.get(i);
+                message.append(i + 1).append(". ID: ").append(nft.getId()).append("\n");
+                message.append("   Placeholder URI: ").append(nft.getPlaceholderUri()).append("\n");
+                message.append("   Раскрыт: ").append(nft.isRevealed() ? "✅" : "❌").append("\n");
+                if (nft.isRevealed() && nft.getRevealedUri() != null) {
+                    message.append("   Revealed URI: ").append(nft.getRevealedUri()).append("\n");
+                }
+                if (nft.getRarity() != null) {
+                    message.append("   Редкость: ").append(nft.getRarity()).append("\n");
+                }
+                message.append("\n");
+            }
+            
+            return createMessage(
+                chatId, 
+                message.toString(), 
+                AdminKeyboards.createBackKeyboard("viewUser:" + userId)
+            );
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на просмотр NFT пользователя: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
         }
     }
 } 

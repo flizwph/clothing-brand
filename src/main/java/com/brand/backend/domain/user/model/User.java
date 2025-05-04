@@ -77,11 +77,11 @@ public class User {
     @Column(name = "balance", nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
 
-    @Transient
-    private Integer tokenVersion = 1;
-
     @Column(name = "telegram_chat_id")
     private String telegramChatId;
+
+    @Column(name = "token_version")
+    private Integer tokenVersion = 1;
 
     public Integer getTokenVersion() {
         return tokenVersion != null ? tokenVersion : 1;

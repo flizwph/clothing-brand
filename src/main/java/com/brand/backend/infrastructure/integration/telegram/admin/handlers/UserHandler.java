@@ -1,5 +1,6 @@
 package com.brand.backend.infrastructure.integration.telegram.admin.handlers;
 
+import com.brand.backend.infrastructure.integration.telegram.admin.keyboards.AdminKeyboards;
 import com.brand.backend.infrastructure.integration.telegram.admin.service.AdminBotService;
 import com.brand.backend.domain.order.model.Order;
 import com.brand.backend.domain.user.model.User;
@@ -195,31 +196,8 @@ public class UserHandler {
      * Создаёт клавиатуру для детальной информации о пользователе
      */
     private InlineKeyboardMarkup createUserDetailsKeyboard(User user) {
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(createButton("📝 Заказы пользователя", "userOrders:" + user.getId()));
-        rows.add(row1);
-        
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(createButton("🎨 NFT пользователя", "userNFTs:" + user.getId()));
-        rows.add(row2);
-        
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        if (user.isActive()) {
-            row3.add(createButton("❌ Деактивировать", "user:deactivate:" + user.getId()));
-        } else {
-            row3.add(createButton("✅ Активировать", "user:activate:" + user.getId()));
-        }
-        rows.add(row3);
-        
-        List<InlineKeyboardButton> row4 = new ArrayList<>();
-        row4.add(createButton("◀️ Назад", "menu:users"));
-        rows.add(row4);
-        
-        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-        markup.setKeyboard(rows);
-        return markup;
+        // Используем общий метод из AdminKeyboards для создания клавиатуры профиля пользователя
+        return AdminKeyboards.createUserProfileKeyboard(user.getId(), user.isActive());
     }
     
     /**
@@ -342,19 +320,37 @@ public class UserHandler {
     /**
      * Отображает форму для поиска пользователей
      */
-    public SendMessage handleSearchUserForm(String chatId) {
+    public SendMessage handleSearchUser(String chatId) {
+        log.info(">> Обработка запроса на поиск пользователя");
+        try {
         String text = """
-                🔍 Поиск пользователя
-                
-                Введите команду /user_search или /usersearch и поисковый запрос для поиска пользователя.
-                
-                Например: 
-                /user_search Иван
-                /usersearch example@mail.com
-                /user_search +79123456789
-                """;
-        
-        return createMessage(chatId, text, false);
+                    🔍 *Поиск пользователя*
+                    
+                    Введите или скопируйте одну из команд ниже и добавьте параметры поиска:
+                    
+                    `/search_user имя_пользователя` - поиск по имени
+                    `/email адрес@почты.com` - поиск по email
+                    `/phone +79991234567` - поиск по телефону
+                    
+                    💡 Команды можно скопировать, нажав на них.
+                    """;
+            
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText(text);
+            message.setParseMode("Markdown");
+            
+            // Добавляем клавиатуру для возврата
+            message.setReplyMarkup(AdminKeyboards.createUserSearchKeyboard());
+            
+            return message;
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на поиск пользователя: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage(), 
+                    AdminKeyboards.createBackKeyboard("menu:users"));
+        } finally {
+            log.info("<< Завершение обработки запроса на поиск пользователя");
+        }
     }
 
     /**
@@ -364,34 +360,61 @@ public class UserHandler {
         log.info(">> Обработка запроса на получение списка пользователей");
         try {
             List<User> users = adminBotService.getAllUsers();
-            return createUsersListMessage(chatId, users, "Список пользователей");
+            
+            if (users.isEmpty()) {
+                log.warn("Список пользователей пуст");
+                return createMessage(
+                    chatId, 
+                    "Пользователи не найдены.", 
+                    AdminKeyboards.createBackKeyboard("menu:main")
+                );
+            }
+            
+            log.info("Получен список пользователей: {} записей", users.size());
+            
+            StringBuilder message = new StringBuilder("*👥 Список пользователей:*\n\n");
+            
+            for (int i = 0; i < Math.min(20, users.size()); i++) {
+                User user = users.get(i);
+                message.append(i + 1).append(". *").append(user.getUsername()).append("*");
+                
+                if (user.getEmail() != null) {
+                    message.append(" (").append(user.getEmail()).append(")");
+                }
+                
+                message.append("\n");
+                
+                List<Order> userOrders = adminBotService.getOrdersByUser(user);
+                message.append("📝 Заказов: ").append(userOrders.size()).append("\n");
+                
+                if (user.getTelegramUsername() != null) {
+                    message.append("🔗 Telegram: @").append(user.getTelegramUsername()).append("\n");
+                }
+                
+                message.append("/user_").append(user.getId()).append(" - подробная информация\n\n");
+            }
+            
+            if (users.size() > 20) {
+                message.append("...и еще ").append(users.size() - 20).append(" пользователей.\n");
+                message.append("Используйте поиск для нахождения конкретного пользователя.");
+            }
+            
+            // Создаем клавиатуру с кнопками поиска и возврата в меню
+            InlineKeyboardMarkup keyboardMarkup = AdminKeyboards.createUsersMenu();
+            
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(message.toString());
+            sendMessage.setParseMode("Markdown");
+            sendMessage.setReplyMarkup(keyboardMarkup);
+            
+            return sendMessage;
         } catch (Exception e) {
             log.error("Ошибка при получении списка пользователей: {}", e.getMessage(), e);
-            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+            return createMessage(chatId, "❌ Произошла ошибка при получении списка пользователей: " + e.getMessage(),
+                    AdminKeyboards.createBackKeyboard("menu:main"));
         } finally {
             log.info("<< Завершение обработки запроса на получение списка пользователей");
-        }
-    }
-
-    /**
-     * Обрабатывает запрос на поиск пользователя
-     */
-    public SendMessage handleSearchUser(String chatId) {
-        log.info(">> Обработка запроса на поиск пользователя");
-        try {
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText("🔍 *Поиск пользователя*\n\n" +
-                    "Введите или скопируйте команду ниже и добавьте параметры поиска:\n\n" +
-                    "`/search_user параметры`\n\n" +
-                    "💡 Команду можно скопировать, нажав на неё.");
-            message.setParseMode("Markdown");
-            return message;
-        } catch (Exception e) {
-            log.error("Ошибка при обработке запроса на поиск пользователя: {}", e.getMessage(), e);
-            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
-        } finally {
-            log.info("<< Завершение обработки запроса на поиск пользователя");
         }
     }
 
@@ -408,10 +431,15 @@ public class UserHandler {
                     "`/email адрес@почты.com`\n\n" +
                     "💡 Команду можно скопировать, нажав на неё.");
             message.setParseMode("Markdown");
+            
+            // Добавляем клавиатуру для возврата
+            message.setReplyMarkup(AdminKeyboards.createBackKeyboard("menu:users"));
+            
             return message;
         } catch (Exception e) {
             log.error("Ошибка при обработке запроса на поиск пользователя по email: {}", e.getMessage(), e);
-            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage(), 
+                    AdminKeyboards.createBackKeyboard("menu:users"));
         } finally {
             log.info("<< Завершение обработки запроса на поиск пользователя по email");
         }
@@ -430,10 +458,15 @@ public class UserHandler {
                     "`/phone +79991234567`\n\n" +
                     "💡 Команду можно скопировать, нажав на неё.");
             message.setParseMode("Markdown");
+            
+            // Добавляем клавиатуру для возврата
+            message.setReplyMarkup(AdminKeyboards.createBackKeyboard("menu:users"));
+            
             return message;
         } catch (Exception e) {
             log.error("Ошибка при обработке запроса на поиск пользователя по телефону: {}", e.getMessage(), e);
-            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage(), 
+                    AdminKeyboards.createBackKeyboard("menu:users"));
         } finally {
             log.info("<< Завершение обработки запроса на поиск пользователя по телефону");
         }
@@ -444,7 +477,8 @@ public class UserHandler {
      */
     private SendMessage createUsersListMessage(String chatId, List<User> users, String title) {
         if (users == null || users.isEmpty()) {
-            return createMessage(chatId, "*" + title + "*\n\nНет пользователей для отображения.");
+            return createMessage(chatId, "*" + title + "*\n\nНет пользователей для отображения.",
+                    AdminKeyboards.createBackKeyboard("menu:main"));
         }
         StringBuilder message = new StringBuilder();
         message.append("*" + title + "*\n\n");
@@ -459,6 +493,63 @@ public class UserHandler {
         if (users.size() > 20) {
             message.append("...и еще ").append(users.size() - 20).append(" пользователей.\n");
         }
-        return createMessage(chatId, message.toString());
+        
+        // Добавляем клавиатуру с меню пользователей
+        InlineKeyboardMarkup keyboardMarkup = AdminKeyboards.createUsersMenu();
+        
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message.toString());
+        sendMessage.setParseMode("Markdown");
+        sendMessage.setReplyMarkup(keyboardMarkup);
+        
+        return sendMessage;
+    }
+
+    /**
+     * Обрабатывает запрос на поиск пользователя по имени
+     */
+    public SendMessage handleSearchUserByName(String chatId) {
+        log.info(">> Обработка запроса на поиск пользователя по имени");
+        try {
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText("👤 *Поиск пользователя по имени*\\n\\n" +
+                    "Введите или скопируйте команду ниже и добавьте имя пользователя:\\n\\n" +
+                    "`/name Имя_пользователя`\\n\\n" +
+                    "💡 Команду можно скопировать, нажав на неё.");
+            message.setParseMode("Markdown");
+            
+            // Добавляем клавиатуру для возврата
+            message.setReplyMarkup(AdminKeyboards.createBackKeyboard("menu:users"));
+            
+            return message;
+        } catch (Exception e) {
+            log.error("Ошибка при обработке запроса на поиск пользователя по имени: {}", e.getMessage());
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Обрабатывает поиск пользователя по имени
+     */
+    public SendMessage handleUserSearchByName(String chatId, String name) {
+        log.info(">> Обработка поиска пользователя по имени: {}", name);
+        try {
+            List<User> users = adminBotService.findUsersByUsername(name);
+            
+            if (users.isEmpty()) {
+                return createMessage(
+                    chatId, 
+                    "Пользователи с именем содержащим \"" + name + "\" не найдены.", 
+                    AdminKeyboards.createBackKeyboard("menu:users")
+                );
+            }
+            
+            return createUsersListMessage(chatId, users, "Результаты поиска по имени: " + name);
+        } catch (Exception e) {
+            log.error("Ошибка при поиске пользователя по имени: {}", e.getMessage());
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
+        }
     }
 } 

@@ -36,8 +36,17 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDto createOrder(String username, OrderDto orderDto) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+        log.info("Создание заказа для пользователя: {}", username);
+        
+        User user;
+        try {
+            user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
+            log.info("Пользователь найден в базе: {}, id: {}", username, user.getId());
+        } catch (Exception e) {
+            log.error("Ошибка при поиске пользователя {}: {}", username, e.getMessage(), e);
+            throw e;
+        }
 
         Product product = productRepository.findById(orderDto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));

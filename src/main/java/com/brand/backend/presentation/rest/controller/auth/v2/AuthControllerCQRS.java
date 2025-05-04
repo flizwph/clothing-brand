@@ -4,6 +4,7 @@ import com.brand.backend.application.auth.cqrs.result.LoginCommandResult;
 import com.brand.backend.application.auth.cqrs.result.RefreshTokenResult;
 import com.brand.backend.application.auth.core.exception.InvalidCredentialsException;
 import com.brand.backend.application.auth.core.exception.UserBlockedException;
+import com.brand.backend.application.auth.core.exception.UserNotVerifiedException;
 import com.brand.backend.application.auth.core.exception.UsernameExistsException;
 import com.brand.backend.application.auth.cqrs.result.ValidateTokenResult;
 import com.brand.backend.application.auth.service.facade.AuthServiceCQRS;
@@ -95,12 +96,23 @@ public class AuthControllerCQRS {
             response.put("minutesLeft", String.valueOf(e.getMinutesLeft()));
             
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+        } catch (UserNotVerifiedException e) {
+            log.warn("⚠️ [LOGIN FAILED] Неверифицированный пользователь пытается войти: {}", request.getUsername());
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "User not verified");
+            response.put("message", "Your account is not verified. Please verify your account with Telegram bot.");
+            response.put("verificationCode", e.getVerificationCode());
+            response.put("status", "not_verified");
+            
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         } catch (Exception e) {
             log.error("🔥 [LOGIN ERROR] Ошибка входа для пользователя {}: {}", 
                     request.getUsername(), e.getMessage());
             
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", "An error occurred during login");
+            errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -137,15 +149,25 @@ public class AuthControllerCQRS {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
         try {
-            String username = request.get("username");
-            
-            if (username == null || username.isBlank()) {
+            // Extract username from the JWT token
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Username is required");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+                errorResponse.put("message", "Authorization header with Bearer token is required");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             }
+            
+            String token = authHeader.substring(7);
+            ValidateTokenResult validationResult = authService.validateToken(token);
+            
+            if (!validationResult.isValid()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            }
+            
+            String username = validationResult.getUsername();
             
             boolean result = authService.logout(username);
             

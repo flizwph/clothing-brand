@@ -182,29 +182,48 @@ public class OrderHandler {
     }
     
     /**
-     * Обновляет статус заказа
+     * Обрабатывает запрос на обновление статуса заказа
      */
-    public BotApiMethod<?> handleUpdateOrderStatus(String chatId, Long orderId, OrderStatus newStatus, Integer messageId) {
-        Order updatedOrder = adminBotService.updateOrderStatus(orderId, newStatus);
-        
-        if (updatedOrder == null) {
-            return createMessage(chatId, "Не удалось обновить статус заказа.");
-        }
-        
-        if (messageId != null) {
-            EditMessageText editMessage = new EditMessageText();
-            editMessage.setChatId(chatId);
-            editMessage.setMessageId(messageId);
-            editMessage.setText(formatOrderDetails(updatedOrder));
-            editMessage.setParseMode("Markdown");
-            editMessage.setReplyMarkup(AdminKeyboards.createStatusKeyboard(updatedOrder));
-            return editMessage;
-        } else {
+    public SendMessage handleUpdateOrderStatus(String chatId, Long orderId, OrderStatus newStatus, Integer messageId) {
+        log.info(">> Обработка запроса на обновление статуса заказа {} на {}", orderId, newStatus);
+        try {
+            // Получаем заказ
+            Order order = adminBotService.getOrderById(orderId);
+            if (order == null) {
+                return createMessage(chatId, "❌ Заказ с ID " + orderId + " не найден.");
+            }
+            
+            OrderStatus oldStatus = order.getStatus();
+            
+            if (oldStatus == newStatus) {
+                return createMessage(
+                    chatId, 
+                    "ℹ️ Заказ #" + order.getOrderNumber() + " уже имеет статус " + newStatus,
+                    AdminKeyboards.createOrderDetailsKeyboard(orderId)
+                );
+            }
+            
+            // Обновляем статус заказа
+            order.setStatus(newStatus);
+            if (newStatus == OrderStatus.COMPLETED) {
+                order.setCompletedAt(LocalDateTime.now());
+            }
+            adminBotService.updateOrderStatus(orderId, newStatus);
+            
+            // Формируем сообщение об успешном обновлении
+            String successMessage = String.format(
+                "✅ Статус заказа #%s изменен с %s на %s",
+                order.getOrderNumber(), oldStatus, newStatus
+            );
+            
             return createMessage(
                 chatId, 
-                "Статус заказа #" + updatedOrder.getOrderNumber() + " обновлен на " + newStatus, 
-                AdminKeyboards.createStatusKeyboard(updatedOrder)
+                successMessage,
+                AdminKeyboards.createOrderDetailsKeyboard(orderId)
             );
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении статуса заказа: {}", e.getMessage(), e);
+            return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
         }
     }
     
@@ -288,14 +307,14 @@ public class OrderHandler {
             return createMessage(
                 chatId, 
                 "У пользователя " + user.getUsername() + " нет заказов.", 
-                AdminKeyboards.createBackKeyboard("menu:main")
+                AdminKeyboards.createBackKeyboard("viewUser:" + userId)
             );
         }
         
         return createMessage(
             chatId, 
             formatOrdersList(userOrders, "Заказы пользователя " + user.getUsername() + " (" + userOrders.size() + "):"), 
-            AdminKeyboards.createBackKeyboard("menu:main")
+            AdminKeyboards.createBackKeyboard("viewUser:" + userId)
         );
     }
     

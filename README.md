@@ -1,789 +1,559 @@
-# Clothing Brand API
+# API Documentation
 
-Документация REST API для интернет-магазина одежды Clothing Brand.
-
-## Содержание
-
+## Оглавление
 - [Аутентификация](#аутентификация)
+  - [Регистрация](#регистрация)
+  - [Авторизация](#авторизация)
+  - [Выход из системы](#выход-из-системы)
+  - [Обновление токена](#обновление-токена)
+  - [Изменение пароля](#изменение-пароля)
+  - [Валидация токена](#валидация-токена)
 - [Пользователи](#пользователи)
-- [Товары](#товары)
+  - [Получение информации о текущем пользователе](#получение-информации-о-текущем-пользователе)
+  - [Проверка верификации в Telegram](#проверка-верификации-в-telegram)
+  - [Обновление профиля](#обновление-профиля)
+  - [Получение контактной информации](#получение-контактной-информации)
 - [Заказы](#заказы)
-- [Платежи и баланс](#платежи-и-баланс)
-- [Промокоды](#промокоды)
-- [NFT](#nft)
+  - [Создание заказа](#создание-заказа)
+  - [Получение заказа по ID](#получение-заказа-по-id)
+  - [Получение всех заказов пользователя](#получение-всех-заказов-пользователя)
+  - [Отмена заказа](#отмена-заказа)
+- [Товары](#товары)
+  - [Получение всех товаров](#получение-всех-товаров)
+  - [Получение товара по ID](#получение-товара-по-id)
+  - [Получение товаров по размеру](#получение-товаров-по-размеру)
 
 ## Аутентификация
 
-### Регистрация пользователя
+### Регистрация
+Регистрация нового пользователя в системе.
 
-**Запрос:**
-```http
-POST /api/auth/register
-Content-Type: application/json
+**URL**: `/api/auth/v2/register`  
+**Метод**: `POST`  
+**Требует авторизации**: Нет
 
-{
-  "username": "user123",
-  "email": "user@example.com",
-  "password": "securepassword",
-  "phoneNumber": "+79991234567"
-}
-```
-
-**Ответ (200 OK):**
+**Тело запроса**:
 ```json
 {
-  "id": 1,
-  "username": "user123",
-  "email": "user@example.com",
-  "role": "customer",
-  "verified": false,
-  "createdAt": "2025-05-01T10:00:00"
+  "username": "test_user",
+  "password": "password123"
 }
 ```
+
+**Успешный ответ**:
+```json
+{
+  "message": "User registered successfully",
+  "verificationCode": "a1b2c3d4"
+}
+```
+
+**Коды ответов**:
+- `200 OK` - Успешная регистрация
+- `409 Conflict` - Пользователь с таким именем уже существует
+- `500 Internal Server Error` - Внутренняя ошибка сервера
 
 ### Авторизация
+Вход пользователя в систему и получение токена доступа.
 
-**Запрос:**
-```http
-POST /api/auth/login
-Content-Type: application/json
+**URL**: `/api/auth/v2/login`  
+**Метод**: `POST`  
+**Требует авторизации**: Нет
 
-{
-  "username": "user123",
-  "password": "securepassword"
-}
-```
-
-**Ответ (200 OK):**
+**Тело запроса**:
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "tokenType": "Bearer",
-  "expiresIn": 3600
+  "username": "test_user",
+  "password": "password123"
 }
 ```
 
-### Обновление токена
-
-**Запрос:**
-```http
-POST /api/auth/refresh
-Content-Type: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-**Ответ (200 OK):**
+**Успешный ответ**:
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "tokenType": "Bearer",
-  "expiresIn": 3600
+  "message": "Login successful",
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "refreshToken": "812cf290-44e9-4144-85c4-347593fdd75f"
 }
 ```
+
+**Коды ответов**:
+- `200 OK` - Успешная авторизация
+- `401 Unauthorized` - Неверные учетные данные
+- `403 Forbidden` - Требуется верификация
+- `429 Too Many Requests` - Слишком много попыток входа (пользователь временно заблокирован)
+- `500 Internal Server Error` - Внутренняя ошибка сервера
 
 ### Выход из системы
+Выход пользователя из системы и инвалидация токена.
 
-**Запрос:**
-```http
-POST /api/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+**URL**: `/api/auth/v2/logout`  
+**Метод**: `POST`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
+- `204 No Content` - Успешный выход
+
+**Коды ответов**:
+- `204 No Content` - Успешный выход
+- `401 Unauthorized` - Токен отсутствует или неверный
+- `404 Not Found` - Пользователь не найден
+- `500 Internal Server Error` - Внутренняя ошибка сервера
+
+### Обновление токена
+Обновление токена доступа с использованием refresh токена.
+
+**URL**: `/api/auth/v2/refresh`  
+**Метод**: `POST`  
+**Требует авторизации**: Нет
+
+**Тело запроса**:
 ```json
 {
-  "message": "Выход из системы выполнен успешно"
+  "refreshToken": "812cf290-44e9-4144-85c4-347593fdd75f"
 }
 ```
+
+**Успешный ответ**:
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "message": "Token refreshed successfully"
+}
+```
+
+**Коды ответов**:
+- `200 OK` - Токен успешно обновлен
+- `400 Bad Request` - Отсутствует refresh токен
+- `401 Unauthorized` - Недействительный refresh токен
+- `500 Internal Server Error` - Внутренняя ошибка сервера
+
+### Изменение пароля
+Изменение пароля пользователя.
+
+**URL**: `/api/auth/v2/change-password`  
+**Метод**: `POST`  
+**Требует авторизации**: Да (Bearer Token)
+
+**Тело запроса**:
+```json
+{
+  "username": "test_user",
+  "currentPassword": "old_password",
+  "newPassword": "new_password"
+}
+```
+
+**Успешный ответ**:
+```json
+{
+  "message": "Password changed successfully. Please login again with your new password."
+}
+```
+
+**Коды ответов**:
+- `200 OK` - Пароль успешно изменен
+- `400 Bad Request` - Неверные учетные данные (текущий пароль)
+- `500 Internal Server Error` - Внутренняя ошибка сервера
+
+### Валидация токена
+Проверка валидности токена доступа.
+
+**URL**: `/api/auth/v2/validate-token`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
+
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
+```json
+{
+  "valid": true,
+  "username": "test_user"
+}
+```
+
+**Коды ответов**:
+- `200 OK` - Токен валиден
+- `401 Unauthorized` - Недействительный токен
+- `500 Internal Server Error` - Внутренняя ошибка сервера
 
 ## Пользователи
 
-### Получение данных текущего пользователя
+### Получение информации о текущем пользователе
+Получение информации о текущем аутентифицированном пользователе.
 
-**Запрос:**
-```http
-GET /api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+**URL**: `/api/users/me`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
 ```json
 {
   "id": 1,
-  "username": "user123",
+  "username": "test_user",
   "email": "user@example.com",
-  "role": "customer",
+  "phoneNumber": "+79123456789",
+  "role": "ROLE_USER",
+  "active": true,
   "verified": true,
-  "balance": 1000.00,
-  "telegramUsername": "user123",
-  "discordUsername": "user123#1234",
-  "createdAt": "2025-05-01T10:00:00",
-  "lastLogin": "2025-05-01T15:00:00"
+  "telegramUsername": "telegram_user",
+  "discordUsername": "discord_user",
+  "vkUsername": "vk_user",
+  "linkedDiscord": false,
+  "linkedVkontakte": false,
+  "createdAt": "2025-04-10T15:30:00",
+  "updatedAt": "2025-05-01T10:15:00",
+  "lastLogin": "2025-05-01T18:20:00"
 }
 ```
 
-### Обновление профиля пользователя
+**Коды ответов**:
+- `200 OK` - Успешное получение данных
+- `401 Unauthorized` - Пользователь не авторизован
+- `404 Not Found` - Пользователь не найден
 
-**Запрос:**
-```http
-PUT /api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
+### Проверка верификации в Telegram
+Проверка статуса верификации пользователя в Telegram.
 
-{
-  "email": "newemail@example.com",
-  "phoneNumber": "+79991234568"
-}
-```
+**URL**: `/api/users/is-verified`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
 ```json
 {
-  "id": 1,
-  "username": "user123",
-  "email": "newemail@example.com",
-  "phoneNumber": "+79991234568",
-  "message": "Профиль успешно обновлен"
+  "isVerified": true
 }
 ```
 
-### Смена пароля
+**Коды ответов**:
+- `200 OK` - Успешное получение статуса
+- `401 Unauthorized` - Пользователь не авторизован
 
-**Запрос:**
-```http
-PUT /api/users/me/password
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
+### Обновление профиля
+Обновление профиля пользователя.
 
-{
-  "currentPassword": "securepassword",
-  "newPassword": "newSecurePassword"
-}
-```
+**URL**: `/api/users/update`  
+**Метод**: `PUT`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Тело запроса**:
 ```json
 {
-  "message": "Пароль успешно изменен"
+  "newUsername": "new_username",
+  "email": "new_email@example.com",
+  "phoneNumber": "+79876543210"
 }
 ```
 
-### Привязка Telegram аккаунта
-
-**Запрос:**
-```http
-POST /api/users/me/telegram/link
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
-
-{
-  "telegramId": "825885701",
-  "telegramUsername": "user123",
-  "verificationCode": "ABC123"
-}
-```
-
-**Ответ (200 OK):**
+**Успешный ответ**:
 ```json
 {
-  "message": "Telegram аккаунт успешно привязан"
+  "message": "User profile updated successfully"
 }
 ```
 
-## Товары
+**Коды ответов**:
+- `200 OK` - Профиль успешно обновлен
+- `400 Bad Request` - Не предоставлены данные для обновления
+- `401 Unauthorized` - Пользователь не авторизован
 
-### Получение списка товаров
+### Получение контактной информации
+Получение контактной информации пользователя.
 
-**Запрос:**
-```http
-GET /api/products?page=0&size=10&sort=createdAt,desc
-```
+**URL**: `/api/users/contacts`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
 ```json
 {
-  "content": [
-    {
-      "id": 1,
-      "name": "Футболка с логотипом",
-      "description": "Хлопковая футболка с логотипом бренда",
-      "price": 1500.00,
-      "categories": ["одежда", "футболки"],
-      "sizes": ["S", "M", "L", "XL"],
-      "colors": ["черный", "белый", "красный"],
-      "stockS": 10,
-      "stockM": 15,
-      "stockL": 20,
-      "stockXL": 5,
-      "images": ["image1.jpg", "image2.jpg"],
-      "createdAt": "2025-05-01T10:00:00"
-    },
-    {
-      "id": 2,
-      "name": "Толстовка базовая",
-      "description": "Базовая толстовка из органического хлопка",
-      "price": 3500.00,
-      "categories": ["одежда", "толстовки"],
-      "sizes": ["S", "M", "L", "XL"],
-      "colors": ["черный", "серый"],
-      "stockS": 5,
-      "stockM": 10,
-      "stockL": 10,
-      "stockXL": 5,
-      "images": ["image3.jpg", "image4.jpg"],
-      "createdAt": "2025-05-01T11:00:00"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false
-    }
-  },
-  "totalElements": 120,
-  "totalPages": 12,
-  "last": false,
-  "first": true,
-  "empty": false
+  "email": "user@example.com",
+  "phoneNumber": "+79123456789"
 }
 ```
 
-### Получение товара по ID
-
-**Запрос:**
-```http
-GET /api/products/1
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "id": 1,
-  "name": "Футболка с логотипом",
-  "description": "Хлопковая футболка с логотипом бренда",
-  "price": 1500.00,
-  "categories": ["одежда", "футболки"],
-  "sizes": ["S", "M", "L", "XL"],
-  "colors": ["черный", "белый", "красный"],
-  "stockS": 10,
-  "stockM": 15,
-  "stockL": 20,
-  "stockXL": 5,
-  "images": ["image1.jpg", "image2.jpg"],
-  "createdAt": "2025-05-01T10:00:00",
-  "updatedAt": "2025-05-01T12:00:00"
-}
-```
-
-### Поиск товаров
-
-**Запрос:**
-```http
-GET /api/products/search?query=футболка&category=одежда&minPrice=1000&maxPrice=2000&page=0&size=10
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "name": "Футболка с логотипом",
-      "description": "Хлопковая футболка с логотипом бренда",
-      "price": 1500.00,
-      "categories": ["одежда", "футболки"],
-      "sizes": ["S", "M", "L", "XL"],
-      "colors": ["черный", "белый", "красный"],
-      "stockS": 10,
-      "stockM": 15,
-      "stockL": 20,
-      "stockXL": 5,
-      "images": ["image1.jpg", "image2.jpg"],
-      "createdAt": "2025-05-01T10:00:00"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false
-    }
-  },
-  "totalElements": 5,
-  "totalPages": 1,
-  "last": true,
-  "first": true,
-  "empty": false
-}
-```
+**Коды ответов**:
+- `200 OK` - Успешное получение контактов
+- `401 Unauthorized` - Пользователь не авторизован
 
 ## Заказы
 
 ### Создание заказа
+Создание нового заказа.
 
-**Запрос:**
-```http
-POST /api/orders
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
+**URL**: `/api/orders`  
+**Метод**: `POST`  
+**Требует авторизации**: Да (Bearer Token)
 
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Тело запроса**:
+```json
 {
-  "items": [
-    {
-      "productId": 1,
-      "size": "M",
-      "color": "черный",
-      "quantity": 2
-    },
-    {
-      "productId": 2,
-      "size": "L",
-      "color": "серый",
-      "quantity": 1
-    }
-  ],
-  "deliveryAddress": {
-    "country": "Россия",
-    "city": "Москва",
-    "street": "Ленина",
-    "house": "10",
-    "apartment": "42",
-    "postalCode": "123456"
-  },
-  "paymentMethod": "BALANCE",
-  "promoCode": "SUMMER2025"
+  "productId": 1,
+  "quantity": 1,
+  "size": "M",
+  "email": "user@example.com",
+  "fullName": "Иван Иванов",
+  "country": "Россия",
+  "address": "ул. Примерная, д. 123, кв. 45",
+  "postalCode": "123456",
+  "phoneNumber": "+79123456789",
+  "telegramUsername": "telegram_user",
+  "cryptoAddress": "0x123...",
+  "orderComment": "Доставить до двери",
+  "promoCode": "PROMO10",
+  "paymentMethod": "CARD"
 }
 ```
 
-**Ответ (201 Created):**
+**Успешный ответ**:
 ```json
 {
   "id": 1,
-  "orderNumber": "ORD-12345678",
-  "status": "NEW",
-  "items": [
-    {
-      "id": 1,
-      "productId": 1,
-      "productName": "Футболка с логотипом",
-      "size": "M",
-      "color": "черный",
-      "quantity": 2,
-      "price": 1500.00,
-      "totalPrice": 3000.00
-    },
-    {
-      "id": 2,
-      "productId": 2,
-      "productName": "Толстовка базовая",
-      "size": "L",
-      "color": "серый",
-      "quantity": 1,
-      "price": 3500.00,
-      "totalPrice": 3500.00
-    }
-  ],
-  "subtotal": 6500.00,
-  "discount": 650.00,
-  "deliveryPrice": 500.00,
-  "total": 6350.00,
-  "deliveryAddress": {
-    "country": "Россия",
-    "city": "Москва",
-    "street": "Ленина",
-    "house": "10",
-    "apartment": "42",
-    "postalCode": "123456"
-  },
-  "paymentMethod": "BALANCE",
-  "paymentStatus": "PAID",
+  "orderNumber": "ORD-a1b2c3d4",
+  "productName": "Футболка",
+  "size": "M",
+  "quantity": 1,
+  "price": 1500.0,
+  "telegramUsername": "telegram_user",
+  "paymentMethod": "CARD",
+  "orderComment": "Доставить до двери",
   "createdAt": "2025-05-01T15:30:00",
-  "appliedPromoCode": "SUMMER2025"
+  "status": "NEW"
 }
 ```
 
-### Получение списка заказов пользователя
-
-**Запрос:**
-```http
-GET /api/orders?page=0&size=10&sort=createdAt,desc
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "orderNumber": "ORD-12345678",
-      "status": "NEW",
-      "total": 6350.00,
-      "createdAt": "2025-05-01T15:30:00",
-      "paymentStatus": "PAID"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false
-    }
-  },
-  "totalElements": 1,
-  "totalPages": 1,
-  "last": true,
-  "first": true,
-  "empty": false
-}
-```
+**Коды ответов**:
+- `201 Created` - Заказ успешно создан
+- `400 Bad Request` - Некорректные данные заказа
+- `401 Unauthorized` - Пользователь не авторизован
+- `404 Not Found` - Товар не найден
 
 ### Получение заказа по ID
+Получение информации о заказе по его идентификатору.
 
-**Запрос:**
-```http
-GET /api/orders/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+**URL**: `/api/orders/{id}`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
 ```json
 {
   "id": 1,
-  "orderNumber": "ORD-12345678",
-  "status": "NEW",
-  "items": [
-    {
-      "id": 1,
-      "productId": 1,
-      "productName": "Футболка с логотипом",
-      "size": "M",
-      "color": "черный",
-      "quantity": 2,
-      "price": 1500.00,
-      "totalPrice": 3000.00
-    },
-    {
-      "id": 2,
-      "productId": 2,
-      "productName": "Толстовка базовая",
-      "size": "L",
-      "color": "серый",
-      "quantity": 1,
-      "price": 3500.00,
-      "totalPrice": 3500.00
-    }
-  ],
-  "subtotal": 6500.00,
-  "discount": 650.00,
-  "deliveryPrice": 500.00,
-  "total": 6350.00,
-  "deliveryAddress": {
-    "country": "Россия",
-    "city": "Москва",
-    "street": "Ленина",
-    "house": "10",
-    "apartment": "42",
-    "postalCode": "123456"
-  },
-  "paymentMethod": "BALANCE",
-  "paymentStatus": "PAID",
+  "orderNumber": "ORD-a1b2c3d4",
+  "productName": "Футболка",
+  "size": "M",
+  "quantity": 1,
+  "price": 1500.0,
+  "telegramUsername": "telegram_user",
+  "paymentMethod": "CARD",
+  "orderComment": "Доставить до двери",
   "createdAt": "2025-05-01T15:30:00",
-  "updatedAt": "2025-05-01T15:30:00",
-  "appliedPromoCode": "SUMMER2025"
+  "status": "NEW"
 }
 ```
 
-### Отмена заказа
+**Коды ответов**:
+- `200 OK` - Заказ найден
+- `401 Unauthorized` - Пользователь не авторизован
+- `404 Not Found` - Заказ не найден
 
-**Запрос:**
-```http
-POST /api/orders/1/cancel
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
+### Получение всех заказов пользователя
+Получение списка всех заказов текущего пользователя.
 
-{
-  "reason": "Изменил решение"
-}
-```
+**URL**: `/api/orders`  
+**Метод**: `GET`  
+**Требует авторизации**: Да (Bearer Token)
 
-**Ответ (200 OK):**
-```json
-{
-  "id": 1,
-  "orderNumber": "ORD-12345678",
-  "status": "CANCELLED",
-  "cancelReason": "Изменил решение",
-  "cancelledAt": "2025-05-01T16:00:00"
-}
-```
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
 
-## Платежи и баланс
-
-### Получение баланса пользователя
-
-**Запрос:**
-```http
-GET /api/payments/balance
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "balance": 1000.00,
-  "pendingDeposits": 500.00,
-  "currency": "RUB"
-}
-```
-
-### Создание запроса на пополнение баланса
-
-**Запрос:**
-```http
-POST /api/payments/deposits
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/json
-
-{
-  "amount": 1000.00
-}
-```
-
-**Ответ (201 Created):**
-```json
-{
-  "transactionId": 1,
-  "transactionCode": "TR-01-AB123C-123456",
-  "amount": 1000.00,
-  "cardNumber": "1234 5678 9012 3456",
-  "cardholderName": "IVAN IVANOV",
-  "bankName": "SBERBANK",
-  "message": "Для пополнения баланса переведите указанную сумму на карту, обязательно указав код транзакции в комментарии к переводу."
-}
-```
-
-### Отмена запроса на пополнение баланса
-
-**Запрос:**
-```http
-POST /api/payments/deposits/TR-01-AB123C-123456/cancel
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "transactionId": 1,
-  "transactionCode": "TR-01-AB123C-123456",
-  "status": "CANCELLED",
-  "message": "Запрос на пополнение баланса успешно отменен"
-}
-```
-
-### Получение истории транзакций
-
-**Запрос:**
-```http
-GET /api/payments/transactions?page=0&size=10&sort=createdAt,desc
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "transactionCode": "TR-01-AB123C-123456",
-      "type": "DEPOSIT",
-      "amount": 1000.00,
-      "status": "PENDING",
-      "createdAt": "2025-05-01T14:00:00"
-    },
-    {
-      "id": 2,
-      "transactionCode": "TR-01-DE456F-789012",
-      "type": "PAYMENT",
-      "amount": 6350.00,
-      "status": "COMPLETED",
-      "orderId": 1,
-      "createdAt": "2025-05-01T15:30:00"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false
-    }
-  },
-  "totalElements": 2,
-  "totalPages": 1,
-  "last": true,
-  "first": true,
-  "empty": false
-}
-```
-
-### Получение деталей транзакции
-
-**Запрос:**
-```http
-GET /api/payments/transactions/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "id": 1,
-  "transactionCode": "TR-01-AB123C-123456",
-  "type": "DEPOSIT",
-  "amount": 1000.00,
-  "status": "PENDING",
-  "createdAt": "2025-05-01T14:00:00",
-  "updatedAt": null,
-  "orderId": null,
-  "adminComment": null
-}
-```
-
-## Промокоды
-
-### Проверка промокода
-
-**Запрос:**
-```http
-GET /api/promocodes/check?code=SUMMER2025
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-{
-  "code": "SUMMER2025",
-  "valid": true,
-  "discountPercent": 10,
-  "description": "Летняя скидка 10%",
-  "expiresAt": "2025-08-31T23:59:59"
-}
-```
-
-### Получение активных промокодов пользователя
-
-**Запрос:**
-```http
-GET /api/promocodes/active
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
-```json
-[
-  {
-    "code": "SUMMER2025",
-    "discountPercent": 10,
-    "description": "Летняя скидка 10%",
-    "expiresAt": "2025-08-31T23:59:59"
-  },
-  {
-    "code": "WELCOME15",
-    "discountPercent": 15,
-    "description": "Скидка для новых пользователей",
-    "expiresAt": "2025-12-31T23:59:59"
-  }
-]
-```
-
-## NFT
-
-### Получение списка NFT пользователя
-
-**Запрос:**
-```http
-GET /api/nfts/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ответ (200 OK):**
+**Успешный ответ**:
 ```json
 [
   {
     "id": 1,
-    "tokenId": "NFT-12345",
-    "placeholderUri": "https://example.com/placeholder.jpg",
-    "isRevealed": false,
-    "rarity": null,
-    "createdAt": "2025-05-01T10:00:00"
+    "orderNumber": "ORD-a1b2c3d4",
+    "productName": "Футболка",
+    "size": "M",
+    "quantity": 1,
+    "price": 1500.0,
+    "telegramUsername": "telegram_user",
+    "paymentMethod": "CARD",
+    "orderComment": "Доставить до двери",
+    "createdAt": "2025-05-01T15:30:00",
+    "status": "NEW"
   },
   {
     "id": 2,
-    "tokenId": "NFT-67890",
-    "placeholderUri": "https://example.com/placeholder.jpg",
-    "isRevealed": true,
-    "revealedUri": "https://example.com/revealed.jpg",
-    "rarity": "RARE",
-    "createdAt": "2025-05-01T11:00:00",
-    "revealedAt": "2025-05-01T12:00:00"
+    "orderNumber": "ORD-e5f6g7h8",
+    "productName": "Худи",
+    "size": "L",
+    "quantity": 1,
+    "price": 3000.0,
+    "telegramUsername": "telegram_user",
+    "paymentMethod": "CRYPTO",
+    "orderComment": "",
+    "createdAt": "2025-05-02T10:15:00",
+    "status": "PROCESSING"
   }
 ]
 ```
 
-### Получение деталей NFT
+**Коды ответов**:
+- `200 OK` - Список заказов успешно получен
+- `401 Unauthorized` - Пользователь не авторизован
 
-**Запрос:**
-```http
-GET /api/nfts/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+### Отмена заказа
+Отмена заказа пользователя.
 
-**Ответ (200 OK):**
+**URL**: `/api/orders/{id}`  
+**Метод**: `DELETE`  
+**Требует авторизации**: Да (Bearer Token)
+
+**Заголовки**:
+- `Authorization: Bearer {access_token}`
+
+**Успешный ответ**:
+- `204 No Content` - Заказ успешно отменен
+
+**Коды ответов**:
+- `204 No Content` - Заказ успешно отменен
+- `401 Unauthorized` - Пользователь не авторизован
+- `403 Forbidden` - Доступ запрещен (не владелец заказа)
+- `404 Not Found` - Заказ не найден
+
+## Товары
+
+### Получение всех товаров
+Получение списка всех доступных товаров.
+
+**URL**: `/api/products`  
+**Метод**: `GET`  
+**Требует авторизации**: Нет
+
+**Успешный ответ**:
 ```json
-{
-  "id": 2,
-  "tokenId": "NFT-67890",
-  "placeholderUri": "https://example.com/placeholder.jpg",
-  "isRevealed": true,
-  "revealedUri": "https://example.com/revealed.jpg",
-  "rarity": "RARE",
-  "description": "Редкий NFT-токен с эксклюзивным дизайном",
-  "benefits": ["Скидка 15% на все товары", "Доступ к эксклюзивным коллекциям"],
-  "createdAt": "2025-05-01T11:00:00",
-  "revealedAt": "2025-05-01T12:00:00"
-}
+[
+  {
+    "id": 1,
+    "name": "Футболка",
+    "description": "Хлопковая футболка с логотипом",
+    "price": 1500.0,
+    "imageUrl": "https://example.com/tshirt.jpg",
+    "availableQuantityS": 10,
+    "availableQuantityM": 15,
+    "availableQuantityL": 8,
+    "createdAt": "2025-04-01T12:00:00",
+    "updatedAt": "2025-04-15T14:30:00"
+  },
+  {
+    "id": 2,
+    "name": "Худи",
+    "description": "Теплое худи с капюшоном",
+    "price": 3000.0,
+    "imageUrl": "https://example.com/hoodie.jpg",
+    "availableQuantityS": 5,
+    "availableQuantityM": 8,
+    "availableQuantityL": 10,
+    "createdAt": "2025-04-02T14:00:00",
+    "updatedAt": "2025-04-16T10:15:00"
+  }
+]
 ```
 
-### Раскрытие NFT
+**Коды ответов**:
+- `200 OK` - Список товаров успешно получен
 
-**Запрос:**
-```http
-POST /api/nfts/1/reveal
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+### Получение товара по ID
+Получение информации о товаре по его идентификатору.
 
-**Ответ (200 OK):**
+**URL**: `/api/products/{id}`  
+**Метод**: `GET`  
+**Требует авторизации**: Нет
+
+**Успешный ответ**:
 ```json
 {
   "id": 1,
-  "tokenId": "NFT-12345",
-  "placeholderUri": "https://example.com/placeholder.jpg",
-  "isRevealed": true,
-  "revealedUri": "https://example.com/revealed_unique.jpg",
-  "rarity": "COMMON",
-  "description": "Обычный NFT-токен с уникальным дизайном",
-  "benefits": ["Скидка 5% на следующий заказ"],
-  "createdAt": "2025-05-01T10:00:00",
-  "revealedAt": "2025-05-01T15:45:00"
+  "name": "Футболка",
+  "description": "Хлопковая футболка с логотипом",
+  "price": 1500.0,
+  "imageUrl": "https://example.com/tshirt.jpg",
+  "availableQuantityS": 10,
+  "availableQuantityM": 15,
+  "availableQuantityL": 8,
+  "createdAt": "2025-04-01T12:00:00",
+  "updatedAt": "2025-04-15T14:30:00"
 }
-``` 
+```
+
+**Коды ответов**:
+- `200 OK` - Товар найден
+- `404 Not Found` - Товар не найден
+
+### Получение товаров по размеру
+Получение списка товаров по указанному размеру.
+
+**URL**: `/api/products/size/{size}`  
+**Метод**: `GET`  
+**Требует авторизации**: Нет
+
+**Параметры URL**:
+- `{size}` - Размер товара (S, M, L, XL)
+
+**Успешный ответ**:
+```json
+[
+  {
+    "id": 1,
+    "name": "Футболка",
+    "description": "Хлопковая футболка с логотипом",
+    "price": 1500.0,
+    "imageUrl": "https://example.com/tshirt.jpg",
+    "availableQuantityS": 10,
+    "availableQuantityM": 15,
+    "availableQuantityL": 8,
+    "createdAt": "2025-04-01T12:00:00",
+    "updatedAt": "2025-04-15T14:30:00"
+  },
+  {
+    "id": 3,
+    "name": "Свитшот",
+    "description": "Стильный свитшот",
+    "price": 2500.0,
+    "imageUrl": "https://example.com/sweatshirt.jpg",
+    "availableQuantityS": 12,
+    "availableQuantityM": 6,
+    "availableQuantityL": 3,
+    "createdAt": "2025-04-03T09:00:00",
+    "updatedAt": "2025-04-17T16:45:00"
+  }
+]
+```
+
+**Коды ответов**:
+- `200 OK` - Список товаров по размеру успешно получен 
