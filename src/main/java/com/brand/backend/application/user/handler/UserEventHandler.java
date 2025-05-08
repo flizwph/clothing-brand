@@ -27,16 +27,12 @@ public class UserEventHandler {
     @EventListener
     public void handleUserEvent(UserEvent event) {
         User user = event.getUser();
-        log.debug("Обработка события пользователя: {}, тип: {}", user.getUsername(), event.getEventType());
+        log.debug("Обработка события пользователя: {}, тип: {}", user.getUsername(), event.getType());
         
         try {
-            switch (event.getEventType()) {
+            switch (event.getType()) {
                 case REGISTERED:
                     log.info("Зарегистрирован новый пользователь: {}", user.getUsername());
-                    break;
-                    
-                case UPDATED:
-                    log.info("Пользователь обновил данные: {}", user.getUsername());
                     break;
                     
                 case LINKED_TELEGRAM:
@@ -48,9 +44,25 @@ public class UserEventHandler {
                     log.info("Пользователь привязал Discord: {}", user.getUsername());
                     notifyUserDiscordLinked(user);
                     break;
+                
+                case UNLINKED_DISCORD:
+                    log.info("Пользователь отвязал Discord: {}", user.getUsername());
+                    break;
                     
                 case VERIFIED:
                     log.info("Пользователь верифицирован: {}", user.getUsername());
+                    break;
+                    
+                case LOGGED_IN:
+                    log.info("Пользователь вошел в систему: {}", user.getUsername());
+                    break;
+                    
+                case PASSWORD_RESET:
+                    log.info("Пользователь сбросил пароль: {}", user.getUsername());
+                    break;
+                    
+                case BALANCE_UPDATED:
+                    log.info("Баланс пользователя обновлен: {}", user.getUsername());
                     break;
             }
         } catch (Exception e) {

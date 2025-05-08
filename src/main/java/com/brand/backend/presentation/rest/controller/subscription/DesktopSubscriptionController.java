@@ -4,12 +4,17 @@ import com.brand.backend.application.subscription.service.SubscriptionService;
 import com.brand.backend.common.exeption.ActivationCodeNotFoundException;
 import com.brand.backend.domain.subscription.model.Subscription;
 import com.brand.backend.domain.subscription.model.SubscriptionLevel;
+import com.brand.backend.domain.subscription.model.SubscriptionStatus;
 import com.brand.backend.domain.subscription.repository.SubscriptionRepository;
+import com.brand.backend.domain.user.model.User;
 import com.brand.backend.presentation.dto.request.subscription.ActivateSubscriptionRequest;
 import com.brand.backend.presentation.dto.response.ApiResponse;
+import com.brand.backend.presentation.dto.response.subscription.DesktopSubscriptionStatusResponse;
 import com.brand.backend.presentation.dto.response.subscription.SubscriptionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -87,6 +92,67 @@ public class DesktopSubscriptionController {
                             .build()
             ));
         }
+    }
+    
+    /**
+     * Проверяет статус подписки для авторизованного пользователя
+     * @param user аутентифицированный пользователь
+     * @return статус подписки desktop-приложения
+     */
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<DesktopSubscriptionStatusResponse>> getSubscriptionStatus(
+            @AuthenticationPrincipal User user) {
+        
+        LocalDateTime now = LocalDateTime.now();
+        // Получаем все действующие подписки пользователя
+        var subscriptions = subscriptionService.getUserValidSubscriptions(user.getId());
+        
+        if (subscriptions.isEmpty()) {
+            // Если нет активных подписок
+            return ResponseEntity.ok(new ApiResponse<>(
+                    DesktopSubscriptionStatusResponse.builder()
+                            .status(SubscriptionStatus.INACTIVE)
+                            .build()
+            ));
+        }
+        
+        // Находим подписку с самым высоким уровнем среди активных
+        Subscription highestLevelSubscription = subscriptions.stream()
+                .sorted((s1, s2) -> {
+                    // Сортировка по уровню подписки (PREMIUM > STANDARD > BASIC)
+                    return s2.getSubscriptionLevel().ordinal() - s1.getSubscriptionLevel().ordinal();
+                })
+                .findFirst()
+                .orElse(null);
+        
+        if (highestLevelSubscription != null) {
+            // Проверяем срок действия подписки
+            boolean isExpired = now.isAfter(highestLevelSubscription.getEndDate());
+            
+            SubscriptionStatus status = isExpired ? 
+                    SubscriptionStatus.EXPIRED : 
+                    (highestLevelSubscription.isActive() ? SubscriptionStatus.ACTIVE : SubscriptionStatus.PENDING);
+            
+            DesktopSubscriptionStatusResponse response = DesktopSubscriptionStatusResponse.builder()
+                    .status(status)
+                    .level(highestLevelSubscription.getSubscriptionLevel())
+                    .activationDate(highestLevelSubscription.getStartDate())
+                    .expirationDate(highestLevelSubscription.getEndDate())
+                    .build();
+            
+            // Обновляем дату последней проверки
+            highestLevelSubscription.setLastCheckDate(now);
+            subscriptionRepository.save(highestLevelSubscription);
+            
+            return ResponseEntity.ok(new ApiResponse<>(response));
+        }
+        
+        // Если не нашли подходящую подписку
+        return ResponseEntity.ok(new ApiResponse<>(
+                DesktopSubscriptionStatusResponse.builder()
+                        .status(SubscriptionStatus.INACTIVE)
+                        .build()
+        ));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.brand.backend.application.order.handler;
 
+import com.brand.backend.application.order.service.OrderNotificationService;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot;
 import com.brand.backend.domain.order.event.OrderEvent;
@@ -28,6 +29,7 @@ public class OrderEventHandler {
     private final TelegramBotService telegramBotService;
     private final AdminTelegramBot adminTelegramBot;
     private final NFTService nftService;
+    private final OrderNotificationService orderNotificationService;
 
     @Async("eventExecutor")
     @EventListener
@@ -39,7 +41,8 @@ public class OrderEventHandler {
             switch (event.getEventType()) {
                 case CREATED:
                     notifyUserOrderCreated(order);
-                    notifyAdminOrderCreated(order);
+                    // Используем новый сервис для отправки расширенного уведомления администраторам
+                    orderNotificationService.notifyNewOrder(order);
                     break;
                     
                 case PAID:
@@ -94,6 +97,13 @@ public class OrderEventHandler {
         }
     }
     
+    /**
+     * Простой метод уведомления админов о новом заказе.
+     * Больше не используется, так как заменен на OrderNotificationService.notifyNewOrder,
+     * который отправляет более подробное уведомление с интерактивными кнопками.
+     * 
+     * @param order заказ, о котором нужно уведомить
+     */
     private void notifyAdminOrderCreated(Order order) {
         sendAdminTelegramMessage(
             "🔔 НОВЫЙ ЗАКАЗ #" + order.getOrderNumber() + "\n" +
@@ -183,4 +193,4 @@ public class OrderEventHandler {
             log.error("Ошибка отправки сообщения администратору: {}", e.getMessage());
         }
     }
-} 
+}

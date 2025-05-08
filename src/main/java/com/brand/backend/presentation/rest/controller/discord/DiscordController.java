@@ -4,12 +4,19 @@ import com.brand.backend.domain.user.model.User;
 import com.brand.backend.domain.user.repository.UserRepository;
 import com.brand.backend.application.user.service.UserService;
 import com.brand.backend.application.user.service.VerificationService;
+import com.brand.backend.presentation.dto.request.discord.LinkDiscordAccountRequest;
+import com.brand.backend.presentation.dto.response.ApiResponse;
+import com.brand.backend.presentation.dto.response.discord.DiscordLinkResponse;
+import com.brand.backend.presentation.dto.response.discord.DiscordStatusResponse;
+import com.brand.backend.presentation.dto.response.discord.DiscordUnlinkResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +30,120 @@ public class DiscordController {
     private final UserService userService;
     private final VerificationService verificationService;
     private final UserRepository userRepository;
+
+    /**
+     * Отвязка Discord-аккаунта для авторизованного пользователя
+     * 
+     * @param user аутентифицированный пользователь
+     * @return результат отвязки
+     */
+    @PostMapping("/unlink")
+    public ResponseEntity<ApiResponse<DiscordUnlinkResponse>> unlinkDiscordAccount(
+            @AuthenticationPrincipal User user) {
+        
+        log.info("Запрос на отвязку Discord-аккаунта от пользователя: {}", user.getUsername());
+        
+        try {
+            boolean success = userService.unlinkDiscordAccount(user.getUsername());
+            
+            DiscordUnlinkResponse response = DiscordUnlinkResponse.builder()
+                    .success(success)
+                    .message(success ? "Discord аккаунт успешно отвязан" : "Discord аккаунт не был привязан")
+                    .build();
+            
+            return ResponseEntity.ok(new ApiResponse<>(response));
+        } catch (Exception e) {
+            log.error("Ошибка при отвязке Discord аккаунта: {}", e.getMessage(), e);
+            
+            DiscordUnlinkResponse response = DiscordUnlinkResponse.builder()
+                    .success(false)
+                    .message("Произошла ошибка при отвязке Discord аккаунта: " + e.getMessage())
+                    .build();
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(response));
+        }
+    }
+
+    /**
+     * Получение статуса привязки Discord-аккаунта для авторизованного пользователя
+     * 
+     * @param user аутентифицированный пользователь
+     * @return статус привязки Discord-аккаунта
+     */
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<DiscordStatusResponse>> getDiscordStatus(
+            @AuthenticationPrincipal User user) {
+        
+        log.info("Запрос на получение статуса Discord-аккаунта от пользователя: {}", user.getUsername());
+        
+        DiscordStatusResponse response = DiscordStatusResponse.builder()
+                .linked(user.isLinkedDiscord())
+                .discordUsername(user.getDiscordUsername())
+                .discordId(user.getDiscordId())
+                .build();
+        
+        return ResponseEntity.ok(new ApiResponse<>(response));
+    }
+    
+    /**
+     * Привязка Discord-аккаунта для авторизованного пользователя
+     * 
+     * @param user аутентифицированный пользователь
+     * @param request данные Discord-аккаунта
+     * @return результат привязки
+     */
+    @PostMapping("/link")
+    public ResponseEntity<ApiResponse<DiscordLinkResponse>> linkDiscordAccount(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody LinkDiscordAccountRequest request) {
+        
+        log.info("Запрос на привязку Discord-аккаунта от пользователя {}: discordId={}, discordUsername={}", 
+                user.getUsername(), request.getDiscordId(), request.getDiscordUsername());
+        
+        try {
+            // Проверка, не привязан ли уже этот Discord ID к другому аккаунту
+            Optional<User> existingUser = userRepository.findByDiscordId(request.getDiscordId());
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+                log.warn("Попытка привязать уже привязанный Discord ID: {}", request.getDiscordId());
+                
+                DiscordLinkResponse response = DiscordLinkResponse.builder()
+                        .success(false)
+                        .message("Этот Discord аккаунт уже привязан к другому пользователю")
+                        .build();
+                
+                return ResponseEntity.ok(new ApiResponse<>(response));
+            }
+            
+            // Привязка Discord аккаунта
+            boolean success = userService.linkDiscordAccount(
+                    user.getUsername(), 
+                    request.getDiscordId(), 
+                    request.getDiscordUsername()
+            );
+            
+            DiscordLinkResponse response = DiscordLinkResponse.builder()
+                    .success(success)
+                    .message(success ? "Discord аккаунт успешно привязан" : "Ошибка при привязке Discord аккаунта")
+                    .username(user.getUsername())
+                    .build();
+            
+            log.info("Discord аккаунт {} успешно привязан к пользователю: {}", 
+                    request.getDiscordUsername(), user.getUsername());
+            
+            return ResponseEntity.ok(new ApiResponse<>(response));
+        } catch (Exception e) {
+            log.error("Ошибка при привязке Discord аккаунта: {}", e.getMessage(), e);
+            
+            DiscordLinkResponse response = DiscordLinkResponse.builder()
+                    .success(false)
+                    .message("Произошла ошибка при привязке Discord аккаунта: " + e.getMessage())
+                    .build();
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(response));
+        }
+    }
 
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyDiscordAccount(
@@ -143,4 +264,4 @@ public class DiscordController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-} 
+}

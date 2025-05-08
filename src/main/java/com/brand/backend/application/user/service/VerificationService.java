@@ -4,9 +4,11 @@ import com.brand.backend.domain.user.model.User;
 import com.brand.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,12 +70,13 @@ public class VerificationService {
     }
     
     /**
-     * Проверяет код верификации
+     * Проверяет код верификации и устанавливает статус верифицирован при успешной проверке
      *
      * @param code код верификации
      * @return пользователь, если код верен, или null
      */
-    @Transactional(readOnly = true)
+    @Transactional
+    @CacheEvict(value = "userAuthCache", key = "#result.username")
     public User verifyCode(String code) {
         Optional<User> userOptional = userRepository.findByVerificationCode(code);
         if (userOptional.isEmpty()) {
@@ -81,7 +84,14 @@ public class VerificationService {
             return null;
         }
         
-        return userOptional.get();
+        User user = userOptional.get();
+        user.setVerified(true);
+        user.setVerificationCode(null);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        log.info("Пользователь {} успешно верифицирован с кодом {}", user.getUsername(), code);
+        return user;
     }
     
     /**

@@ -22,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -122,5 +124,48 @@ public class OrderController {
         
         orderService.cancelOrder(id, username);
         return ResponseEntity.noContent().build();
+    }
+    
+    @Operation(summary = "Получение статуса заказа", description = "Возвращает информацию о статусе заказа по его идентификатору")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Статус заказа получен успешно"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "404", description = "Заказ не найден")
+    })
+    @GetMapping("/{id}/status")
+    public ResponseEntity<Map<String, Object>> getOrderStatus(
+            @Parameter(description = "ID заказа") @PathVariable Long id) {
+        
+        return orderService.getOrderById(id)
+                .map(order -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("orderNumber", order.getOrderNumber());
+                    response.put("status", order.getStatus());
+                    response.put("createdAt", order.getCreatedAt());
+                    return ResponseEntity.ok(response);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Заказ", "id", id));
+    }
+    
+    /**
+     * Сообщает об ошибке, если клиент отправляет item JSON
+     */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        
+        log.warn("Получен некорректный JSON: {}", ex.getMessage());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Некорректный формат JSON");
+        
+        if (ex.getMessage().contains("items")) {
+            response.put("message", "Для создания заказа с несколькими товарами используйте API: /api/digital-orders");
+            response.put("hint", "API /api/orders предназначен только для заказов с одним товаром");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        
+        response.put("message", "Проверьте формат отправляемых данных");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

@@ -10,7 +10,9 @@ import com.brand.backend.application.auth.cqrs.handler.base.CommandHandler;
 import com.brand.backend.application.auth.service.security.LoginAttemptService;
 import com.brand.backend.application.auth.service.facade.AccountManagementService;
 import com.brand.backend.domain.user.model.User;
+import com.brand.backend.domain.user.model.RefreshToken;
 import com.brand.backend.domain.user.repository.UserRepository;
+import com.brand.backend.domain.user.repository.RefreshTokenRepository;
 import com.brand.backend.infrastructure.security.audit.SecurityAuditService;
 import com.brand.backend.infrastructure.security.audit.SecurityEventType;
 import com.brand.backend.infrastructure.security.jwt.JwtUtil;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +35,7 @@ import java.util.UUID;
 public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginCommandResult> {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final LoginAttemptService loginAttemptService;
@@ -168,6 +172,32 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginCo
 
     // Временно дублируем логику из AuthService
     private String generateRefreshToken(User user) {
-        return UUID.randomUUID().toString();
+        // Обновляем или создаем запись в базе для refresh токена
+        String token = UUID.randomUUID().toString();
+        
+        // Сохраняем токен в базе данных
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
+        
+        // Создаем дату истечения срока (7 дней)
+        Instant expiryDate = Instant.now().plusMillis(604800000);
+        
+        if (existingToken.isPresent()) {
+            // Обновляем существующий токен
+            RefreshToken refreshToken = existingToken.get();
+            refreshToken.setToken(token);
+            refreshToken.setExpiryDate(expiryDate);
+            refreshTokenRepository.save(refreshToken);
+            log.debug("Обновлен существующий refresh token для пользователя: {}", user.getUsername());
+        } else {
+            // Создаем новый токен
+            RefreshToken refreshToken = new RefreshToken();
+            refreshToken.setUser(user);
+            refreshToken.setToken(token);
+            refreshToken.setExpiryDate(expiryDate);
+            refreshTokenRepository.save(refreshToken);
+            log.debug("Создан новый refresh token для пользователя: {}", user.getUsername());
+        }
+        
+        return token;
     }
 } 

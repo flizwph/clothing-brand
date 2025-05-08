@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -188,12 +189,19 @@ public class AuthControllerCQRS {
     }
     
     @PostMapping("/change-password")
-    public ResponseEntity<Map<String, String>> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody @Valid ChangePasswordRequest request, Authentication authentication) {
         try {
-            log.info("🔑 [CHANGE PASSWORD] Получен запрос на изменение пароля для пользователя: {}", request.getUsername());
+            String username;
+            if (authentication.getPrincipal() instanceof User) {
+                username = ((User) authentication.getPrincipal()).getUsername();
+            } else {
+                username = authentication.getName();
+            }
+            
+            log.info("🔑 [CHANGE PASSWORD] Получен запрос на изменение пароля для пользователя: {}", username);
             
             boolean success = authService.changePassword(
-                    request.getUsername(), 
+                    username, 
                     request.getCurrentPassword(), 
                     request.getNewPassword());
             

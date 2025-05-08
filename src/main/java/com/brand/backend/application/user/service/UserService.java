@@ -61,12 +61,9 @@ public class UserService {
         return getUserByUsername(username).isVerified();
     }
 
-    // ✅ Обновление профиля пользователя
+    // ✅ Обновление профиля пользователя с переданным объектом User
     @Transactional
-    public void updateUserProfile(String newUsername, String newEmail, String newPhoneNumber) {
-        String username = getAuthenticatedUsername();
-        User user = getUserByUsername(username);
-
+    public void updateUserProfile(User user, String newUsername, String newEmail, String newPhoneNumber) {
         if (newUsername != null && !newUsername.isBlank()) {
             user.setUsername(newUsername);
         }
@@ -81,22 +78,19 @@ public class UserService {
         userRepository.save(user);
 
         log.info("✅ [USER UPDATED] {} обновил профиль: username={}, email={}, phone={}",
-                username, newUsername, newEmail, newPhoneNumber);
+                user.getUsername(), newUsername, newEmail, newPhoneNumber);
     }
 
-    // ✅ Смена пароля
+    // ✅ Смена пароля с переданным объектом User
     @Transactional
-    public void changePassword(String oldPassword, String newPassword) {
-        String username = getAuthenticatedUsername();
-        User user = getUserByUsername(username);
-
+    public void changePassword(User user, String oldPassword, String newPassword) {
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid old password");
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        log.info("✅ [PASSWORD CHANGED] Пароль обновлен для {}", username);
+        log.info("✅ [PASSWORD CHANGED] Пароль обновлен для {}", user.getUsername());
     }
 
     // 🔹 Вспомогательные методы
@@ -118,6 +112,7 @@ public class UserService {
         user.setTelegramId(telegramId);
         user.setTelegramUsername(telegramUsername);
         user.setUpdatedAt(LocalDateTime.now());
+        user.setVerified(true);
         
         User savedUser = userRepository.save(user);
         
@@ -211,5 +206,66 @@ public class UserService {
     
     public User getUserByVerificationCode(String code) {
         return userRepository.findByVerificationCode(code).orElse(null);
+    }
+
+    /**
+     * Преобразует доменный объект User в DTO
+     */
+    public UserDTO convertToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setRole(user.getRole());
+        dto.setActive(user.isActive());
+        dto.setTelegramId(user.getTelegramId());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        dto.setVerificationCode(user.getVerificationCode());
+        dto.setVerified(user.isVerified());
+        dto.setDiscordId(user.getDiscordId());
+        dto.setLastLogin(user.getLastLogin());
+        dto.setTelegramUsername(user.getTelegramUsername());
+        dto.setDiscordUsername(user.getDiscordUsername());
+        dto.setVkUsername(user.getVkUsername());
+        dto.setLinkedDiscord(user.isLinkedDiscord());
+        dto.setLinkedVkontakte(user.isLinkedVkontakte());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        return dto;
+    }
+
+    /**
+     * Отвязывает Discord аккаунт от пользователя
+     *
+     * @param username имя пользователя
+     * @return true, если отвязка успешна
+     */
+    @Transactional
+    public boolean unlinkDiscordAccount(String username) {
+        User user = getUserByUsername(username);
+        
+        if (!user.isLinkedDiscord()) {
+            log.warn("Попытка отвязать Discord аккаунт у пользователя без привязки: {}", username);
+            return false;
+        }
+        
+        // Сохраняем старые данные для лога
+        String oldDiscordUsername = user.getDiscordUsername();
+        Long oldDiscordId = user.getDiscordId();
+        
+        // Отвязываем аккаунт
+        user.setDiscordId(null);
+        user.setDiscordUsername(null);
+        user.setLinkedDiscord(false);
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        userRepository.save(user);
+        
+        // Публикуем событие отвязки Discord
+        eventPublisher.publishEvent(new UserEvent(this, user, UserEvent.UserEventType.UNLINKED_DISCORD));
+        
+        log.info("Discord аккаунт отвязан от пользователя: {}, был discordId={}, discordUsername={}", 
+                username, oldDiscordId, oldDiscordUsername);
+        return true;
     }
 }
