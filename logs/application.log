@@ -1,0 +1,92 @@
+2025-05-15 20:13:10.927  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 13760 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
+2025-05-15 20:13:10.940  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-05-15 20:13:19.866 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-05-15 20:13:19.869 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-05-15 20:13:19.871  INFO 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-05-15 20:13:20.452  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
+2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
+2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
+2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
+2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
+2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
+2025-05-15 20:13:20.858  INFO 13760 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-05-15 20:13:20.903  INFO 13760 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-05-15 20:13:21.214  INFO 13760 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-05-15 20:13:21.216  WARN 13760 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-05-15 20:13:21.400  WARN 13760 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-15 20:13:23.967  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 13.74 seconds (process running for 14.771)
+2025-05-15 20:17:19.625  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Admin 825885701 sent command: /start
+2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Обработка callback-запроса: menu:users
+2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Отображение меню пользователей для администратора 825885701
+2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : >> Обработка запроса на получение списка пользователей
+2025-05-15 20:17:20.902  WARN 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : Список пользователей пуст
+2025-05-15 20:17:20.902  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : << Завершение обработки запроса на получение списка пользователей
+2025-05-15 20:17:21.023  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Отправка ответа на callback 3547152079203757646: , isError: false
+2025-05-15 20:17:21.106  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Ответ на callback успешно отправлен
+2025-05-15 21:57:16.135  INFO 14540 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 14540 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
+2025-05-15 21:57:16.137  INFO 14540 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-05-15 21:57:20.524 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-05-15 21:57:20.525  INFO 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
+2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
+2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
+2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
+2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
+2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
+2025-05-15 21:57:20.952  INFO 14540 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-05-15 21:57:20.965  INFO 14540 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-05-15 21:57:21.014  WARN 14540 --- [main] ConfigServletWebServerApplicationContext [no-request-id] : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'desktopSyncController' defined in file [C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes\com\brand\backend\presentation\rest\controller\desktop\DesktopSyncController.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-05-15 21:57:21.077 ERROR 14540 --- [main] o.s.b.d.LoggingFailureAnalysisReporter   [no-request-id] : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.brand.backend.presentation.rest.controller.desktop.DesktopSyncController required a bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' in your configuration.
+
+2025-05-15 21:59:35.183  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 14128 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
+2025-05-15 21:59:35.184  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-05-15 21:59:40.270 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-05-15 21:59:40.273  INFO 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
+2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
+2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
+2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
+2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
+2025-05-15 21:59:40.571  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
+2025-05-15 21:59:40.723  INFO 14128 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-05-15 21:59:40.737  INFO 14128 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-05-15 21:59:40.880  INFO 14128 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-05-15 21:59:40.881  WARN 14128 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-05-15 21:59:40.956  WARN 14128 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-15 21:59:42.392  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 7.566 seconds (process running for 8.025)

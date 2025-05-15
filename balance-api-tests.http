@@ -1,0 +1,51 @@
+### Переменные
+@baseUrl = http://localhost:8080
+@jwtToken = eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl92ZXJzaW9uIjoxLCJzdWIiOiJ0ZXN0X3VzZXJfdjIiLCJpYXQiOjE3NDY1NDIyMDQsImV4cCI6MTc0NjU0NTgwNH0.mwtFWjpNzJXcTKjACxQ2--gptyg-PcHxSFwehlbmhwA
+
+### Получение текущего баланса пользователя
+GET {{baseUrl}}/api/balance
+Authorization: Bearer {{jwtToken}}
+
+### Запрос на пополнение баланса (должен отправить уведомление в Telegram)
+POST {{baseUrl}}/api/balance/deposit
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "amount": 666.00
+}
+
+### Получение списка транзакций пользователя
+GET {{baseUrl}}/api/balance/transactions
+Authorization: Bearer {{jwtToken}}
+
+### Получение статистики по транзакциям пользователя
+GET {{baseUrl}}/api/balance/stats
+Authorization: Bearer {{jwtToken}}
+
+### Получить все транзакции пользователя без пагинации
+GET {{baseUrl}}/api/balance/transactions/all
+Authorization: Bearer {{jwtToken}}
+
+### Получить транзакции пользователя по статусу PENDING
+GET {{baseUrl}}/api/balance/transactions/filtered?status=PENDING
+Authorization: Bearer {{jwtToken}}
+
+### Получить завершенные транзакции пополнения
+GET {{baseUrl}}/api/balance/transactions/filtered?status=COMPLETED&type=DEPOSIT
+Authorization: Bearer {{jwtToken}}
+
+### Получить подробную информацию о конкретной транзакции
+### (Замените {id} на реальный ID транзакции из предыдущих запросов)
+GET {{baseUrl}}/api/balance/transactions/1
+Authorization: Bearer {{jwtToken}}
+
+### Получить транзакцию по коду
+### (Замените {code} на реальный код транзакции из предыдущих запросов)
+GET {{baseUrl}}/api/balance/transactions/code/ABCDEF123456
+Authorization: Bearer {{jwtToken}}
+
+### Отменить пополнение баланса
+### (Замените {id} на реальный ID транзакции типа DEPOSIT со статусом PENDING)
+POST {{baseUrl}}/api/balance/transactions/1/cancel
+Authorization: Bearer {{jwtToken}} 

@@ -1,0 +1,72 @@
+### Тестовые запросы для проверки новых эндпоинтов
+
+# Переменные
+@baseUrl = http://localhost:8080
+@authToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTY4ODkwNDAwMCwiZXhwIjoxNjg4OTA3NjAwfQ.3nJgGyEeWaUsh2qCnZJDFfNGu5FhQrPx4Tf7f_mD0Gg
+
+### 1. Получение статуса заказа одежды
+GET {{baseUrl}}/api/orders/1/status
+Authorization: Bearer {{authToken}}
+
+### 2. Получение статуса цифрового заказа
+GET {{baseUrl}}/api/digital-orders/1/status
+Authorization: Bearer {{authToken}}
+
+### 3. Получение статуса подписки в десктопном приложении
+GET {{baseUrl}}/api/desktop/status
+Authorization: Bearer {{authToken}}
+
+### 4. Создание обычного заказа для тестирования
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 1,
+  "size": "M",
+  "email": "user@example.com",
+  "fullName": "Тестовый Пользователь",
+  "country": "Россия",
+  "address": "ул. Тестовая, д. 123, кв. 45",
+  "postalCode": "123456",
+  "phoneNumber": "+79123456789",
+  "telegramUsername": "test_user",
+  "orderComment": "Тестовый заказ",
+  "paymentMethod": "CARD"
+}
+
+### 5. Создание цифрового заказа для тестирования
+POST {{baseUrl}}/api/digital-orders
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "paymentMethod": "CARD",
+  "items": [
+    {
+      "digitalProductId": 1,
+      "quantity": 1
+    },
+    {
+      "digitalProductId": 2,
+      "quantity": 2
+    }
+  ]
+}
+
+### 6. Получение всех заказов пользователя
+GET {{baseUrl}}/api/orders
+Authorization: Bearer {{authToken}}
+
+### 7. Получение всех цифровых заказов пользователя
+GET {{baseUrl}}/api/digital-orders
+Authorization: Bearer {{authToken}}
+
+### 8. Получение заказа по ID
+GET {{baseUrl}}/api/orders/1
+Authorization: Bearer {{authToken}}
+
+### 9. Получение цифрового заказа по ID
+GET {{baseUrl}}/api/digital-orders/1
+Authorization: Bearer {{authToken}} 

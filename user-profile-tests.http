@@ -1,0 +1,81 @@
+### Переменные для запросов
+@baseUrl = http://localhost:8080
+@authToken = eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl92ZXJzaW9uIjoxLCJzdWIiOiLQvdC-0LLQvtC1X9C40LzRjyIsImlhdCI6MTc0NjU0MzIzOSwiZXhwIjoxNzQ2NTQ2ODM5fQ.f_AkMbjCUFkU5ZD_LAjHSz7rGEB8FOWGzlb3LGzHCvw
+
+### Получение информации о профиле текущего пользователя
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{authToken}}
+
+### Проверка верификации в Telegram
+GET {{baseUrl}}/api/users/is-verified
+Authorization: Bearer {{authToken}}
+
+### Обновление профиля пользователя (все поля)
+PUT {{baseUrl}}/api/users/update
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "newUsername": "новое_имя",
+  "email": "новый_email@example.com",
+  "phoneNumber": "+79876543210"
+}
+
+### Обновление только email
+PUT {{baseUrl}}/api/users/update
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "email": "новый_email@example.com"
+}
+
+### Обновление только имени пользователя
+PUT {{baseUrl}}/api/users/update
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "newUsername": "новое_имя"
+}
+
+### Обновление только номера телефона
+PUT {{baseUrl}}/api/users/update
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phoneNumber": "+79876543210"
+}
+
+### Изменение пароля пользователя
+PUT {{baseUrl}}/api/users/change-password
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "oldPassword": "старый_пароль",
+  "newPassword": "новый_пароль"
+}
+
+### Тест на ошибку при изменении пароля (неверный старый пароль)
+PUT {{baseUrl}}/api/users/change-password
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "oldPassword": "неверный_пароль",
+  "newPassword": "новый_пароль"
+}
+
+### Получение контактной информации пользователя
+GET {{baseUrl}}/api/users/contacts
+Authorization: Bearer {{authToken}}
+
+### Тест с пустым авторизационным токеном
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer 
+
+### Тест с некорректным авторизационным токеном
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer invalid_token_123456 

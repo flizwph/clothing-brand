@@ -78,7 +78,7 @@ public class UserHandler {
             return createMessage(chatId, "Пользователь не найден.");
         }
         
-        StringBuilder message = new StringBuilder("*👤 Пользователь: ").append(user.getUsername()).append("*\n\n");
+        StringBuilder message = new StringBuilder("*👤 Пользователь: ").append(escapeMarkdown(user.getUsername())).append("*\n\n");
         
         message.append("*ID:* ").append(user.getId()).append("\n");
         message.append("*Роль:* ").append(user.getRole()).append("\n");
@@ -87,9 +87,9 @@ public class UserHandler {
         
         message.append("*Социальные сети:*\n");
         message.append("*Telegram ID:* ").append(user.getTelegramId() != null ? user.getTelegramId() : "-").append("\n");
-        message.append("*Telegram:* ").append(user.getTelegramUsername() != null ? "@" + user.getTelegramUsername() : "-").append("\n");
-        message.append("*Discord:* ").append(user.getDiscordUsername() != null ? user.getDiscordUsername() : "-").append("\n");
-        message.append("*VK:* ").append(user.getVkUsername() != null ? user.getVkUsername() : "-").append("\n\n");
+        message.append("*Telegram:* ").append(user.getTelegramUsername() != null ? "@" + escapeMarkdown(user.getTelegramUsername()) : "-").append("\n");
+        message.append("*Discord:* ").append(escapeMarkdown(user.getDiscordUsername())).append("\n");
+        message.append("*VK:* ").append(escapeMarkdown(user.getVkUsername())).append("\n\n");
         
         message.append("*Статус:*\n");
         message.append("*Активен:* ").append(user.isActive() ? "✅" : "❌").append("\n");
@@ -311,7 +311,7 @@ public class UserHandler {
         adminBotService.updateUserActiveStatus(userId, newStatus);
         
         String statusText = newStatus ? "активирован ✅" : "деактивирован ❌";
-        String message = "*👤 Пользователь " + user.getUsername() + " " + statusText + "*\n\n" +
+        String message = "*👤 Пользователь " + escapeMarkdown(user.getUsername()) + " " + statusText + "*\n\n" +
                 "Статус успешно обновлен.";
         
         return createMessage(chatId, message, createUserDetailsKeyboard(user));
@@ -376,9 +376,11 @@ public class UserHandler {
             
             for (int i = 0; i < Math.min(20, users.size()); i++) {
                 User user = users.get(i);
-                message.append(i + 1).append(". *").append(user.getUsername()).append("*");
+                // Избегаем проблем с Markdown, экранируя имя пользователя
+                message.append(i + 1).append(". *").append(escapeMarkdown(user.getUsername())).append("*");
                 
                 if (user.getEmail() != null) {
+                    // Для email не используем форматирование Markdown, чтобы избежать проблем со спецсимволами
                     message.append(" (").append(user.getEmail()).append(")");
                 }
                 
@@ -477,19 +479,28 @@ public class UserHandler {
      */
     private SendMessage createUsersListMessage(String chatId, List<User> users, String title) {
         if (users == null || users.isEmpty()) {
-            return createMessage(chatId, "*" + title + "*\n\nНет пользователей для отображения.",
+            return createMessage(chatId, "*" + escapeMarkdown(title) + "*\n\nНет пользователей для отображения.",
                     AdminKeyboards.createBackKeyboard("menu:main"));
         }
         StringBuilder message = new StringBuilder();
-        message.append("*" + title + "*\n\n");
+        message.append("*").append(escapeMarkdown(title)).append("*\n\n");
+        
         for (int i = 0; i < Math.min(20, users.size()); i++) {
             User user = users.get(i);
-            message.append(i + 1).append(". *").append(user.getUsername()).append("*\n");
+            message.append(i + 1).append(". *").append(escapeMarkdown(user.getUsername())).append("*\n");
             message.append("ID: ").append(user.getId()).append("\n");
-            if (user.getEmail() != null) message.append("Email: ").append(user.getEmail()).append("\n");
-            if (user.getPhoneNumber() != null) message.append("Телефон: ").append(user.getPhoneNumber()).append("\n");
+            
+            if (user.getEmail() != null) {
+                message.append("Email: ").append(user.getEmail()).append("\n");
+            }
+            
+            if (user.getPhoneNumber() != null) {
+                message.append("Телефон: ").append(user.getPhoneNumber()).append("\n");
+            }
+            
             message.append("/user_").append(user.getId()).append(" - подробная информация\n\n");
         }
+        
         if (users.size() > 20) {
             message.append("...и еще ").append(users.size() - 20).append(" пользователей.\n");
         }
@@ -514,9 +525,9 @@ public class UserHandler {
         try {
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
-            message.setText("👤 *Поиск пользователя по имени*\\n\\n" +
-                    "Введите или скопируйте команду ниже и добавьте имя пользователя:\\n\\n" +
-                    "`/name Имя_пользователя`\\n\\n" +
+            message.setText("👤 *Поиск пользователя по имени*\n\n" +
+                    "Введите или скопируйте команду ниже и добавьте имя пользователя:\n\n" +
+                    "`/name Имя_пользователя`\n\n" +
                     "💡 Команду можно скопировать, нажав на неё.");
             message.setParseMode("Markdown");
             
@@ -551,5 +562,21 @@ public class UserHandler {
             log.error("Ошибка при поиске пользователя по имени: {}", e.getMessage());
             return createMessage(chatId, "❌ Произошла ошибка: " + e.getMessage());
         }
+    }
+
+    /**
+     * Экранирует специальные символы Markdown
+     * 
+     * @param text текст для экранирования
+     * @return экранированный текст
+     */
+    private String escapeMarkdown(String text) {
+        if (text == null) {
+            return "-";
+        }
+        return text.replace("*", "\\*")
+                  .replace("_", "\\_")
+                  .replace("`", "\\`")
+                  .replace("[", "\\[");
     }
 } 
