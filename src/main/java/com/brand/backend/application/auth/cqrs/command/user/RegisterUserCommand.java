@@ -13,6 +13,8 @@ import lombok.Data;
 public class RegisterUserCommand implements Command<User> {
     
     private String username;
+    private String email;
     private String password;
+    private String confirmPassword;
     
 } 

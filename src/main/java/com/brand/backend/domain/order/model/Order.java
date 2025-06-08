@@ -1,11 +1,10 @@
 package com.brand.backend.domain.order.model;
+
 import com.brand.backend.domain.product.model.Product;
 import com.brand.backend.domain.user.model.User;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 
 import java.time.LocalDateTime;
 
@@ -83,4 +82,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status = OrderStatus.NEW;
+
+    @Column(name = "tracking_number")
+    private String trackingNumber;
 }

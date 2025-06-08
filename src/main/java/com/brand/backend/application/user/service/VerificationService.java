@@ -86,6 +86,7 @@ public class VerificationService {
         
         User user = userOptional.get();
         user.setVerified(true);
+        user.setLastUsedVerificationCode(code);
         user.setVerificationCode(null);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);

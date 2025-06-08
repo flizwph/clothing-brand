@@ -1,57 +1,265 @@
-2025-05-15 20:13:10.927  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 13760 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
-2025-05-15 20:13:10.940  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
-2025-05-15 20:13:19.866 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
-2025-05-15 20:13:19.869 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
-2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
-2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
-2025-05-15 20:13:19.870 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
-2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
-2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
-2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
-2025-05-15 20:13:19.871 DEBUG 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
-2025-05-15 20:13:19.871  INFO 13760 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
-2025-05-15 20:13:20.452  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
-2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
-2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
-2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
-2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
-2025-05-15 20:13:20.453  INFO 13760 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
-2025-05-15 20:13:20.858  INFO 13760 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
-2025-05-15 20:13:20.903  INFO 13760 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
-2025-05-15 20:13:21.214  INFO 13760 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2025-05-15 20:13:21.216  WARN 13760 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
-2025-05-15 20:13:21.400  WARN 13760 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-05-15 20:13:23.967  INFO 13760 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 13.74 seconds (process running for 14.771)
-2025-05-15 20:17:19.625  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Admin 825885701 sent command: /start
-2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Обработка callback-запроса: menu:users
-2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Отображение меню пользователей для администратора 825885701
-2025-05-15 20:17:20.885  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : >> Обработка запроса на получение списка пользователей
-2025-05-15 20:17:20.902  WARN 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : Список пользователей пуст
-2025-05-15 20:17:20.902  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.handlers.UserHandler   [no-request-id] : << Завершение обработки запроса на получение списка пользователей
-2025-05-15 20:17:21.023  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Отправка ответа на callback 3547152079203757646: , isError: false
-2025-05-15 20:17:21.106  INFO 13760 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Ответ на callback успешно отправлен
-2025-05-15 21:57:16.135  INFO 14540 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 14540 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
-2025-05-15 21:57:16.137  INFO 14540 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
-2025-05-15 21:57:20.524 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
-2025-05-15 21:57:20.525 DEBUG 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
-2025-05-15 21:57:20.525  INFO 14540 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
-2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
-2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
-2025-05-15 21:57:20.798  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
-2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
-2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
-2025-05-15 21:57:20.799  INFO 14540 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
-2025-05-15 21:57:20.952  INFO 14540 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
-2025-05-15 21:57:20.965  INFO 14540 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
-2025-05-15 21:57:21.014  WARN 14540 --- [main] ConfigServletWebServerApplicationContext [no-request-id] : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'desktopSyncController' defined in file [C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes\com\brand\backend\presentation\rest\controller\desktop\DesktopSyncController.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
-2025-05-15 21:57:21.077 ERROR 14540 --- [main] o.s.b.d.LoggingFailureAnalysisReporter   [no-request-id] : 
+2025-06-08 20:10:17.038  INFO 19964 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 19964 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 20:10:17.045  INFO 19964 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 20:10:19.634 ERROR 19964 --- [main] j.LocalContainerEntityManagerFactoryBean [no-request-id] : Failed to initialize JPA EntityManagerFactory: Entity classes [com.brand.backend.domain.balance.model.Transaction] and [com.brand.backend.domain.payment.model.Transaction] share the entity name 'Transaction' (entity names must be distinct)
+2025-06-08 20:10:19.635  WARN 19964 --- [main] ConfigServletWebServerApplicationContext [no-request-id] : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'interactionConfig' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\infrastructure\config\InteractionConfig.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\user\service\UserService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userRepository' defined in com.brand.backend.domain.user.repository.UserRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'
+2025-06-08 20:10:19.682 ERROR 19964 --- [main] o.s.boot.SpringApplication               [no-request-id] : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'interactionConfig' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\infrastructure\config\InteractionConfig.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\user\service\UserService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userRepository' defined in com.brand.backend.domain.user.repository.UserRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:409)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:205)
+	at org.springframework.context.support.AbstractApplicationContext.initApplicationEventMulticaster(AbstractApplicationContext.java:851)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352)
+	at com.brand.backend.applicationstart.ClothingBrandApplication.main(ClothingBrandApplication.java:13)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'userService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\user\service\UserService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userRepository' defined in com.brand.backend.domain.user.repository.UserRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 27 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'userRepository' defined in com.brand.backend.domain.user.repository.UserRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:377)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1705)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1454)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 41 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jpaSharedEM_entityManagerFactory': Cannot resolve reference to bean 'entityManagerFactory' while setting constructor argument
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:377)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:682)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:509)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	... 55 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Entity classes [com.brand.backend.domain.balance.model.Transaction] and [com.brand.backend.domain.payment.model.Transaction] share the entity name 'Transaction' (entity names must be distinct)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1806)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	... 67 common frames omitted
+Caused by: org.hibernate.DuplicateMappingException: Entity classes [com.brand.backend.domain.balance.model.Transaction] and [com.brand.backend.domain.payment.model.Transaction] share the entity name 'Transaction' (entity names must be distinct)
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.addEntityBinding(InFlightMetadataCollectorImpl.java:339)
+	at org.hibernate.boot.model.internal.EntityBinder.bindEntityClass(EntityBinder.java:245)
+	at org.hibernate.boot.model.internal.AnnotationBinder.bindClass(AnnotationBinder.java:423)
+	at org.hibernate.boot.model.source.internal.annotations.AnnotationMetadataSourceProcessorImpl.processEntityHierarchies(AnnotationMetadataSourceProcessorImpl.java:256)
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess$1.processEntityHierarchies(MetadataBuildingProcess.java:279)
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:322)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:1432)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1503)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1853)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1802)
+	... 74 common frames omitted
+
+2025-06-08 20:13:33.097  INFO 6052 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 6052 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 20:13:33.098  INFO 6052 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 20:13:37.326  WARN 6052 --- [main] ConfigServletWebServerApplicationContext [no-request-id] : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'paymentController' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\api\controller\PaymentController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'paymentService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\domain\payment\service\PaymentService.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'balanceService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\balance\service\BalanceService.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'transactionRepository' defined in com.brand.backend.domain.balance.repository.TransactionRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+2025-06-08 20:13:37.392 ERROR 6052 --- [main] o.s.boot.SpringApplication               [no-request-id] : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'paymentController' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\api\controller\PaymentController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'paymentService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\domain\payment\service\PaymentService.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'balanceService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\balance\service\BalanceService.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'transactionRepository' defined in com.brand.backend.domain.balance.repository.TransactionRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:971)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352)
+	at com.brand.backend.applicationstart.ClothingBrandApplication.main(ClothingBrandApplication.java:13)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'paymentService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\domain\payment\service\PaymentService.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'balanceService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\balance\service\BalanceService.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'transactionRepository' defined in com.brand.backend.domain.balance.repository.TransactionRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 19 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'balanceService' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\balance\service\BalanceService.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'transactionRepository' defined in com.brand.backend.domain.balance.repository.TransactionRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 33 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'transactionRepository' defined in com.brand.backend.domain.balance.repository.TransactionRepository defined in @EnableJpaRepositories declared on ClothingBrandApplication: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1806)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 47 common frames omitted
+Caused by: org.springframework.data.repository.query.QueryCreationException: Could not create query for public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable); Reason: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.data.repository.query.QueryCreationException.create(QueryCreationException.java:101)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.lookupQuery(QueryExecutorMethodInterceptor.java:119)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.mapMethodsToQuery(QueryExecutorMethodInterceptor.java:103)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.lambda$new$0(QueryExecutorMethodInterceptor.java:92)
+	at java.base/java.util.Optional.map(Optional.java:260)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.<init>(QueryExecutorMethodInterceptor.java:92)
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport.getRepository(RepositoryFactorySupport.java:357)
+	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.lambda$afterPropertiesSet$5(RepositoryFactoryBeanSupport.java:286)
+	at org.springframework.data.util.Lazy.getNullable(Lazy.java:135)
+	at org.springframework.data.util.Lazy.get(Lazy.java:113)
+	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.afterPropertiesSet(RepositoryFactoryBeanSupport.java:292)
+	at org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean.afterPropertiesSet(JpaRepositoryFactoryBean.java:132)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1853)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1802)
+	... 58 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Validation failed for query for method public abstract org.springframework.data.domain.Page com.brand.backend.domain.balance.repository.TransactionRepository.findByUserAndDateRange(com.brand.backend.domain.user.model.User,java.time.LocalDateTime,java.time.LocalDateTime,org.springframework.data.domain.Pageable)
+	at org.springframework.data.jpa.repository.query.SimpleJpaQuery.validateQuery(SimpleJpaQuery.java:100)
+	at org.springframework.data.jpa.repository.query.SimpleJpaQuery.<init>(SimpleJpaQuery.java:70)
+	at org.springframework.data.jpa.repository.query.JpaQueryFactory.fromMethodWithQueryString(JpaQueryFactory.java:60)
+	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$DeclaredQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:170)
+	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$CreateIfNotFoundQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:252)
+	at org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy$AbstractQueryLookupStrategy.resolveQuery(JpaQueryLookupStrategy.java:95)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.lookupQuery(QueryExecutorMethodInterceptor.java:115)
+	... 70 common frames omitted
+Caused by: java.lang.IllegalArgumentException: org.hibernate.query.sqm.UnknownEntityException: Could not resolve root entity 'Transaction'
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:143)
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:167)
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:173)
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:827)
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:732)
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:133)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364)
+	at jdk.proxy2/jdk.proxy2.$Proxy167.createQuery(Unknown Source)
+	at org.springframework.data.jpa.repository.query.SimpleJpaQuery.validateQuery(SimpleJpaQuery.java:94)
+	... 76 common frames omitted
+Caused by: org.hibernate.query.sqm.UnknownEntityException: Could not resolve root entity 'Transaction'
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.resolveRootEntity(SemanticQueryBuilder.java:2013)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitRootEntity(SemanticQueryBuilder.java:1944)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitRootEntity(SemanticQueryBuilder.java:269)
+	at org.hibernate.grammars.hql.HqlParser$RootEntityContext.accept(HqlParser.java:2549)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitEntityWithJoins(SemanticQueryBuilder.java:1914)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitFromClause(SemanticQueryBuilder.java:1901)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitQuery(SemanticQueryBuilder.java:1148)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitQuerySpecExpression(SemanticQueryBuilder.java:941)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitQuerySpecExpression(SemanticQueryBuilder.java:269)
+	at org.hibernate.grammars.hql.HqlParser$QuerySpecExpressionContext.accept(HqlParser.java:1869)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitSimpleQueryGroup(SemanticQueryBuilder.java:926)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitSimpleQueryGroup(SemanticQueryBuilder.java:269)
+	at org.hibernate.grammars.hql.HqlParser$SimpleQueryGroupContext.accept(HqlParser.java:1740)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitSelectStatement(SemanticQueryBuilder.java:443)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.visitStatement(SemanticQueryBuilder.java:402)
+	at org.hibernate.query.hql.internal.SemanticQueryBuilder.buildSemanticModel(SemanticQueryBuilder.java:311)
+	at org.hibernate.query.hql.internal.StandardHqlTranslator.translate(StandardHqlTranslator.java:71)
+	at org.hibernate.query.internal.QueryInterpretationCacheStandardImpl.createHqlInterpretation(QueryInterpretationCacheStandardImpl.java:165)
+	at org.hibernate.query.internal.QueryInterpretationCacheStandardImpl.resolveHqlInterpretation(QueryInterpretationCacheStandardImpl.java:147)
+	at org.hibernate.internal.AbstractSharedSessionContract.interpretHql(AbstractSharedSessionContract.java:769)
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:819)
+	... 83 common frames omitted
+
+2025-06-08 20:14:31.370  INFO 5696 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 5696 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 20:14:31.371  INFO 5696 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 20:14:35.839 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 20:14:35.840 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 20:14:35.841 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 20:14:35.841 DEBUG 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 20:14:35.841  INFO 5696 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 20:14:36.116  WARN 5696 --- [main] ConfigServletWebServerApplicationContext [no-request-id] : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'orderEventHandler' defined in file [C:\Users\vanan\Desktop\new-backend-front-desk\target\classes\com\brand\backend\application\order\handler\OrderEventHandler.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-06-08 20:14:36.184 ERROR 5696 --- [main] o.s.b.d.LoggingFailureAnalysisReporter   [no-request-id] : 
 
 ***************************
 APPLICATION FAILED TO START
@@ -59,34 +267,894 @@ APPLICATION FAILED TO START
 
 Description:
 
-Parameter 0 of constructor in com.brand.backend.presentation.rest.controller.desktop.DesktopSyncController required a bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' that could not be found.
+Parameter 1 of constructor in com.brand.backend.application.order.handler.OrderEventHandler required a bean of type 'com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot' that could not be found.
 
 
 Action:
 
-Consider defining a bean of type 'com.brand.backend.application.desktop.service.DesktopSyncService' in your configuration.
+Consider defining a bean of type 'com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot' in your configuration.
 
-2025-05-15 21:59:35.183  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 14128 (C:\Users\vanan\Desktop\main-clothing-brand-1.01\target\classes started by vanan in C:\Users\vanan\Desktop\main-clothing-brand-1.01)
-2025-05-15 21:59:35.184  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
-2025-05-15 21:59:40.270 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
-2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
-2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
-2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
-2025-05-15 21:59:40.272 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
-2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
-2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
-2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
-2025-05-15 21:59:40.273 DEBUG 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
-2025-05-15 21:59:40.273  INFO 14128 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
-2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 825885701
-2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 916948327
-2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 486377773
-2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 979322246
-2025-05-15 21:59:40.570  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Добавлен администратор с ID: 6133963100
-2025-05-15 21:59:40.571  INFO 14128 --- [main] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Всего администраторов: 5
-2025-05-15 21:59:40.723  INFO 14128 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
-2025-05-15 21:59:40.737  INFO 14128 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
-2025-05-15 21:59:40.880  INFO 14128 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2025-05-15 21:59:40.881  WARN 14128 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
-2025-05-15 21:59:40.956  WARN 14128 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-05-15 21:59:42.392  INFO 14128 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 7.566 seconds (process running for 8.025)
+2025-06-08 20:15:50.486  INFO 18708 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 18708 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 20:15:50.487  INFO 18708 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 20:15:55.397 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 20:15:55.398 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 20:15:55.398 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 20:15:55.398 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 20:15:55.398 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 20:15:55.398 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 20:15:55.399 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 20:15:55.399 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 20:15:55.399 DEBUG 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 20:15:55.399  INFO 18708 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 20:15:55.795  INFO 18708 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-06-08 20:15:55.876  INFO 18708 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-06-08 20:15:56.045  INFO 18708 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-06-08 20:15:56.046  WARN 18708 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-06-08 20:15:56.142  WARN 18708 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-08 20:15:57.585  INFO 18708 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 7.495 seconds (process running for 8.016)
+2025-06-08 20:15:57.594  INFO 18708 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Starting cleanup of expired payments
+2025-06-08 20:15:57.664  INFO 18708 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Completed cleanup of expired payments
+2025-06-08 20:16:00.742 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:00.767 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:04.868 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:04.870 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:08.970 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:08.984 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:13.077 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:13.096 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:17.181 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:17.204 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:21.301 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:21.312 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:25.509 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:25.518 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:29.627 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:29.635 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:33.736 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:33.737 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:37.840 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:37.844 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:41.946 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:41.967 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:46.057 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:46.075 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:50.163 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:50.186 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:50.792  INFO 18708 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Received update: Update(updateId=405669116, message=Message(messageId=1207, messageThreadId=null, from=User(id=825885701, firstName=флиз, isBot=false, lastName=null, userName=w1w1w1w1w111, languageCode=ru, canJoinGroups=null, canReadAllGroupMessages=null, supportInlineQueries=null, isPremium=null, addedToAttachmentMenu=null), date=1749403024, chat=Chat(id=825885701, type=private, title=null, firstName=флиз, lastName=null, userName=w1w1w1w1w111, photo=null, description=null, inviteLink=null, pinnedMessage=null, stickerSetName=null, canSetStickerSet=null, permissions=null, slowModeDelay=null, bio=null, linkedChatId=null, location=null, messageAutoDeleteTime=null, hasPrivateForwards=null, HasProtectedContent=null, joinToSendMessages=null, joinByRequest=null, hasRestrictedVoiceAndVideoMessages=null, isForum=null, activeUsernames=null, emojiStatusCustomEmojiId=null, hasAggressiveAntiSpamEnabled=null, hasHiddenMembers=null), forwardFrom=null, forwardFromChat=null, forwardDate=null, text=/start, entities=[MessageEntity(type=bot_command, offset=0, length=6, url=null, user=null, language=null, customEmojiId=null, text=/start)], captionEntities=null, audio=null, document=null, photo=null, sticker=null, video=null, contact=null, location=null, venue=null, animation=null, pinnedMessage=null, newChatMembers=[], leftChatMember=null, newChatTitle=null, newChatPhoto=null, deleteChatPhoto=null, groupchatCreated=null, replyToMessage=null, voice=null, caption=null, superGroupCreated=null, channelChatCreated=null, migrateToChatId=null, migrateFromChatId=null, editDate=null, game=null, forwardFromMessageId=null, invoice=null, successfulPayment=null, videoNote=null, authorSignature=null, forwardSignature=null, mediaGroupId=null, connectedWebsite=null, passportData=null, forwardSenderName=null, poll=null, replyMarkup=null, dice=null, viaBot=null, senderChat=null, proximityAlertTriggered=null, messageAutoDeleteTimerChanged=null, isAutomaticForward=null, hasProtectedContent=null, webAppData=null, videoChatStarted=null, videoChatEnded=null, videoChatParticipantsInvited=null, videoChatScheduled=null, isTopicMessage=null, forumTopicCreated=null, forumTopicClosed=null, forumTopicReopened=null, forumTopicEdited=null, generalForumTopicHidden=null, generalForumTopicUnhidden=null, writeAccessAllowed=null, hasMediaSpoiler=null, userShared=null, chatShared=null), inlineQuery=null, chosenInlineQuery=null, callbackQuery=null, editedMessage=null, channelPost=null, editedChannelPost=null, shippingQuery=null, preCheckoutQuery=null, poll=null, pollAnswer=null, myChatMember=null, chatMember=null, chatJoinRequest=null)
+2025-06-08 20:16:54.276 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:54.295 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:58.379 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:16:58.415 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:02.480 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:02.530 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:06.587 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:06.639 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:07.544  INFO 18708 --- [@Obl1v1umAdministrator_bot Telegram Executor] c.b.b.i.i.t.admin.AdminTelegramBot       [no-request-id] : Received update: Update(updateId=405669123, message=null, inlineQuery=null, chosenInlineQuery=null, callbackQuery=CallbackQuery(id=3547152080302090253, from=User(id=825885701, firstName=флиз, isBot=false, lastName=null, userName=w1w1w1w1w111, languageCode=ru, canJoinGroups=null, canReadAllGroupMessages=null, supportInlineQueries=null, isPremium=null, addedToAttachmentMenu=null), message=Message(messageId=1215, messageThreadId=null, from=User(id=7672915154, firstName=Obl1v1umAdministrator, isBot=true, lastName=null, userName=Obl1v1umAdministrator_bot, languageCode=null, canJoinGroups=null, canReadAllGroupMessages=null, supportInlineQueries=null, isPremium=null, addedToAttachmentMenu=null), date=1749403039, chat=Chat(id=825885701, type=private, title=null, firstName=флиз, lastName=null, userName=w1w1w1w1w111, photo=null, description=null, inviteLink=null, pinnedMessage=null, stickerSetName=null, canSetStickerSet=null, permissions=null, slowModeDelay=null, bio=null, linkedChatId=null, location=null, messageAutoDeleteTime=null, hasPrivateForwards=null, HasProtectedContent=null, joinToSendMessages=null, joinByRequest=null, hasRestrictedVoiceAndVideoMessages=null, isForum=null, activeUsernames=null, emojiStatusCustomEmojiId=null, hasAggressiveAntiSpamEnabled=null, hasHiddenMembers=null), forwardFrom=null, forwardFromChat=null, forwardDate=null, text=📋 Главное меню
+
+Выберите раздел:, entities=[MessageEntity(type=bold, offset=0, length=15, url=null, user=null, language=null, customEmojiId=null, text=📋 Главное меню)], captionEntities=null, audio=null, document=null, photo=null, sticker=null, video=null, contact=null, location=null, venue=null, animation=null, pinnedMessage=null, newChatMembers=[], leftChatMember=null, newChatTitle=null, newChatPhoto=null, deleteChatPhoto=null, groupchatCreated=null, replyToMessage=null, voice=null, caption=null, superGroupCreated=null, channelChatCreated=null, migrateToChatId=null, migrateFromChatId=null, editDate=null, game=null, forwardFromMessageId=null, invoice=null, successfulPayment=null, videoNote=null, authorSignature=null, forwardSignature=null, mediaGroupId=null, connectedWebsite=null, passportData=null, forwardSenderName=null, poll=null, replyMarkup=InlineKeyboardMarkup(keyboard=[[InlineKeyboardButton(text=📦 Заказы, url=null, callbackData=menu:orders, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null), InlineKeyboardButton(text=👥 Пользователи, url=null, callbackData=menu:users, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null)], [InlineKeyboardButton(text=🎟 Промокоды, url=null, callbackData=menu:promocodes, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null), InlineKeyboardButton(text=🛍 Товары, url=null, callbackData=menu:products, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null)], [InlineKeyboardButton(text=💰 Пополнения, url=null, callbackData=menu:deposits, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null), InlineKeyboardButton(text=🔍 Поиск заказа, url=null, callbackData=menu:search, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null)], [InlineKeyboardButton(text=⚙️ Настройки, url=null, callbackData=menu:settings, callbackGame=null, switchInlineQuery=null, switchInlineQueryCurrentChat=null, pay=null, loginUrl=null, webApp=null)]]), dice=null, viaBot=null, senderChat=null, proximityAlertTriggered=null, messageAutoDeleteTimerChanged=null, isAutomaticForward=null, hasProtectedContent=null, webAppData=null, videoChatStarted=null, videoChatEnded=null, videoChatParticipantsInvited=null, videoChatScheduled=null, isTopicMessage=null, forumTopicCreated=null, forumTopicClosed=null, forumTopicReopened=null, forumTopicEdited=null, generalForumTopicHidden=null, generalForumTopicUnhidden=null, writeAccessAllowed=null, hasMediaSpoiler=null, userShared=null, chatShared=null), inlineMessageId=null, data=menu:search, gameShortName=null, chatInstance=7670620810005802623), editedMessage=null, channelPost=null, editedChannelPost=null, shippingQuery=null, preCheckoutQuery=null, poll=null, pollAnswer=null, myChatMember=null, chatMember=null, chatJoinRequest=null)
+2025-06-08 20:17:10.788 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:10.856 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:14.896 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:14.955 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:19.005 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:19.077 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:23.111 ERROR 18708 --- [@obl1vium_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:17:23.198 ERROR 18708 --- [@Obl1v1umAdministrator_bot Telegram Connection] o.t.t.u.DefaultBotSession                [no-request-id] : Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException: Error executing org.telegram.telegrambots.meta.api.methods.updates.GetUpdates query: [409] Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseInternal(PartialBotApiMethod.java:54)
+	at org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod.deserializeResponseArray(PartialBotApiMethod.java:39)
+	at org.telegram.telegrambots.meta.api.methods.updates.GetUpdates.deserializeResponse(GetUpdates.java:83)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.getUpdatesFromServer(DefaultBotSession.java:258)
+	at org.telegram.telegrambots.updatesreceivers.DefaultBotSession$ReaderThread.run(DefaultBotSession.java:188)
+
+2025-06-08 20:33:44.127  INFO 21932 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 21932 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 20:33:44.128  INFO 21932 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 20:33:48.581 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 20:33:48.583 DEBUG 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 20:33:48.584  INFO 21932 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 20:33:48.974  INFO 21932 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-06-08 20:33:48.988  INFO 21932 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-06-08 20:33:49.141  INFO 21932 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-06-08 20:33:49.142  WARN 21932 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-06-08 20:33:49.223  WARN 21932 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-08 20:33:50.571  INFO 21932 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 6.827 seconds (process running for 7.323)
+2025-06-08 20:33:50.579  INFO 21932 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Starting cleanup of expired payments
+2025-06-08 20:33:50.641  INFO 21932 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Completed cleanup of expired payments
+2025-06-08 21:50:57.523  INFO 17996 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 17996 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 21:50:57.524  INFO 17996 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 21:51:01.995 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 21:51:01.996 DEBUG 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 21:51:01.996  INFO 17996 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 21:51:02.395  INFO 17996 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-06-08 21:51:02.409  INFO 17996 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-06-08 21:51:02.565  INFO 17996 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-06-08 21:51:02.566  WARN 17996 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-06-08 21:51:02.652  WARN 17996 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-08 21:51:03.973  INFO 17996 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 6.818 seconds (process running for 7.479)
+2025-06-08 21:51:03.981  INFO 17996 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Starting cleanup of expired payments
+2025-06-08 21:51:04.045  INFO 17996 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Completed cleanup of expired payments
+2025-06-08 21:51:33.147 ERROR 17996 --- [http-nio-8080-exec-3] c.b.b.c.exeption.GlobalExceptionHandler  [f70a9cfc-79b4-4b01-8e70-3cced5bb88fd] : Uncaught exception
+
+org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Unrecognized field "email" (class com.brand.backend.presentation.dto.request.UserRegistrationRequest), not marked as ignorable
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:406)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.read(AbstractJackson2HttpMessageConverter.java:354)
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver.readWithMessageConverters(AbstractMessageConverterMethodArgumentResolver.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.readWithMessageConverters(RequestResponseBodyMethodProcessor.java:161)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:135)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:224)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:178)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.infrastructure.security.jwt.JwtRequestFilter.doFilterInternal(JwtRequestFilter.java:35)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.infrastructure.security.jwt.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:47)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.common.filter.RequestIdFilter.doFilterInternal(RequestIdFilter.java:44)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340)
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.brand.backend.infrastructure.security.jwt.TokenAuthenticationFilter.doFilterInternal(TokenAuthenticationFilter.java:90)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.brand.backend.infrastructure.security.filter.ApiKeyAuthFilter.doFilterInternal(ApiKeyAuthFilter.java:53)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+Caused by: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field "email" (class com.brand.backend.presentation.dto.request.UserRegistrationRequest), not marked as ignorable (2 known properties: "password", "username"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 3, column: 13] (through reference chain: com.brand.backend.presentation.dto.request.UserRegistrationRequest["email"])
+	at com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.from(UnrecognizedPropertyException.java:61)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleUnknownProperty(DeserializationContext.java:1153)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer.handleUnknownProperty(StdDeserializer.java:2241)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownProperty(BeanDeserializerBase.java:1793)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownVanilla(BeanDeserializerBase.java:1771)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.vanillaDeserialize(BeanDeserializer.java:316)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:177)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectReader._bindAndClose(ObjectReader.java:2125)
+	at com.fasterxml.jackson.databind.ObjectReader.readValue(ObjectReader.java:1501)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:395)
+	... 160 common frames omitted
+
+2025-06-08 21:55:09.381  INFO 18040 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 18040 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 21:55:09.383  INFO 18040 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 21:55:13.796 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 21:55:13.797 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 21:55:13.797 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 21:55:13.797 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 21:55:13.797 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 21:55:13.798 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 21:55:13.798 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 21:55:13.798 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 21:55:13.798 DEBUG 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 21:55:13.798  INFO 18040 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 21:55:14.165  INFO 18040 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-06-08 21:55:14.180  INFO 18040 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-06-08 21:55:14.333  INFO 18040 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-06-08 21:55:14.333  WARN 18040 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-06-08 21:55:14.418  WARN 18040 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-08 21:55:15.722  INFO 18040 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 6.718 seconds (process running for 7.174)
+2025-06-08 21:55:15.730  INFO 18040 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Starting cleanup of expired payments
+2025-06-08 21:55:15.792  INFO 18040 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Completed cleanup of expired payments
+2025-06-08 21:55:17.169  INFO 18040 --- [http-nio-8080-exec-1] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Получен запрос на регистрацию: testuser
+2025-06-08 21:55:17.170  INFO 18040 --- [http-nio-8080-exec-1] c.b.b.a.a.s.facade.AuthServiceCQRS       [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Регистрация нового пользователя: testuser с email: test@example.com
+2025-06-08 21:55:17.170 DEBUG 18040 --- [http-nio-8080-exec-1] c.b.b.a.auth.bus.impl.SimpleCommandBus   [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Шина команд: отправка команды RegisterUserCommand
+2025-06-08 21:55:17.170 DEBUG 18040 --- [http-nio-8080-exec-1] c.b.b.a.a.i.m.impl.SpringMediator        [13b3c486-d2a3-455a-9860-a26f2876a7b1] : [6dd01373] Обработка запроса: RegisterUserCommand
+2025-06-08 21:55:17.171  INFO 18040 --- [http-nio-8080-exec-1] b.b.a.a.c.h.u.RegisterUserCommandHandler [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Обработка команды регистрации пользователя: testuser с email: test@example.com
+2025-06-08 21:55:17.239  INFO 18040 --- [http-nio-8080-exec-1] b.b.a.a.c.h.u.RegisterUserCommandHandler [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Пользователь зарегистрирован: testuser с email: test@example.com
+2025-06-08 21:55:17.267 DEBUG 18040 --- [http-nio-8080-exec-1] c.b.b.a.a.i.m.impl.SpringMediator        [13b3c486-d2a3-455a-9860-a26f2876a7b1] : [6dd01373] Запрос успешно обработан: RegisterUserCommand
+2025-06-08 21:55:17.272  INFO 18040 --- [http-nio-8080-exec-1] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [13b3c486-d2a3-455a-9860-a26f2876a7b1] : Регистрация успешна для пользователя: testuser с email: test@example.com
+2025-06-08 21:55:33.792  INFO 18040 --- [@obl1vium_bot Telegram Executor] c.b.b.a.u.service.VerificationService    [no-request-id] : Пользователь testuser успешно верифицирован с кодом kpfjlk5g3MTZne4kB1Q2NxAPD6Psz5vM
+2025-06-08 21:56:14.251  INFO 18040 --- [http-nio-8080-exec-2] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : 📥 [LOGIN] Получен запрос на вход: testuser
+2025-06-08 21:56:14.252  INFO 18040 --- [http-nio-8080-exec-2] c.b.b.a.a.s.facade.AuthServiceCQRS       [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : Вход пользователя: testuser
+2025-06-08 21:56:14.252 DEBUG 18040 --- [http-nio-8080-exec-2] c.b.b.a.auth.bus.impl.SimpleCommandBus   [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : Шина команд: отправка команды LoginCommand
+2025-06-08 21:56:14.252 DEBUG 18040 --- [http-nio-8080-exec-2] c.b.b.a.a.i.m.impl.SpringMediator        [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : [a572b516] Обработка запроса: LoginCommand
+2025-06-08 21:56:14.252  INFO 18040 --- [http-nio-8080-exec-2] c.b.b.a.a.c.h.user.LoginCommandHandler   [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : Попытка входа в систему: testuser
+2025-06-08 21:56:14.266 ERROR 18040 --- [http-nio-8080-exec-2] c.b.b.a.a.i.m.impl.SpringMediator        [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : [a572b516] Критическая ошибка при обработке запроса LoginCommand: Null key returned for cache operation [Builder[public abstract java.util.Optional com.brand.backend.domain.user.repository.UserRepository.findUserForAuth(java.lang.String)] caches=[userAuthCache] | key='#username' | keyGenerator='' | cacheManager='' | cacheResolver='' | condition='' | unless='' | sync='false']. If you are using named parameters, ensure that the compiler uses the '-parameters' flag.
+
+java.lang.IllegalArgumentException: Null key returned for cache operation [Builder[public abstract java.util.Optional com.brand.backend.domain.user.repository.UserRepository.findUserForAuth(java.lang.String)] caches=[userAuthCache] | key='#username' | keyGenerator='' | cacheManager='' | cacheResolver='' | condition='' | unless='' | sync='false']. If you are using named parameters, ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.cache.interceptor.CacheAspectSupport.generateKey(CacheAspectSupport.java:714)
+	at org.springframework.cache.interceptor.CacheAspectSupport.findCachedValue(CacheAspectSupport.java:480)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:431)
+	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:395)
+	at org.springframework.cache.interceptor.CacheInterceptor.invoke(CacheInterceptor.java:65)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223)
+	at jdk.proxy2/jdk.proxy2.$Proxy173.findUserForAuth(Unknown Source)
+	at com.brand.backend.application.auth.cqrs.handler.user.LoginCommandHandler.handle(LoginCommandHandler.java:71)
+	at com.brand.backend.application.auth.cqrs.handler.user.LoginCommandHandler.handle(LoginCommandHandler.java:32)
+	at com.brand.backend.application.auth.infra.mediator.impl.SpringMediator.send(SpringMediator.java:78)
+	at com.brand.backend.application.auth.bus.impl.SimpleCommandBus.dispatch(SimpleCommandBus.java:26)
+	at com.brand.backend.application.auth.service.facade.AuthServiceCQRS.login(AuthServiceCQRS.java:80)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:716)
+	at com.brand.backend.application.auth.service.facade.AuthServiceCQRS$$SpringCGLIB$$0.login(<generated>)
+	at com.brand.backend.presentation.rest.controller.auth.v2.AuthControllerCQRS.loginUser(AuthControllerCQRS.java:89)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.infrastructure.security.jwt.JwtRequestFilter.doFilterInternal(JwtRequestFilter.java:35)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.infrastructure.security.jwt.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:47)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.brand.backend.common.filter.RequestIdFilter.doFilterInternal(RequestIdFilter.java:44)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340)
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.brand.backend.infrastructure.security.jwt.TokenAuthenticationFilter.doFilterInternal(TokenAuthenticationFilter.java:90)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.brand.backend.infrastructure.security.filter.ApiKeyAuthFilter.doFilterInternal(ApiKeyAuthFilter.java:53)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1575)
+
+2025-06-08 21:56:14.270 ERROR 18040 --- [http-nio-8080-exec-2] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [5410b5c4-7966-4efe-91f0-3ec362e0b0e1] : 🔥 [LOGIN ERROR] Ошибка входа для пользователя testuser: Null key returned for cache operation [Builder[public abstract java.util.Optional com.brand.backend.domain.user.repository.UserRepository.findUserForAuth(java.lang.String)] caches=[userAuthCache] | key='#username' | keyGenerator='' | cacheManager='' | cacheResolver='' | condition='' | unless='' | sync='false']. If you are using named parameters, ensure that the compiler uses the '-parameters' flag.
+2025-06-08 22:04:03.796  INFO 15948 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Starting ClothingBrandApplication using Java 23 with PID 15948 (C:\Users\vanan\Desktop\new-backend-front-desk\target\classes started by vanan in C:\Users\vanan\Desktop\new-backend-front-desk)
+2025-06-08 22:04:03.798  INFO 15948 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : No active profile set, falling back to 1 default profile: "default"
+2025-06-08 22:04:13.389 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ChangePasswordCommand
+2025-06-08 22:04:13.390 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: CompletePasswordResetCommand
+2025-06-08 22:04:13.390 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: InitiatePasswordResetCommand
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: GetUserByUsernameQuery
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LoginCommand
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: LogoutCommand
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RefreshTokenCommand
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: RegisterUserCommand
+2025-06-08 22:04:13.391 DEBUG 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрирован обработчик для запроса: ValidateTokenQuery
+2025-06-08 22:04:13.391  INFO 15948 --- [main] c.b.b.a.a.i.m.impl.SpringMediator        [no-request-id] : Зарегистрировано 9 обработчиков запросов в медиаторе
+2025-06-08 22:04:13.824  INFO 15948 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Проверка существования таблицы security_audit_events...
+2025-06-08 22:04:13.840  INFO 15948 --- [main] c.b.b.i.config.DataInitializer           [no-request-id] : Таблица security_audit_events существует
+2025-06-08 22:04:14.030  INFO 15948 --- [main] eAuthenticationProviderManagerConfigurer [no-request-id] : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-06-08 22:04:14.032  WARN 15948 --- [main] r$InitializeUserDetailsManagerConfigurer [no-request-id] : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2025-06-08 22:04:14.130  WARN 15948 --- [main] JpaBaseConfiguration$JpaWebConfiguration [no-request-id] : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-08 22:04:15.615  INFO 15948 --- [main] c.b.b.a.ClothingBrandApplication         [no-request-id] : Started ClothingBrandApplication in 12.254 seconds (process running for 12.81)
+2025-06-08 22:04:15.623  INFO 15948 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Starting cleanup of expired payments
+2025-06-08 22:04:15.701  INFO 15948 --- [scheduling-1] c.b.b.i.s.PaymentCleanupScheduler        [no-request-id] : Completed cleanup of expired payments
+2025-06-08 22:04:27.440  INFO 15948 --- [http-nio-8080-exec-2] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [da599a21-4f67-405e-9f63-9c32f6714d71] : 📥 [LOGIN] Получен запрос на вход: testuser
+2025-06-08 22:04:27.441  INFO 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.s.facade.AuthServiceCQRS       [da599a21-4f67-405e-9f63-9c32f6714d71] : Вход пользователя: testuser
+2025-06-08 22:04:27.441 DEBUG 15948 --- [http-nio-8080-exec-2] c.b.b.a.auth.bus.impl.SimpleCommandBus   [da599a21-4f67-405e-9f63-9c32f6714d71] : Шина команд: отправка команды LoginCommand
+2025-06-08 22:04:27.441 DEBUG 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.i.m.impl.SpringMediator        [da599a21-4f67-405e-9f63-9c32f6714d71] : [b19e19ce] Обработка запроса: LoginCommand
+2025-06-08 22:04:27.441  INFO 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.c.h.user.LoginCommandHandler   [da599a21-4f67-405e-9f63-9c32f6714d71] : Попытка входа в систему: testuser
+2025-06-08 22:04:27.489  WARN 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.c.h.user.LoginCommandHandler   [da599a21-4f67-405e-9f63-9c32f6714d71] : Пользователь не найден: testuser
+2025-06-08 22:04:27.490  WARN 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.s.s.LoginAttemptService        [da599a21-4f67-405e-9f63-9c32f6714d71] : Неудачная попытка входа #1 для пользователя testuser с IP 0:0:0:0:0:0:0:1
+2025-06-08 22:04:27.492  WARN 15948 --- [http-nio-8080-exec-2] c.b.b.a.a.i.m.impl.SpringMediator        [da599a21-4f67-405e-9f63-9c32f6714d71] : [b19e19ce] Ошибка аутентификации при обработке LoginCommand: Invalid username or password
+2025-06-08 22:04:27.492 ERROR 15948 --- [http-nio-8080-exec-2] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [da599a21-4f67-405e-9f63-9c32f6714d71] : 🔥 [LOGIN ERROR] Ошибка входа для пользователя testuser: Invalid username or password
+2025-06-08 22:06:39.891  INFO 15948 --- [http-nio-8080-exec-5] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [18e3f710-6b2a-455b-8baa-3207a8119567] : Получен запрос на регистрацию: testuser
+2025-06-08 22:06:39.892  INFO 15948 --- [http-nio-8080-exec-5] c.b.b.a.a.s.facade.AuthServiceCQRS       [18e3f710-6b2a-455b-8baa-3207a8119567] : Регистрация нового пользователя: testuser с email: test@example.com
+2025-06-08 22:06:39.893 DEBUG 15948 --- [http-nio-8080-exec-5] c.b.b.a.auth.bus.impl.SimpleCommandBus   [18e3f710-6b2a-455b-8baa-3207a8119567] : Шина команд: отправка команды RegisterUserCommand
+2025-06-08 22:06:39.893 DEBUG 15948 --- [http-nio-8080-exec-5] c.b.b.a.a.i.m.impl.SpringMediator        [18e3f710-6b2a-455b-8baa-3207a8119567] : [34879c72] Обработка запроса: RegisterUserCommand
+2025-06-08 22:06:39.893  INFO 15948 --- [http-nio-8080-exec-5] b.b.a.a.c.h.u.RegisterUserCommandHandler [18e3f710-6b2a-455b-8baa-3207a8119567] : Обработка команды регистрации пользователя: testuser с email: test@example.com
+2025-06-08 22:06:39.969  INFO 15948 --- [http-nio-8080-exec-5] b.b.a.a.c.h.u.RegisterUserCommandHandler [18e3f710-6b2a-455b-8baa-3207a8119567] : Пользователь зарегистрирован: testuser с email: test@example.com
+2025-06-08 22:06:39.975 DEBUG 15948 --- [http-nio-8080-exec-5] c.b.b.a.a.i.m.impl.SpringMediator        [18e3f710-6b2a-455b-8baa-3207a8119567] : [34879c72] Запрос успешно обработан: RegisterUserCommand
+2025-06-08 22:06:39.976  INFO 15948 --- [http-nio-8080-exec-5] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [18e3f710-6b2a-455b-8baa-3207a8119567] : Регистрация успешна для пользователя: testuser с email: test@example.com
+2025-06-08 22:06:58.374  INFO 15948 --- [@obl1vium_bot Telegram Executor] c.b.b.a.u.service.VerificationService    [no-request-id] : Пользователь testuser успешно верифицирован с кодом VgPERszPcyn6tuxgjz5uoZF02CoHCUr7
+2025-06-08 22:13:15.977  WARN 15948 --- [http-nio-8080-exec-7] .b.b.p.r.c.a.v.LegacyAuthControllerProxy [66de6fc2-b121-467c-bdf8-f80fd655cea0] : Обращение к устаревшему эндпоинту: /api/auth/login
+2025-06-08 22:13:26.021  INFO 15948 --- [http-nio-8080-exec-8] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [221128b0-14c3-4553-b2c1-2720df308af4] : 📥 [LOGIN] Получен запрос на вход: testuser
+2025-06-08 22:13:26.021  INFO 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.s.facade.AuthServiceCQRS       [221128b0-14c3-4553-b2c1-2720df308af4] : Вход пользователя: testuser
+2025-06-08 22:13:26.021 DEBUG 15948 --- [http-nio-8080-exec-8] c.b.b.a.auth.bus.impl.SimpleCommandBus   [221128b0-14c3-4553-b2c1-2720df308af4] : Шина команд: отправка команды LoginCommand
+2025-06-08 22:13:26.021 DEBUG 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.i.m.impl.SpringMediator        [221128b0-14c3-4553-b2c1-2720df308af4] : [0aa034ca] Обработка запроса: LoginCommand
+2025-06-08 22:13:26.021  INFO 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.c.h.user.LoginCommandHandler   [221128b0-14c3-4553-b2c1-2720df308af4] : Попытка входа в систему: testuser
+2025-06-08 22:13:26.092  INFO 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.s.s.LoginAttemptService        [221128b0-14c3-4553-b2c1-2720df308af4] : Успешный вход для пользователя testuser с IP 0:0:0:0:0:0:0:1, счетчик попыток сброшен
+2025-06-08 22:13:26.117 DEBUG 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.c.h.user.LoginCommandHandler   [221128b0-14c3-4553-b2c1-2720df308af4] : Создан новый refresh token для пользователя: testuser
+2025-06-08 22:13:26.120 DEBUG 15948 --- [http-nio-8080-exec-8] c.b.b.a.a.i.m.impl.SpringMediator        [221128b0-14c3-4553-b2c1-2720df308af4] : [0aa034ca] Запрос успешно обработан: LoginCommand
+2025-06-08 22:13:26.122  INFO 15948 --- [http-nio-8080-exec-8] c.b.b.p.r.c.auth.v2.AuthControllerCQRS   [221128b0-14c3-4553-b2c1-2720df308af4] : ✅ [LOGIN SUCCESS] Успешный вход: testuser

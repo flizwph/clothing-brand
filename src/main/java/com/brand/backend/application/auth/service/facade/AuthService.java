@@ -54,7 +54,7 @@ public class AuthService {
     public Optional<User> authenticateUser(String username, String password) {
         log.info("Попытка входа в систему: {}", username);
 
-        Optional<User> userOptional = userRepository.findUserForAuth(username);
+        Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();

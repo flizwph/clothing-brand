@@ -41,6 +41,9 @@ public class User {
     @Column(name = "verification_code")
     private String verificationCode;
 
+    @Column(name = "last_used_verification_code")
+    private String lastUsedVerificationCode;
+
     @Column(name = "telegram_id", unique = true)
     private Long telegramId;
 
@@ -82,6 +85,40 @@ public class User {
 
     @Column(name = "token_version")
     private Integer tokenVersion = 1;
+
+    // Аватарки социальных сетей
+    @Column(name = "telegram_avatar_url")
+    private String telegramAvatarUrl;
+
+    @Column(name = "discord_avatar_url")
+    private String discordAvatarUrl;
+
+    @Column(name = "vk_avatar_url")
+    private String vkAvatarUrl;
+
+    // VK интеграция
+    @Column(name = "vk_id", unique = true)
+    private Long vkId;
+
+    // Балансы по валютам
+    @Column(name = "balance_rub", nullable = false, precision = 15, scale = 2)
+    private BigDecimal balanceRub = BigDecimal.ZERO;
+
+    @Column(name = "balance_usd", nullable = false, precision = 15, scale = 2)
+    private BigDecimal balanceUsd = BigDecimal.ZERO;
+
+    @Column(name = "livium_balance", nullable = false, precision = 15, scale = 2)
+    private BigDecimal liviumBalance = BigDecimal.ZERO;
+
+    // Статусы подключения для UI
+    @Column(name = "is_telegram_linked", nullable = false)
+    private boolean isTelegramLinked = false;
+
+    @Column(name = "is_discord_linked", nullable = false) 
+    private boolean isDiscordLinked = false;
+
+    @Column(name = "is_vk_linked", nullable = false)
+    private boolean isVkLinked = false;
 
     public Integer getTokenVersion() {
         return tokenVersion != null ? tokenVersion : 1;

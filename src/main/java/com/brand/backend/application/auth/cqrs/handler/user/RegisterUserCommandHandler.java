@@ -27,8 +27,9 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
 
     @Override
     public User handle(RegisterUserCommand command) {
-        log.info("Обработка команды регистрации пользователя: {}", command.getUsername());
+        log.info("Обработка команды регистрации пользователя: {} с email: {}", command.getUsername(), command.getEmail());
 
+        // Валидация пароля
         if (command.getPassword() == null || command.getPassword().isEmpty()) {
             log.error("Пароль не может быть пустым!");
             throw InvalidPasswordException.empty();
@@ -39,13 +40,28 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
             throw InvalidPasswordException.tooShort(6);
         }
 
+        // Проверка совпадения паролей
+        if (!command.getPassword().equals(command.getConfirmPassword())) {
+            log.error("Пароли не совпадают для пользователя: {}", command.getUsername());
+            throw new InvalidPasswordException("Passwords do not match");
+        }
+
+        // Проверка уникальности username
         if (userRepository.findByUsername(command.getUsername()).isPresent()) {
             log.warn("Пользователь с таким именем уже существует: {}", command.getUsername());
             throw new UsernameExistsException(command.getUsername());
         }
 
+        // Проверка уникальности email
+        if (command.getEmail() != null && userRepository.findByEmail(command.getEmail()).isPresent()) {
+            log.warn("Пользователь с таким email уже существует: {}", command.getEmail());
+            throw new RuntimeException("Email already exists");
+        }
+
+        // Создание нового пользователя
         User user = new User();
         user.setUsername(command.getUsername());
+        user.setEmail(command.getEmail());
         user.setPasswordHash(passwordEncoder.encode(command.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -55,7 +71,7 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
         user.setVerificationCode(verificationCode);
         user.setVerified(false);
 
-        log.info("Пользователь зарегистрирован: {}", user.getUsername());
+        log.info("Пользователь зарегистрирован: {} с email: {}", user.getUsername(), user.getEmail());
         return userRepository.save(user);
     }
     

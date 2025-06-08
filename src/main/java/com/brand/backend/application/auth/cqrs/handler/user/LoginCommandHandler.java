@@ -68,7 +68,7 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginCo
             throw new UserBlockedException(command.getUsername(), 30); // 30 минут (по умолчанию)
         }
 
-        Optional<User> userOptional = userRepository.findUserForAuth(command.getUsername());
+        Optional<User> userOptional = userRepository.findByUsername(command.getUsername());
 
         if (userOptional.isEmpty()) {
             log.warn("Пользователь не найден: {}", command.getUsername());

@@ -1,9 +1,9 @@
 package com.brand.backend.domain.order.model;
 
 public enum OrderStatus {
-    NEW,         // Новый заказ
-    PROCESSING,  // Заказ в обработке
-    DISPATCHED,
-    COMPLETED,   // Заказ выполнен
-    CANCELLED    // Заказ отменен
+    NEW,         // New order
+    PROCESSING,  // Order in processing
+    DISPATCHED,  // Order dispatched
+    COMPLETED,   // Order completed
+    CANCELLED    // Order cancelled
 }

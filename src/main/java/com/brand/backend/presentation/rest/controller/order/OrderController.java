@@ -1,8 +1,9 @@
 package com.brand.backend.presentation.rest.controller.order;
 
 import com.brand.backend.presentation.dto.request.OrderDto;
+import com.brand.backend.presentation.dto.response.DetailedOrderDTO;
 import com.brand.backend.presentation.dto.response.OrderResponseDto;
-import com.brand.backend.common.exeption.ResourceNotFoundException;
+import com.brand.backend.common.exception.ResourceNotFoundException;
 import com.brand.backend.application.order.service.OrderService;
 import com.brand.backend.domain.user.model.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -145,6 +147,38 @@ public class OrderController {
                     return ResponseEntity.ok(response);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Заказ", "id", id));
+    }
+    
+    @Operation(summary = "Получение активных заказов", description = "Возвращает список всех активных заказов пользователя с детальной информацией")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список активных заказов успешно получен"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @GetMapping("/active")
+    public ResponseEntity<List<DetailedOrderDTO>> getActiveOrders(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
+        
+        List<DetailedOrderDTO> activeOrders = orderService.getActiveOrdersDetailed(user.getId());
+        return ResponseEntity.ok(activeOrders);
+    }
+
+    @Operation(summary = "Получение истории заказов", description = "Возвращает список всех завершенных заказов пользователя с детальной информацией")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "История заказов успешно получена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @GetMapping("/history")
+    public ResponseEntity<List<DetailedOrderDTO>> getOrderHistory(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
+        
+        List<DetailedOrderDTO> orderHistory = orderService.getOrderHistoryDetailed(user.getId());
+        return ResponseEntity.ok(orderHistory);
     }
     
     /**

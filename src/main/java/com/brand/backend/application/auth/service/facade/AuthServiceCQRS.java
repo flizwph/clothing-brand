@@ -36,11 +36,13 @@ public class AuthServiceCQRS {
      * Регистрирует нового пользователя
      */
     @Transactional
-    public User registerUser(String username, String password) {
-        log.info("Регистрация нового пользователя: {}", username);
+    public User registerUser(String username, String email, String password, String confirmPassword) {
+        log.info("Регистрация нового пользователя: {} с email: {}", username, email);
         RegisterUserCommand command = RegisterUserCommand.builder()
                 .username(username)
+                .email(email)
                 .password(password)
+                .confirmPassword(confirmPassword)
                 .build();
                 
         return commandBus.dispatch(command);

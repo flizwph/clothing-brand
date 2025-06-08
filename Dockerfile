@@ -1,40 +1,45 @@
-# Этап сборки приложения
-FROM gradle:7.6-jdk17-alpine AS build
+# Этап сборки с готовым Maven
+FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Копируем файлы для сборки
-COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
+# Копируем pom.xml и скачиваем зависимости (для кэширования слоёв)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Копируем исходный код и собираем
 COPY src ./src
+RUN mvn clean package -DskipTests -B
 
-# Сборка приложения
-RUN gradle build --no-daemon
-
-# Этап выполнения приложения
-FROM eclipse-temurin:17-jre-alpine
+# Этап выполнения
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Установка необходимых утилит
-RUN apk add --no-cache curl jq
+# Устанавливаем curl для health checks
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Создание группы и пользователя для запуска приложения
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Создаём пользователя
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
-# Копирование JAR из этапа сборки
-COPY --from=build /app/build/libs/*.jar app.jar
+# Копируем JAR файл
+COPY --from=build /app/target/clothing-brand-*.jar app.jar
 
-# Владелец файлов
-RUN chown -R appuser:appgroup /app
+# Устанавливаем владельца
+RUN chown appuser:appgroup app.jar
 
-# Переключение на непривилегированного пользователя
+# Переключаемся на пользователя
 USER appuser
-
-# Проверка здоровья приложения
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Порт приложения
 EXPOSE 8080
 
-# Запуск приложения
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# JVM настройки
+ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseContainerSupport"
+
+# Запуск
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

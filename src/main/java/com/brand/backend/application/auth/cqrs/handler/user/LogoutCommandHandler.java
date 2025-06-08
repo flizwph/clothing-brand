@@ -11,9 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Обработчик команды выхода из системы
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,18 +21,18 @@ public class LogoutCommandHandler implements CommandHandler<LogoutCommand, Boole
 
     @Override
     public Boolean handle(LogoutCommand command) {
-        log.info("Обработка команды выхода из системы для пользователя: {}", command.getUsername());
+        log.info("Processing logout command for user: {}", command.getUsername());
 
         Optional<User> userOptional = userRepository.findByUsername(command.getUsername());
         
         if (userOptional.isEmpty()) {
-            log.warn("Пользователь не найден: {}", command.getUsername());
+            log.warn("User not found: {}", command.getUsername());
             return false;
         }
         
         User user = userOptional.get();
         refreshTokenRepository.deleteByUser(user);
-        log.info("Выход из системы выполнен для пользователя: {}", command.getUsername());
+        log.info("Logout completed for user: {}", command.getUsername());
         
         return true;
     }

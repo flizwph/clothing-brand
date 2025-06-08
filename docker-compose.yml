@@ -29,6 +29,13 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION=3600000
       - JWT_REFRESH_EXPIRATION=86400000
+      # Параметры VK бота
+      - VK_ACCESS_TOKEN=${VK_ACCESS_TOKEN}
+      - VK_GROUP_ID=${VK_GROUP_ID}
+      - VK_SECRET_KEY=${VK_SECRET_KEY}
+      - VK_CONFIRMATION_TOKEN=${VK_CONFIRMATION_TOKEN}
+      - VK_WEBHOOK_URL=${VK_WEBHOOK_URL}
+      - VK_ENABLED=${VK_ENABLED:-false}
     deploy:
       mode: replicated
       replicas: ${APP_REPLICAS:-1}

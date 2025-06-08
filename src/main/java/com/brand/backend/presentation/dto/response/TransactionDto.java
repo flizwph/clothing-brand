@@ -1,86 +1,78 @@
 package com.brand.backend.presentation.dto.response;
 
-import com.brand.backend.domain.payment.model.Transaction;
-import com.brand.backend.domain.payment.model.TransactionStatus;
-import com.brand.backend.domain.payment.model.TransactionType;
+import com.brand.backend.domain.balance.model.Transaction;
+import com.brand.backend.domain.balance.model.TransactionType;
+import com.brand.backend.domain.balance.model.TransactionStatus;
+import com.brand.backend.domain.balance.model.Currency;
+import com.brand.backend.domain.balance.model.PaymentMethod;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * DTO для отображения информации о транзакции
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionDto {
-    
+public class TransactionDTO {
     private Long id;
-    private BigDecimal amount;
-    private TransactionType type;
-    private TransactionStatus status;
-    private String transactionCode;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Long orderId;
-    private String statusMessage;
-    private String adminComment;
-    private String formattedCreatedAt;
-    private String formattedUpdatedAt;
-    private String typeMessage;
+    private String type;                   // Тип транзакции (DEPOSIT, WITHDRAWAL, etc.)
+    private String typeDisplay;            // "Пополнение", "Вывод", etc.
+    private String status;                 // Статус (COMPLETED, PENDING, etc.)
+    private String statusDisplay;          // "Завершена", "В обработке", etc.
+    
+    private BigDecimal amount;             // Основная сумма
+    private String currency;               // Валюта (RUB, USD, LIV)
+    private String amountDisplay;          // "1,234.56 ₽"
+    
+    // Для конвертаций
+    private String fromCurrency;           // Исходная валюта
+    private String toCurrency;             // Целевая валюта
+    private BigDecimal fromAmount;         // Сумма до конвертации
+    private BigDecimal toAmount;           // Сумма после конвертации
+    private BigDecimal exchangeRate;       // Курс обмена
+    private String conversionDisplay;      // "100.00 USD → 9,000.00 RUB"
+    
+    private String paymentMethod;          // Способ оплаты
+    private String paymentMethodDisplay;   // "Банковская карта"
+    private String description;            // Описание
+    
+    private LocalDateTime createdAt;       // Дата создания
+    private LocalDateTime completedAt;     // Дата завершения
+    private String timeDisplay;            // "2 часа назад"
     
     /**
-     * Преобразование из сущности в DTO
+     * Статический метод для конвертации Transaction в TransactionDTO
      */
-    public static TransactionDto fromEntity(Transaction transaction) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        
-        return TransactionDto.builder()
-                .id(transaction.getId())
-                .amount(transaction.getAmount())
-                .type(transaction.getType())
-                .status(transaction.getStatus())
-                .transactionCode(transaction.getTransactionCode())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
-                .orderId(transaction.getOrderId())
-                .adminComment(transaction.getAdminComment())
-                .statusMessage(getStatusMessage(transaction.getStatus()))
-                .formattedCreatedAt(transaction.getCreatedAt().format(formatter))
-                .formattedUpdatedAt(transaction.getUpdatedAt() != null ? 
-                        transaction.getUpdatedAt().format(formatter) : null)
-                .typeMessage(getTypeMessage(transaction.getType()))
-                .build();
+    public static TransactionDTO fromEntity(Transaction transaction) {
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(transaction.getId());
+        dto.setType(transaction.getType().name());
+        dto.setTypeDisplay(transaction.getType().getDisplayName());
+        dto.setStatus(transaction.getStatus().name());
+        dto.setStatusDisplay(transaction.getStatus().getDisplayName());
+        dto.setAmount(transaction.getAmount());
+        dto.setCurrency(transaction.getCurrency().name());
+        dto.setAmountDisplay(formatAmount(transaction.getAmount(), transaction.getCurrency()));
+        dto.setPaymentMethod(transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().name() : null);
+        dto.setPaymentMethodDisplay(transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().getDisplayName() : null);
+        dto.setDescription(transaction.getDescription());
+        dto.setCreatedAt(transaction.getCreatedAt());
+        dto.setCompletedAt(transaction.getCompletedAt());
+        dto.setTimeDisplay(getTimeDisplay(transaction.getCreatedAt()));
+        return dto;
     }
     
-    /**
-     * Получить понятное для пользователя описание статуса
-     */
-    private static String getStatusMessage(TransactionStatus status) {
-        return switch (status) {
-            case PENDING -> "Ожидает подтверждения";
-            case COMPLETED -> "Выполнено";
-            case REJECTED -> "Отклонено";
-            case CANCELLED -> "Отменено пользователем";
-            default -> status.toString();
-        };
+    private static String formatAmount(BigDecimal amount, Currency currency) {
+        return String.format("%.2f %s", amount, currency.getSymbol());
     }
     
-    /**
-     * Получить понятное для пользователя описание типа транзакции
-     */
-    private static String getTypeMessage(TransactionType type) {
-        return switch (type) {
-            case DEPOSIT -> "Пополнение баланса";
-            case WITHDRAWAL -> "Вывод средств";
-            case ORDER_PAYMENT -> "Оплата заказа";
-            default -> type.toString();
-        };
+    private static String getTimeDisplay(LocalDateTime dateTime) {
+        // Заглушка для отображения времени
+        return "недавно";
     }
 } 

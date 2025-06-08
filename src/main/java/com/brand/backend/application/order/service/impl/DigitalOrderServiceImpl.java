@@ -2,7 +2,7 @@ package com.brand.backend.application.order.service.impl;
 
 import com.brand.backend.application.order.service.DigitalOrderService;
 import com.brand.backend.application.order.service.OrderNotificationService;
-import com.brand.backend.common.exeption.ResourceNotFoundException;
+import com.brand.backend.common.exception.ResourceNotFoundException;
 import com.brand.backend.domain.order.model.DigitalOrder;
 import com.brand.backend.domain.order.model.DigitalOrderItem;
 import com.brand.backend.domain.order.repository.DigitalOrderItemRepository;

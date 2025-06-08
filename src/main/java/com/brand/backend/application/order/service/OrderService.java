@@ -1,11 +1,17 @@
 package com.brand.backend.application.order.service;
 
+import com.brand.backend.application.order.util.OrderStatusUtil;
 import com.brand.backend.application.promotion.service.PromoCodeService;
 import com.brand.backend.presentation.dto.request.OrderDto;
+import com.brand.backend.presentation.dto.response.DetailedOrderDTO;
+import com.brand.backend.presentation.dto.response.OrderItemDTO;
 import com.brand.backend.presentation.dto.response.OrderResponseDto;
 import com.brand.backend.domain.order.event.OrderEvent;
+import com.brand.backend.domain.order.model.DigitalOrder;
+import com.brand.backend.domain.order.model.DigitalOrderItem;
 import com.brand.backend.domain.order.model.Order;
 import com.brand.backend.domain.order.model.OrderStatus;
+import com.brand.backend.domain.order.repository.DigitalOrderRepository;
 import com.brand.backend.domain.product.model.Product;
 import com.brand.backend.domain.user.model.User;
 import com.brand.backend.domain.order.repository.OrderRepository;
@@ -19,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +36,7 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final DigitalOrderRepository digitalOrderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -211,6 +219,135 @@ public class OrderService {
                 order.getOrderComment(),
                 order.getCreatedAt(),
                 order.getStatus()
+        );
+    }
+
+    /**
+     * Получение активных заказов с детальной информацией
+     */
+    public List<DetailedOrderDTO> getActiveOrdersDetailed(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        
+        List<DetailedOrderDTO> result = new ArrayList<>();
+        
+        // Получаем обычные заказы
+        List<Order> orders = orderRepository.findByUser(user).stream()
+                .filter(order -> OrderStatusUtil.isActiveOrder(order.getStatus()))
+                .toList();
+        
+        for (Order order : orders) {
+            result.add(mapToDetailedDTO(order));
+        }
+        
+        // Получаем цифровые заказы
+        List<DigitalOrder> digitalOrders = digitalOrderRepository.findAllByUserOrderByCreatedAtDesc(user).stream()
+                .filter(order -> !order.isPaid()) // Неоплаченные считаем активными
+                .toList();
+        
+        for (DigitalOrder digitalOrder : digitalOrders) {
+            result.add(mapToDetailedDTO(digitalOrder));
+        }
+        
+        return result;
+    }
+
+    /**
+     * Получение истории заказов с детальной информацией
+     */
+    public List<DetailedOrderDTO> getOrderHistoryDetailed(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        
+        List<DetailedOrderDTO> result = new ArrayList<>();
+        
+        // Получаем обычные заказы
+        List<Order> orders = orderRepository.findByUser(user).stream()
+                .filter(order -> !OrderStatusUtil.isActiveOrder(order.getStatus()))
+                .toList();
+        
+        for (Order order : orders) {
+            result.add(mapToDetailedDTO(order));
+        }
+        
+        // Получаем цифровые заказы
+        List<DigitalOrder> digitalOrders = digitalOrderRepository.findAllByUserOrderByCreatedAtDesc(user).stream()
+                .filter(DigitalOrder::isPaid) // Оплаченные считаем историей
+                .toList();
+        
+        for (DigitalOrder digitalOrder : digitalOrders) {
+            result.add(mapToDetailedDTO(digitalOrder));
+        }
+        
+        return result;
+    }
+
+    /**
+     * Маппинг обычного заказа в DetailedOrderDTO
+     */
+    private DetailedOrderDTO mapToDetailedDTO(Order order) {
+        List<OrderItemDTO> items = new ArrayList<>();
+        
+        // Для обычного заказа создаем один элемент
+        OrderItemDTO item = new OrderItemDTO(
+                order.getProduct().getId(),
+                order.getProduct().getName(),
+                "Одежда",
+                order.getQuantity(),
+                order.getPrice() / order.getQuantity(), // Цена за единицу
+                order.getPrice(),
+                order.getSize(),
+                null // Код активации только для цифровых товаров
+        );
+        items.add(item);
+        
+        return new DetailedOrderDTO(
+                order.getId(),
+                order.getOrderNumber(),
+                items,
+                order.getTrackingNumber(),
+                OrderStatusUtil.getStatusInRussian(order.getStatus()),
+                order.getStatus().name(),
+                order.getPrice(),
+                order.getCreatedAt(),
+                order.getPaymentMethod()
+        );
+    }
+
+    /**
+     * Маппинг цифрового заказа в DetailedOrderDTO
+     */
+    private DetailedOrderDTO mapToDetailedDTO(DigitalOrder digitalOrder) {
+        List<OrderItemDTO> items = new ArrayList<>();
+        
+        // Преобразуем все элементы цифрового заказа
+        for (DigitalOrderItem orderItem : digitalOrder.getItems()) {
+            OrderItemDTO item = new OrderItemDTO(
+                    orderItem.getDigitalProduct().getId(),
+                    orderItem.getDigitalProduct().getName(),
+                    "Цифровой продукт",
+                    orderItem.getQuantity(),
+                    orderItem.getPrice(),
+                    orderItem.getTotalPrice(),
+                    null, // Размер не применим к цифровым товарам
+                    orderItem.getActivationCode()
+            );
+            items.add(item);
+        }
+        
+        String status = digitalOrder.isPaid() ? "Выполнен" : "Ожидает оплаты";
+        String statusCode = digitalOrder.isPaid() ? "COMPLETED" : "NEW";
+        
+        return new DetailedOrderDTO(
+                digitalOrder.getId(),
+                digitalOrder.getOrderNumber(),
+                items,
+                null, // Трек-номер для цифровых товаров не нужен
+                status,
+                statusCode,
+                digitalOrder.getTotalPrice(),
+                digitalOrder.getCreatedAt(),
+                digitalOrder.getPaymentMethod()
         );
     }
 }

@@ -2,6 +2,8 @@ package com.brand.backend.presentation.rest.controller.user;
 
 import com.brand.backend.domain.user.model.User;
 import com.brand.backend.presentation.dto.request.UserDTO;
+import com.brand.backend.presentation.dto.response.SubscriptionInfoDTO;
+import com.brand.backend.presentation.dto.response.UserStatsDTO;
 import com.brand.backend.application.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,26 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(userService.convertToDTO(user));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<UserStatsDTO> getUserStats(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
+        UserStatsDTO stats = userService.getUserStats(user.getId());
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/subscription")
+    public ResponseEntity<SubscriptionInfoDTO> getUserSubscription(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
+        SubscriptionInfoDTO subscription = userService.getUserSubscriptionInfo(user.getId());
+        return ResponseEntity.ok(subscription);
     }
 
     @GetMapping("/is-verified")

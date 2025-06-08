@@ -19,8 +19,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.brand.backend.application.user.service.VerificationService;
 import com.brand.backend.domain.subscription.model.Subscription;
 import com.brand.backend.application.subscription.service.SubscriptionService;
-import com.brand.backend.domain.payment.model.Transaction;
-import com.brand.backend.domain.payment.model.TransactionStatus;
+import com.brand.backend.domain.balance.model.Transaction;
+import com.brand.backend.domain.balance.model.TransactionStatus;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -1448,7 +1448,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
             case COMPLETED:
                 statusEmoji = "✅";
                 break;
-            case REJECTED:
+            case FAILED:
                 statusEmoji = "❌";
                 break;
             case CANCELLED:
@@ -1456,6 +1456,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 break;
             case PENDING:
                 statusEmoji = "⏳";
+                break;
+            case PROCESSING:
+                statusEmoji = "🔄";
                 break;
             default:
                 statusEmoji = "❓";

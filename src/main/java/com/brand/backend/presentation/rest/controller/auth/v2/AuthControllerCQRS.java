@@ -41,12 +41,19 @@ public class AuthControllerCQRS {
         Map<String, String> response = new HashMap<>();
 
         try {
-            User user = authService.registerUser(request.getUsername(), request.getPassword());
+            User user = authService.registerUser(
+                request.getUsername(), 
+                request.getEmail(), 
+                request.getPassword(), 
+                request.getConfirmPassword()
+            );
 
             response.put("message", "User registered successfully");
             response.put("verificationCode", user.getVerificationCode());
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
 
-            log.info("Регистрация успешна для пользователя: {}", request.getUsername());
+            log.info("Регистрация успешна для пользователя: {} с email: {}", request.getUsername(), request.getEmail());
             return ResponseEntity.ok(response);
         } catch (UsernameExistsException e) {
             log.warn("Попытка регистрации уже существующего логина: {}", request.getUsername());
@@ -54,9 +61,23 @@ public class AuthControllerCQRS {
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (RuntimeException e) {
-            log.error("Ошибка во время регистрации: {}", e.getMessage(), e);
-            response.put("error", "Internal Server Error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("Email already exists")) {
+                log.warn("Попытка регистрации уже существующего email: {}", request.getEmail());
+                response.put("error", "Email already exists");
+                response.put("message", "User with this email already exists");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            } else if (errorMessage != null && errorMessage.contains("Passwords do not match")) {
+                log.warn("Попытка регистрации с несовпадающими паролями: {}", request.getUsername());
+                response.put("error", "Passwords do not match");
+                response.put("message", "Password and confirm password do not match");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            } else {
+                log.error("Ошибка во время регистрации: {}", e.getMessage(), e);
+                response.put("error", "Internal Server Error");
+                response.put("message", "An error occurred during registration");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
         }
     }
 

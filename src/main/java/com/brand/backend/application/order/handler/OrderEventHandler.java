@@ -182,9 +182,9 @@ public class OrderEventHandler {
     
     private void sendAdminTelegramMessage(String text) {
         try {
-            for (String chatId : adminTelegramBot.getAllowedAdminIds()) {
+            for (Long chatId : adminTelegramBot.getAllowedAdminIds()) {
                 SendMessage message = new SendMessage();
-                message.setChatId(chatId);
+                message.setChatId(chatId.toString());
                 message.setText(text);
                 adminTelegramBot.execute(message);
                 log.debug("Отправлено сообщение администратору с ID {}", chatId);

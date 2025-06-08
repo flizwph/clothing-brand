@@ -1,11 +1,11 @@
 package com.brand.backend.presentation.rest.controller.admin;
 
-import com.brand.backend.application.payment.service.BalanceService;
-import com.brand.backend.domain.payment.model.Transaction;
-import com.brand.backend.domain.payment.model.TransactionStatus;
-import com.brand.backend.domain.payment.repository.TransactionRepository;
+import com.brand.backend.application.balance.service.BalanceService;
+import com.brand.backend.domain.balance.model.Transaction;
+import com.brand.backend.domain.balance.model.TransactionStatus;
+import com.brand.backend.domain.balance.repository.TransactionRepository;
 import com.brand.backend.domain.user.model.User;
-import com.brand.backend.presentation.dto.response.TransactionDto;
+import com.brand.backend.presentation.dto.response.TransactionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,11 +35,11 @@ public class AdminTransactionController {
      * Получить все ожидающие транзакции
      */
     @GetMapping("/pending")
-    public ResponseEntity<Page<TransactionDto>> getPendingTransactions(Pageable pageable) {
+    public ResponseEntity<Page<TransactionDTO>> getPendingTransactions(Pageable pageable) {
         log.info("Запрос ожидающих транзакций");
         
         Page<Transaction> transactions = transactionRepository.findByStatus(TransactionStatus.PENDING, pageable);
-        Page<TransactionDto> transactionDtos = transactions.map(TransactionDto::fromEntity);
+        Page<TransactionDTO> transactionDtos = transactions.map(TransactionDTO::fromEntity);
         
         return ResponseEntity.ok(transactionDtos);
     }
@@ -48,7 +48,7 @@ public class AdminTransactionController {
      * Подтвердить транзакцию
      */
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<TransactionDto> confirmTransaction(
+    public ResponseEntity<TransactionDTO> confirmTransaction(
             @PathVariable Long id, 
             @AuthenticationPrincipal User admin) {
         
@@ -60,14 +60,14 @@ public class AdminTransactionController {
         Transaction confirmedTransaction = balanceService.confirmDeposit(
                 transaction.getTransactionCode(), admin.getUsername());
         
-        return ResponseEntity.ok(TransactionDto.fromEntity(confirmedTransaction));
+        return ResponseEntity.ok(TransactionDTO.fromEntity(confirmedTransaction));
     }
     
     /**
      * Отклонить транзакцию
      */
     @PostMapping("/{id}/reject")
-    public ResponseEntity<TransactionDto> rejectTransaction(
+    public ResponseEntity<TransactionDTO> rejectTransaction(
             @PathVariable Long id,
             @RequestParam String reason,
             @AuthenticationPrincipal User admin) {
@@ -80,7 +80,7 @@ public class AdminTransactionController {
         Transaction rejectedTransaction = balanceService.rejectDeposit(
                 transaction.getTransactionCode(), reason, admin.getUsername());
         
-        return ResponseEntity.ok(TransactionDto.fromEntity(rejectedTransaction));
+        return ResponseEntity.ok(TransactionDTO.fromEntity(rejectedTransaction));
     }
     
     /**
@@ -94,7 +94,7 @@ public class AdminTransactionController {
                 .orElseThrow(() -> new IllegalArgumentException("Транзакция не найдена"));
         
         Map<String, Object> response = new HashMap<>();
-        response.put("transaction", TransactionDto.fromEntity(transaction));
+        response.put("transaction", TransactionDTO.fromEntity(transaction));
         response.put("user", Map.of(
                 "id", transaction.getUser().getId(),
                 "username", transaction.getUser().getUsername(),

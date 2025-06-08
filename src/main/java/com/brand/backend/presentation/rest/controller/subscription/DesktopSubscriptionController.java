@@ -1,7 +1,7 @@
 package com.brand.backend.presentation.rest.controller.subscription;
 
 import com.brand.backend.application.subscription.service.SubscriptionService;
-import com.brand.backend.common.exeption.ActivationCodeNotFoundException;
+import com.brand.backend.common.exception.ActivationCodeNotFoundException;
 import com.brand.backend.domain.subscription.model.Subscription;
 import com.brand.backend.domain.subscription.model.SubscriptionLevel;
 import com.brand.backend.domain.subscription.model.SubscriptionStatus;

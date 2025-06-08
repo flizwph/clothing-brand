@@ -34,6 +34,7 @@ public class UserEvent extends ApplicationEvent {
         VERIFIED,             // Верификация пользователя
         LINKED_TELEGRAM,      // Привязка Telegram аккаунта
         LINKED_DISCORD,       // Привязка Discord аккаунта
+        LINKED_VK,            // Привязка VK аккаунта
         UNLINKED_DISCORD,     // Отвязка Discord аккаунта
         LOGGED_IN,            // Вход в систему
         PASSWORD_RESET,       // Сброс пароля

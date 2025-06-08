@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -31,4 +32,16 @@ public class UserDTO {
     private boolean linkedVkontakte;
     private String email;
     private String phoneNumber;
+    
+    // Новые поля для профиля
+    private BigDecimal liviumBalance;
+    private String discordAvatarUrl;
+    private String telegramAvatarUrl;
+    private String vkAvatarUrl;
+    private Long vkId;
+
+    // Статусы привязки интеграций
+    private boolean discordLinked;
+    private boolean telegramLinked;
+    private boolean vkLinked;
 }

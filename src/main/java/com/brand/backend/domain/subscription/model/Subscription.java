@@ -49,4 +49,7 @@ public class Subscription {
 
     @Column(name = "last_check_date")
     private LocalDateTime lastCheckDate;
+
+    @Column(name = "auto_renewal", nullable = false)
+    private boolean autoRenewal = false;
 } 

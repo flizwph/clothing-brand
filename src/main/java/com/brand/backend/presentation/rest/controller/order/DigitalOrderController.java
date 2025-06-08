@@ -1,7 +1,7 @@
 package com.brand.backend.presentation.rest.controller.order;
 
 import com.brand.backend.application.order.service.DigitalOrderService;
-import com.brand.backend.common.exeption.ResourceNotFoundException;
+import com.brand.backend.common.exception.ResourceNotFoundException;
 import com.brand.backend.domain.user.model.User;
 import com.brand.backend.presentation.dto.request.DigitalOrderDto;
 import com.brand.backend.presentation.dto.response.DigitalOrderItemResponseDto;

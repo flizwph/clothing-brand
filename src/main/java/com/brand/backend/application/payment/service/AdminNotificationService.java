@@ -1,9 +1,8 @@
 package com.brand.backend.application.payment.service;
 
-import com.brand.backend.domain.payment.model.Transaction;
+import com.brand.backend.domain.balance.model.Transaction;
 import com.brand.backend.infrastructure.config.PaymentProperties;
 import com.brand.backend.infrastructure.integration.telegram.admin.AdminTelegramBot;
-import com.brand.backend.infrastructure.integration.telegram.admin.keyboards.AdminKeyboards;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -48,9 +47,9 @@ public class AdminNotificationService {
             AdminTelegramBot adminTelegramBot = applicationContext.getBean(AdminTelegramBot.class);
             
             // Получаем список разрешенных админских чатов из Telegram-бота
-            Set<String> adminIds = adminTelegramBot.getAllowedAdminIds();
-            for (String chatId : adminIds) {
-                sendMessageWithKeyboard(adminTelegramBot, chatId, message, keyboard);
+            List<Long> adminIds = adminTelegramBot.getAllowedAdminIds();
+            for (Long chatId : adminIds) {
+                sendMessageWithKeyboard(adminTelegramBot, chatId.toString(), message, keyboard);
             }
         } catch (Exception e) {
             log.error("Ошибка при отправке уведомления админам: {}", e.getMessage(), e);

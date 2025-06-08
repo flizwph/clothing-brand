@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: ru.escapismart.Main
-Created-By: VK Escapism Bot
-Build-Jdk: 11
-Class-Path: . 

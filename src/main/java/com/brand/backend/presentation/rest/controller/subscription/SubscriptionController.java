@@ -1,73 +1,123 @@
 package com.brand.backend.presentation.rest.controller.subscription;
 
 import com.brand.backend.application.subscription.service.SubscriptionService;
-import com.brand.backend.domain.subscription.model.PurchasePlatform;
-import com.brand.backend.domain.subscription.model.Subscription;
-import com.brand.backend.domain.subscription.model.SubscriptionLevel;
-import com.brand.backend.presentation.dto.request.subscription.ActivateSubscriptionRequest;
-import com.brand.backend.presentation.dto.request.subscription.CreateSubscriptionRequest;
-import com.brand.backend.presentation.dto.response.subscription.SubscriptionResponse;
-import com.brand.backend.presentation.dto.response.ApiResponse;
+import com.brand.backend.domain.user.model.User;
+import com.brand.backend.presentation.dto.response.SubscriptionInfoDTO;
+import com.brand.backend.presentation.dto.response.SubscriptionPlanDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
+@Tag(name = "Подписки", description = "API для управления подписками")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<SubscriptionResponse>> createSubscription(@RequestBody CreateSubscriptionRequest request) {
-        Subscription subscription = subscriptionService.createSubscription(
-                request.getUserId(),
-                request.getLevel(),
-                request.getDurationInDays(),
-                request.getPlatform()
-        );
+    @Operation(summary = "Получение текущей подписки", description = "Возвращает информацию о текущей подписке пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Информация о подписке получена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @GetMapping("/current")
+    public ResponseEntity<SubscriptionInfoDTO> getCurrentSubscription(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
         
-        return ResponseEntity.ok(new ApiResponse<>(mapToResponse(subscription)));
+        SubscriptionInfoDTO subscription = subscriptionService.getDetailedSubscriptionInfo(user.getId());
+        return ResponseEntity.ok(subscription);
     }
 
-    @PostMapping("/activate")
-    public ResponseEntity<ApiResponse<SubscriptionResponse>> activateSubscription(@RequestBody ActivateSubscriptionRequest request) {
-        Subscription subscription = subscriptionService.activateSubscription(request.getActivationCode());
-        return ResponseEntity.ok(new ApiResponse<>(mapToResponse(subscription)));
+    @Operation(summary = "Получение всех тарифных планов", description = "Возвращает список всех доступных тарифных планов")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Тарифные планы получены")
+    })
+    @GetMapping("/plans")
+    public ResponseEntity<List<SubscriptionPlanDTO>> getSubscriptionPlans() {
+        List<SubscriptionPlanDTO> plans = subscriptionService.getAllActivePlans();
+        return ResponseEntity.ok(plans);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<ApiResponse<List<SubscriptionResponse>>> getUserSubscriptions(@PathVariable Long userId) {
-        List<Subscription> subscriptions = subscriptionService.getUserActiveSubscriptions(userId);
-        List<SubscriptionResponse> responses = subscriptions.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    @Operation(summary = "Продление подписки", description = "Продлевает текущую подписку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Подписка продлена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "404", description = "Подписка не найдена")
+    })
+    @PostMapping("/renew")
+    public ResponseEntity<Map<String, Object>> renewSubscription(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
         
-        return ResponseEntity.ok(new ApiResponse<>(responses));
+        Map<String, Object> result = subscriptionService.renewSubscription(user.getId());
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/check/{userId}/{level}")
-    public ResponseEntity<ApiResponse<Boolean>> checkSubscription(
-            @PathVariable Long userId,
-            @PathVariable SubscriptionLevel level) {
-        boolean isActive = subscriptionService.isSubscriptionActive(userId, level);
-        return ResponseEntity.ok(new ApiResponse<>(isActive));
+    @Operation(summary = "Смена тарифного плана", description = "Изменяет тарифный план подписки")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "План изменен"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "404", description = "План не найден")
+    })
+    @PostMapping("/change-plan")
+    public ResponseEntity<Map<String, Object>> changeSubscriptionPlan(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Новый уровень подписки") @RequestParam String level
+    ) {
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Map<String, Object> result = subscriptionService.changeSubscriptionPlan(user.getId(), level);
+        return ResponseEntity.ok(result);
     }
 
-    private SubscriptionResponse mapToResponse(Subscription subscription) {
-        return SubscriptionResponse.builder()
-                .id(subscription.getId())
-                .userId(subscription.getUser().getId())
-                .activationCode(subscription.getActivationCode())
-                .subscriptionLevel(subscription.getSubscriptionLevel())
-                .startDate(subscription.getStartDate())
-                .endDate(subscription.getEndDate())
-                .isActive(subscription.isActive())
-                .purchasePlatform(subscription.getPurchasePlatform())
-                .build();
+    @Operation(summary = "Управление автопродлением", description = "Включает/выключает автопродление подписки")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Автопродление обновлено"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @PostMapping("/auto-renewal")
+    public ResponseEntity<Map<String, Object>> toggleAutoRenewal(
+            @AuthenticationPrincipal User user,
+            @Parameter(description = "Включить/выключить автопродление") @RequestParam boolean enabled
+    ) {
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Map<String, Object> result = subscriptionService.toggleAutoRenewal(user.getId(), enabled);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Отмена подписки", description = "Отменяет текущую подписку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Подписка отменена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @PostMapping("/cancel")
+    public ResponseEntity<Map<String, Object>> cancelSubscription(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Map<String, Object> result = subscriptionService.cancelSubscription(user.getId());
+        return ResponseEntity.ok(result);
     }
 } 
