@@ -33,8 +33,13 @@ public class InitiatePasswordResetCommandHandler implements CommandHandler<Initi
     public String handle(InitiatePasswordResetCommand command) {
         log.info("Обработка команды инициации восстановления пароля для пользователя: {}", command.getUsername());
         
-        // Проверка существования пользователя
-        Optional<User> userOptional = userRepository.findByUsername(command.getUsername());
+        // Проверка существования пользователя - сначала по email, затем по username
+        Optional<User> userOptional = userRepository.findByEmail(command.getUsername());
+        if (userOptional.isEmpty()) {
+            // Если не найден по email, пробуем найти по username
+            userOptional = userRepository.findByUsername(command.getUsername());
+        }
+        
         if (userOptional.isEmpty()) {
             log.warn("Попытка восстановления пароля для несуществующего пользователя: {}", command.getUsername());
             throw PasswordResetException.userNotFound(command.getUsername());

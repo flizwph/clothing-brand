@@ -8,9 +8,8 @@ import com.brand.backend.domain.nft.model.NFT;
 import com.brand.backend.domain.order.model.Order;
 import com.brand.backend.domain.order.model.OrderStatus;
 import com.brand.backend.application.nft.service.NFTService;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,17 +18,26 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * Обработчик событий, связанных с заказами
+ * Работает без очередей с опциональными Telegram ботами
  */
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class OrderEventHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OrderEventHandler.class);
-
-    private final TelegramBotService telegramBotService;
-    private final AdminTelegramBot adminTelegramBot;
     private final NFTService nftService;
     private final OrderNotificationService orderNotificationService;
+    
+    // Опциональные зависимости для Telegram ботов
+    @Autowired(required = false)
+    private TelegramBotService telegramBotService;
+    
+    @Autowired(required = false)
+    private AdminTelegramBot adminTelegramBot;
+    
+    public OrderEventHandler(NFTService nftService, OrderNotificationService orderNotificationService) {
+        this.nftService = nftService;
+        this.orderNotificationService = orderNotificationService;
+    }
 
     @Async("eventExecutor")
     @EventListener
@@ -170,27 +178,35 @@ public class OrderEventHandler {
     }
     
     private void sendTelegramMessage(String chatId, String text) {
-        try {
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText(text);
-            telegramBotService.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Ошибка отправки сообщения в Telegram: {}", e.getMessage());
+        if (telegramBotService != null) {
+            try {
+                SendMessage message = new SendMessage();
+                message.setChatId(chatId);
+                message.setText(text);
+                telegramBotService.execute(message);
+            } catch (TelegramApiException e) {
+                log.error("Ошибка отправки сообщения в Telegram: {}", e.getMessage());
+            }
+        } else {
+            log.debug("Telegram бот отключен, сообщение не отправлено: {}", text);
         }
     }
     
     private void sendAdminTelegramMessage(String text) {
-        try {
-            for (Long chatId : adminTelegramBot.getAllowedAdminIds()) {
-                SendMessage message = new SendMessage();
-                message.setChatId(chatId.toString());
-                message.setText(text);
-                adminTelegramBot.execute(message);
-                log.debug("Отправлено сообщение администратору с ID {}", chatId);
+        if (adminTelegramBot != null) {
+            try {
+                for (Long chatId : adminTelegramBot.getAllowedAdminIds()) {
+                    SendMessage message = new SendMessage();
+                    message.setChatId(chatId.toString());
+                    message.setText(text);
+                    adminTelegramBot.execute(message);
+                    log.debug("Отправлено сообщение администратору с ID {}", chatId);
+                }
+            } catch (TelegramApiException e) {
+                log.error("Ошибка отправки сообщения администратору: {}", e.getMessage());
             }
-        } catch (TelegramApiException e) {
-            log.error("Ошибка отправки сообщения администратору: {}", e.getMessage());
+        } else {
+            log.debug("Админский Telegram бот отключен, сообщение не отправлено: {}", text);
         }
     }
 }

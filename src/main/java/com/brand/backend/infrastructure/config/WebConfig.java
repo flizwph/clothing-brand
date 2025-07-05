@@ -9,21 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                    // Продакшен домены
-                    "https://escap1sm.com",
-                    "http://escap1sm.com",
-                    // React development server (по умолчанию порт 3000)
-                    "http://localhost:3000",
-                    "https://localhost:3000",
-                    // Дополнительные порты для React (если нужно)
-                    "http://localhost:3001",
-                    "http://localhost:3002",
-                    // Existing развивающиеся серверы
-                    "https://127.0.0.1:5500",
-                    "http://127.0.0.1:5501",
-                    "http://127.0.0.1:5502"
-                )
+                .allowedOriginPatterns("*") // Разрешаем все источники
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true)

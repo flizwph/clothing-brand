@@ -2,6 +2,10 @@ package com.brand.backend.infrastructure.security.jwt;
 
 import com.brand.backend.domain.user.model.User;
 import com.brand.backend.domain.user.repository.UserRepository;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,10 +42,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         log.debug("TokenAuthenticationFilter обрабатывает запрос к: {}", path);
         
-        try {
             String jwt = getJwtFromRequest(request);
             
             if (jwt != null) {
+            try {
                 log.debug("Найден JWT токен в запросе");
                 String username = jwtUtil.extractUsername(jwt);
                 log.debug("Извлечено имя пользователя из токена: {}", username);
@@ -79,11 +83,27 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                         log.warn("Токен не прошел валидацию для пользователя: {}", username);
                     }
                 }
-            } else {
-                log.debug("JWT токен не найден в запросе");
+            } catch (ExpiredJwtException e) {
+                log.debug("JWT токен истек для запроса к {}: {}", path, e.getMessage());
+                // Просто продолжаем без аутентификации - это нормальная ситуация
+            } catch (MalformedJwtException e) {
+                log.debug("Неверный формат JWT токена для запроса к {}: {}", path, e.getMessage());
+                // Просто продолжаем без аутентификации - это может быть некорректный токен от клиента
+            } catch (UnsupportedJwtException e) {
+                log.debug("Неподдерживаемый JWT токен для запроса к {}: {}", path, e.getMessage());
+                // Просто продолжаем без аутентификации
+            } catch (SignatureException e) {
+                log.debug("Неверная подпись JWT токена для запроса к {}: {}", path, e.getMessage());
+                // Просто продолжаем без аутентификации - возможно попытка подделки
+            } catch (IllegalArgumentException e) {
+                log.debug("Пустой или некорректный JWT токен для запроса к {}: {}", path, e.getMessage());
+                // Просто продолжаем без аутентификации
+            } catch (Exception e) {
+                log.error("Неожиданная ошибка при обработке JWT токена для запроса к {}: {}", path, e.getMessage(), e);
+                // Продолжаем без аутентификации, но логируем серьезную ошибку
             }
-        } catch (Exception e) {
-            log.error("Не удалось установить аутентификацию пользователя: {}", e.getMessage(), e);
+        } else {
+            log.debug("JWT токен не найден в запросе");
         }
         
         log.debug("Продолжаем обработку запроса к: {}", path);

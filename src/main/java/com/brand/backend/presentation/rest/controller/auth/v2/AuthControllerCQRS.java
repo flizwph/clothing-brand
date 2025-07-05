@@ -20,9 +20,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.brand.backend.application.user.service.VerificationService;
+import java.util.Optional;
 
 /**
  * Контроллер для аутентификации с использованием CQRS
@@ -34,51 +38,27 @@ import java.util.Map;
 public class AuthControllerCQRS {
 
     private final AuthServiceCQRS authService;
+    private final VerificationService verificationService;
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody @Valid UserRegistrationRequest request) {
         log.info("Получен запрос на регистрацию: {}", request.getUsername());
+        
+        User user = authService.registerUser(
+            request.getUsername(), 
+            request.getEmail(), 
+            request.getPassword(), 
+            request.getConfirmPassword()
+        );
+
         Map<String, String> response = new HashMap<>();
+        response.put("message", "Пользователь успешно зарегистрирован");
+        response.put("verificationCode", user.getVerificationCode());
+        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
 
-        try {
-            User user = authService.registerUser(
-                request.getUsername(), 
-                request.getEmail(), 
-                request.getPassword(), 
-                request.getConfirmPassword()
-            );
-
-            response.put("message", "User registered successfully");
-            response.put("verificationCode", user.getVerificationCode());
-            response.put("username", user.getUsername());
-            response.put("email", user.getEmail());
-
-            log.info("Регистрация успешна для пользователя: {} с email: {}", request.getUsername(), request.getEmail());
-            return ResponseEntity.ok(response);
-        } catch (UsernameExistsException e) {
-            log.warn("Попытка регистрации уже существующего логина: {}", request.getUsername());
-            response.put("error", "Username already exists");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } catch (RuntimeException e) {
-            String errorMessage = e.getMessage();
-            if (errorMessage != null && errorMessage.contains("Email already exists")) {
-                log.warn("Попытка регистрации уже существующего email: {}", request.getEmail());
-                response.put("error", "Email already exists");
-                response.put("message", "User with this email already exists");
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-            } else if (errorMessage != null && errorMessage.contains("Passwords do not match")) {
-                log.warn("Попытка регистрации с несовпадающими паролями: {}", request.getUsername());
-                response.put("error", "Passwords do not match");
-                response.put("message", "Password and confirm password do not match");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            } else {
-                log.error("Ошибка во время регистрации: {}", e.getMessage(), e);
-                response.put("error", "Internal Server Error");
-                response.put("message", "An error occurred during registration");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-        }
+        log.info("Регистрация успешна для пользователя: {} с email: {}", request.getUsername(), request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
@@ -244,6 +224,184 @@ public class AuthControllerCQRS {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", "An error occurred while changing password");
             
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Генерирует новый код верификации для Telegram
+     */
+    @PostMapping("/generate-telegram-code")
+    public ResponseEntity<Map<String, String>> generateTelegramCode(@RequestBody Map<String, String> request) {
+        try {
+            String username = request.get("username");
+            
+            if (username == null || username.isBlank()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("success", "false");
+                errorResponse.put("message", "Username is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            log.info("🔄 [GENERATE TELEGRAM CODE] Генерация нового кода верификации для: {}", username);
+            
+            String verificationCode = verificationService.generateAndSaveVerificationCode(username);
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "true");
+            response.put("message", "Новый код верификации сгенерирован");
+            response.put("verificationCode", verificationCode);
+            response.put("username", username);
+            
+            log.info("✅ [GENERATE TELEGRAM CODE] Код верификации сгенерирован для: {}", username);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.warn("❌ [GENERATE TELEGRAM CODE] Пользователь не найден: {}", e.getMessage());
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            log.error("🔥 [GENERATE TELEGRAM CODE ERROR] Ошибка генерации кода: {}", e.getMessage(), e);
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("success", "false");
+            errorResponse.put("message", "An error occurred during code generation");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Обработка OPTIONS запроса для CORS preflight
+     */
+    @RequestMapping(value = "/login-verified", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> loginVerifiedOptions() {
+        log.info("🔧 [OPTIONS] Получен OPTIONS запрос на login-verified");
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Проверяет статус верификации пользователя (только проверка, без автологина)
+     */
+    @GetMapping("/verification-status")
+    public ResponseEntity<Map<String, Object>> getVerificationStatus(@RequestParam("code") String verificationCode) {
+        try {
+            log.info("🔍 [VERIFICATION STATUS] Проверка статуса верификации по коду: {}", verificationCode);
+            
+            if (verificationCode == null || verificationCode.isBlank()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "Verification code is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            // Поиск пользователя по коду
+            Optional<User> userOptional = authService.findUserByVerificationCode(verificationCode);
+            
+            Map<String, Object> response = new HashMap<>();
+            
+            if (userOptional.isEmpty()) {
+                log.warn("❌ [VERIFICATION STATUS] Пользователь с кодом {} не найден", verificationCode);
+                response.put("success", false);
+                response.put("found", false);
+                response.put("message", "Неверный код верификации");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            
+            User user = userOptional.get();
+            
+            response.put("success", true);
+            response.put("found", true);
+            response.put("verified", user.isVerified());
+            response.put("username", user.getUsername());
+            
+            if (user.isVerified()) {
+                response.put("message", "Пользователь верифицирован и готов к автологину");
+                response.put("canLogin", true);
+            } else {
+                response.put("message", "Пользователь найден, но еще не верифицирован в Telegram");
+                response.put("canLogin", false);
+            }
+            
+            log.info("✅ [VERIFICATION STATUS] Статус для {}: verified={}", user.getUsername(), user.isVerified());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("🔥 [VERIFICATION STATUS ERROR] Ошибка при проверке статуса: {}", e.getMessage(), e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "An error occurred during status check");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * DEPRECATED: Используйте /verification-status (GET) + /login-verified (POST)
+     * Оставлен для обратной совместимости
+     */
+    @PostMapping("/check-verification")
+    public ResponseEntity<Map<String, Object>> checkVerificationDeprecated(@RequestBody Map<String, String> request) {
+        log.warn("⚠️ [DEPRECATED] Использован устаревший эндпоинт /check-verification. Используйте /verification-status + /login-verified");
+        return loginVerified(request);
+    }
+
+    /**
+     * Выполняет автологин для верифицированного пользователя по коду верификации
+     */
+    @PostMapping("/login-verified")
+    public ResponseEntity<Map<String, Object>> loginVerified(@RequestBody Map<String, String> request) {
+        try {
+            String verificationCode = request.get("verificationCode");
+            
+            if (verificationCode == null || verificationCode.isBlank()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "Verification code is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            log.info("🔍 [CHECK VERIFICATION] Проверка верификации по коду: {}", verificationCode);
+            
+            LoginCommandResult result = authService.checkVerificationAndLogin(verificationCode);
+            Map<String, Object> response = new HashMap<>();
+            
+            if (!result.isSuccess()) {
+                log.warn("❌ [CHECK VERIFICATION] Неверный код верификации: {}", verificationCode);
+                response.put("success", false);
+                response.put("message", result.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+            
+            if (result.isNeedsVerification()) {
+                // Пользователь найден, но еще не верифицирован
+                log.info("⏳ [CHECK VERIFICATION] Пользователь найден но не верифицирован: код {}", verificationCode);
+                response.put("success", true);
+                response.put("verified", false);
+                response.put("message", result.getMessage());
+                response.put("verificationCode", result.getVerificationCode());
+                return ResponseEntity.ok(response);
+            } else {
+                // Пользователь верифицирован - возвращаем токены
+                log.info("✅ [CHECK VERIFICATION] Пользователь верифицирован, выдаем токены: {}", result.getUser().getUsername());
+                response.put("success", true);
+                response.put("verified", true);
+                response.put("message", result.getMessage());
+                response.put("accessToken", result.getAccessToken());
+                response.put("refreshToken", result.getRefreshToken());
+                response.put("username", result.getUser().getUsername());
+                
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + result.getAccessToken())
+                        .body(response);
+            }
+        } catch (Exception e) {
+            log.error("🔥 [CHECK VERIFICATION ERROR] Ошибка при проверке верификации: {}", e.getMessage(), e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "An error occurred during verification check");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

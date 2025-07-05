@@ -145,12 +145,12 @@ public class CallbackHandler {
     
     private void handleDesktopPlanCallback(String callbackData, String chatId, TelegramBotService bot) {
         // Обработка callback'ов для desktop приложения
-        if (callbackData.equals("desktop_basic")) {
-            bot.showDesktopPlan(chatId, "basic");
-        } else if (callbackData.equals("desktop_standard")) {
+        if (callbackData.equals("desktop_standard")) {
             bot.showDesktopPlan(chatId, "standard");
         } else if (callbackData.equals("desktop_premium")) {
             bot.showDesktopPlan(chatId, "premium");
+        } else if (callbackData.equals("desktop_deluxe")) {
+            bot.showDesktopPlan(chatId, "deluxe");
         } else if (callbackData.startsWith("desktop_buy_")) {
             // Обработка покупки подписки: desktop_buy_plan_duration
             String[] parts = callbackData.split("_");
@@ -167,16 +167,16 @@ public class CallbackHandler {
         int pricePerMonth;
         
         switch (plan) {
-            case "basic":
-                planName = "Базовый";
-                pricePerMonth = 99;
-                break;
             case "standard":
-                planName = "Стандарт";
-                pricePerMonth = 199;
+                planName = "Стандартный";
+                pricePerMonth = 99;
                 break;
             case "premium":
                 planName = "Премиум";
+                pricePerMonth = 199;
+                break;
+            case "deluxe":
+                planName = "Делюкс";
                 pricePerMonth = 299;
                 break;
             default:

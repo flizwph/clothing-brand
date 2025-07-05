@@ -76,7 +76,7 @@ public class VerificationService {
      * @return пользователь, если код верен, или null
      */
     @Transactional
-    @CacheEvict(value = "userAuthCache", key = "#result.username")
+    @CacheEvict(value = "userAuthCache", key = "#result != null ? #result.username : 'unknown'")
     public User verifyCode(String code) {
         Optional<User> userOptional = userRepository.findByVerificationCode(code);
         if (userOptional.isEmpty()) {
@@ -95,6 +95,37 @@ public class VerificationService {
         return user;
     }
     
+    /**
+     * Генерирует код верификации для Discord
+     *
+     * @param username имя пользователя
+     * @param discordId ID Discord (опционально)
+     * @return сгенерированный код верификации
+     */
+    @Transactional
+    public String generateDiscordVerificationCode(String username, String discordId) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            log.error("Пользователь не найден: {}", username);
+            throw new IllegalArgumentException("Пользователь не найден");
+        }
+
+        User user = userOptional.get();
+        String code = generateVerificationCode();
+        user.setDiscordVerificationCode(code);
+        if (discordId != null && !discordId.isEmpty()) {
+            try {
+                user.setDiscordId(Long.parseLong(discordId));
+            } catch (NumberFormatException e) {
+                log.warn("Неверный формат Discord ID: {}", discordId);
+            }
+        }
+        userRepository.save(user);
+        
+        log.info("Сгенерирован Discord код верификации для пользователя {}: {}", username, code);
+        return code;
+    }
+
     /**
      * Генерирует случайный код верификации
      *

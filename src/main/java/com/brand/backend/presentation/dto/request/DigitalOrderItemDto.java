@@ -22,4 +22,9 @@ public class DigitalOrderItemDto {
     @NotNull(message = "Укажите количество")
     @Min(value = 1, message = "Количество не может быть меньше 1")
     private Integer quantity;
+    
+    /**
+     * Тип лицензии для цифрового продукта
+     */
+    private String licenseType;
 } 

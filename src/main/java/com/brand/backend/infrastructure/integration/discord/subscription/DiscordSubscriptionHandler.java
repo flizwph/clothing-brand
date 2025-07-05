@@ -149,9 +149,9 @@ public class DiscordSubscriptionHandler {
      */
     private String getSubscriptionLevelName(SubscriptionLevel level) {
         return switch (level) {
-            case BASIC -> "Базовый";
             case STANDARD -> "Стандартный";
             case PREMIUM -> "Премиум";
+            case DELUXE -> "Делюкс";
         };
     }
     
@@ -162,9 +162,9 @@ public class DiscordSubscriptionHandler {
      */
     private int getDurationForLevel(SubscriptionLevel level) {
         return switch (level) {
-            case BASIC -> 30;    // 1 месяц
-            case STANDARD -> 90; // 3 месяца
-            case PREMIUM -> 365; // 1 год
+            case STANDARD -> 30;  // 1 месяц
+            case PREMIUM -> 90;   // 3 месяца
+            case DELUXE -> 365;   // 1 год
         };
     }
 } 

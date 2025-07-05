@@ -17,6 +17,9 @@ public class Product {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", length = 2000)
+    private String description;
+
     @Column(name = "price", nullable = false)
     private double price;
 
@@ -37,6 +40,9 @@ public class Product {
     @Column(name = "available_quantity_l", nullable = false)
     private int availableQuantityL;
 
+    @Column(name = "total_quantity")
+    private Integer totalQuantity;
+
     public static Product createProduct(String name, double price, int quantityS, int quantityM, int quantityL) {
         Product product = new Product();
         product.setName(name);
@@ -45,6 +51,7 @@ public class Product {
         product.setAvailableQuantityS(quantityS);
         product.setAvailableQuantityM(quantityM);
         product.setAvailableQuantityL(quantityL);
+        product.setTotalQuantity(quantityS + quantityM + quantityL);
         return product;
     }
 
@@ -52,5 +59,24 @@ public class Product {
         Product product = createProduct(name, price, quantityS, quantityM, quantityL);
         product.setImageUrl(imageUrl);
         return product;
+    }
+
+    // Методы для работы с общим количеством
+    public int getTotalQuantity() {
+        if (totalQuantity == null) {
+            return this.availableQuantityS + this.availableQuantityM + this.availableQuantityL;
+        }
+        return totalQuantity;
+    }
+    
+    public void updateTotalQuantity() {
+        this.totalQuantity = this.availableQuantityS + this.availableQuantityM + this.availableQuantityL;
+    }
+
+    public void setQuantities(int quantityS, int quantityM, int quantityL) {
+        this.availableQuantityS = quantityS;
+        this.availableQuantityM = quantityM;
+        this.availableQuantityL = quantityL;
+        updateTotalQuantity();
     }
 }

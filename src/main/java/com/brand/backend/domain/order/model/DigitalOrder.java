@@ -52,7 +52,17 @@ public class DigitalOrder {
     private LocalDateTime paymentDate;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<DigitalOrderItem> items = new ArrayList<>();
+    
+    /**
+     * Инициализация списка элементов если он null
+     */
+    private void ensureItemsInitialized() {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+    }
     
     /**
      * Добавить позицию в заказ
@@ -60,6 +70,7 @@ public class DigitalOrder {
      * @param item позиция для добавления
      */
     public void addItem(DigitalOrderItem item) {
+        ensureItemsInitialized();
         items.add(item);
         item.setOrder(this);
     }
@@ -70,14 +81,24 @@ public class DigitalOrder {
      * @param item позиция для удаления
      */
     public void removeItem(DigitalOrderItem item) {
+        ensureItemsInitialized();
         items.remove(item);
         item.setOrder(null);
+    }
+    
+    /**
+     * Получить список элементов заказа (с защитой от null)
+     */
+    public List<DigitalOrderItem> getItems() {
+        ensureItemsInitialized();
+        return this.items;
     }
     
     /**
      * Вычислить общую стоимость заказа
      */
     public void calculateTotalPrice() {
+        ensureItemsInitialized();
         this.totalPrice = items.stream()
                 .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
@@ -90,6 +111,7 @@ public class DigitalOrder {
      * @return true, если заказ содержит продукт
      */
     public boolean containsProduct(Long productId) {
+        ensureItemsInitialized();
         return items.stream()
                 .anyMatch(item -> item.getDigitalProduct().getId().equals(productId));
     }
@@ -100,6 +122,7 @@ public class DigitalOrder {
         if (this.orderNumber == null) {
             this.orderNumber = generateOrderNumber();
         }
+        ensureItemsInitialized();
     }
     
     /**

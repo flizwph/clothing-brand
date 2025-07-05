@@ -3,9 +3,8 @@ package com.brand.backend.application.user.handler;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.domain.user.event.UserEvent;
 import com.brand.backend.domain.user.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -14,14 +13,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * Обработчик событий, связанных с пользователями
+ * Работает без очередей с опциональным Telegram ботом
  */
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class UserEventHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(UserEventHandler.class);
-
-    private final TelegramBotService telegramBotService;
+    // Опциональная зависимость для Telegram бота
+    @Autowired(required = false)
+    private TelegramBotService telegramBotService;
 
     @Async("eventExecutor")
     @EventListener
@@ -71,7 +71,7 @@ public class UserEventHandler {
     }
     
     private void notifyUserTelegramLinked(User user) {
-        if (user.getTelegramId() != null) {
+        if (user.getTelegramId() != null && telegramBotService != null) {
             String message = "🔗 Ваш аккаунт успешно привязан к Telegram!\n" +
                     "Теперь вы можете делать покупки и получать уведомления о заказах через бота.";
             
@@ -85,6 +85,8 @@ public class UserEventHandler {
             } catch (TelegramApiException e) {
                 log.error("Ошибка отправки уведомления о привязке Telegram: {}", e.getMessage());
             }
+        } else if (telegramBotService == null) {
+            log.debug("Telegram бот отключен, уведомление не отправлено для пользователя: {}", user.getUsername());
         }
     }
     

@@ -3,6 +3,7 @@ package com.brand.backend.application.order.service;
 import com.brand.backend.application.order.util.OrderStatusUtil;
 import com.brand.backend.application.promotion.service.PromoCodeService;
 import com.brand.backend.presentation.dto.request.OrderDto;
+import com.brand.backend.presentation.dto.request.UpdateOrderDto;
 import com.brand.backend.presentation.dto.response.DetailedOrderDTO;
 import com.brand.backend.presentation.dto.response.OrderItemDTO;
 import com.brand.backend.presentation.dto.response.OrderResponseDto;
@@ -25,10 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -57,10 +60,19 @@ public class OrderService {
         }
 
         Product product = productRepository.findById(orderDto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Товар не найден"));
+                .orElseThrow(() -> {
+                    log.error("Товар с ID {} не найден при создании заказа пользователем {}", 
+                            orderDto.getProductId(), username);
+                    return new RuntimeException("Товар не найден. ID товара: " + orderDto.getProductId());
+                });
 
         if(!isProductSizeAvailable(product, orderDto.getSize())) {
-            throw new RuntimeException("Товар данного размера не доступен");
+            log.warn("Товар {} размера {} недоступен. Доступные размеры: S={}, M={}, L={}", 
+                    product.getName(), orderDto.getSize(),
+                    product.getAvailableQuantityS(), 
+                    product.getAvailableQuantityM(), 
+                    product.getAvailableQuantityL());
+            throw new RuntimeException("Товар данного размера не доступен. Размер: " + orderDto.getSize());
         }
 
         String orderNumber = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
@@ -143,12 +155,114 @@ public class OrderService {
             throw new RuntimeException("Вы не можете отменить этот заказ");
         }
 
-        orderRepository.delete(order);
+        // Проверяем 24-часовое ограничение
+        if (!canModifyOrder(order)) {
+            throw new RuntimeException("Срок редактирования заказа истек (доступно только в течение 24 часов)");
+        }
+        
+        // Проверяем, что заказ еще можно отменить
+        if (order.getStatus() == OrderStatus.COMPLETED || order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Нельзя отменить заказ со статусом: " + order.getStatus());
+        }
+
+        // Меняем статус на CANCELLED вместо удаления
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+        
+        // Возвращаем товар на склад
+        restoreProductQuantity(order.getProduct(), order.getSize(), order.getQuantity());
         
         // Публикуем событие отмены заказа
         eventPublisher.publishEvent(new OrderEvent(this, order, OrderEvent.OrderEventType.CANCELED));
         
         log.info("🗑 [ORDER CANCELED] Заказ {} отменен пользователем {}", order.getOrderNumber(), username);
+    }
+    
+    /**
+     * Обновить данные заказа (только в течение 24 часов)
+     */
+    @Transactional
+    public OrderResponseDto updateOrder(Long orderId, String username, UpdateOrderDto updateDto) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Вы не можете редактировать этот заказ");
+        }
+        
+        // Проверяем 24-часовое ограничение
+        if (!canModifyOrder(order)) {
+            throw new RuntimeException("Срок редактирования заказа истек (доступно только в течение 24 часов)");
+        }
+        
+        // Проверяем, что заказ еще можно редактировать
+        if (order.getStatus() == OrderStatus.COMPLETED || order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Нельзя редактировать заказ со статусом: " + order.getStatus());
+        }
+
+        // Обновляем только разрешенные поля
+        if (updateDto.getEmail() != null) {
+            order.setEmail(updateDto.getEmail());
+        }
+        if (updateDto.getFullName() != null) {
+            order.setFullName(updateDto.getFullName());
+        }
+        if (updateDto.getCountry() != null) {
+            order.setCountry(updateDto.getCountry());
+        }
+        if (updateDto.getAddress() != null) {
+            order.setAddress(updateDto.getAddress());
+        }
+        if (updateDto.getPostalCode() != null) {
+            order.setPostalCode(updateDto.getPostalCode());
+        }
+        if (updateDto.getPhoneNumber() != null) {
+            order.setPhoneNumber(updateDto.getPhoneNumber());
+        }
+        if (updateDto.getTelegramUsername() != null) {
+            order.setTelegramUsername(updateDto.getTelegramUsername());
+        }
+        if (updateDto.getCryptoAddress() != null) {
+            order.setCryptoAddress(updateDto.getCryptoAddress());
+        }
+        if (updateDto.getOrderComment() != null) {
+            order.setOrderComment(updateDto.getOrderComment());
+        }
+        
+        order.setUpdatedAt(LocalDateTime.now());
+        Order savedOrder = orderRepository.save(order);
+        
+        // Публикуем событие обновления заказа
+        eventPublisher.publishEvent(new OrderEvent(this, savedOrder, OrderEvent.OrderEventType.UPDATED));
+        
+        log.info("✏️ [ORDER UPDATED] Заказ {} обновлен пользователем {}", order.getOrderNumber(), username);
+        return mapToDto(savedOrder);
+    }
+    
+    /**
+     * Проверяет, можно ли модифицировать заказ (24-часовое ограничение)
+     */
+    private boolean canModifyOrder(Order order) {
+        LocalDateTime createdAt = order.getCreatedAt();
+        LocalDateTime now = LocalDateTime.now();
+        long hoursElapsed = ChronoUnit.HOURS.between(createdAt, now);
+        return hoursElapsed <= 24;
+    }
+    
+    /**
+     * Возвращает товар на склад при отмене заказа
+     */
+    private void restoreProductQuantity(Product product, String size, int quantity) {
+        switch (size.toLowerCase()) {
+            case "s" -> product.setAvailableQuantityS(product.getAvailableQuantityS() + quantity);
+            case "m" -> product.setAvailableQuantityM(product.getAvailableQuantityM() + quantity);
+            case "l" -> product.setAvailableQuantityL(product.getAvailableQuantityL() + quantity);
+            default -> log.warn("Неизвестный размер при возврате товара на склад: {}", size);
+        }
+        productRepository.save(product);
+        log.info("📦 Возвращено на склад: {} шт. размера {} для товара {}", 
+                quantity, size, product.getName());
     }
     
     @Transactional
@@ -190,18 +304,22 @@ public class OrderService {
 
     private boolean isProductSizeAvailable(Product product, String size) {
         return switch (size.toLowerCase()) {
-            case "m" -> product.getAvailableQuantityS() > 0;
-            case "l" -> product.getAvailableQuantityM() > 0;
-            case "xl" -> product.getAvailableQuantityL() > 0;
-            default -> false;
+            case "s" -> product.getAvailableQuantityS() > 0;
+            case "m" -> product.getAvailableQuantityM() > 0;
+            case "l" -> product.getAvailableQuantityL() > 0;
+            default -> {
+                log.warn("Неизвестный размер: {}", size);
+                yield false;
+            }
         };
     }
 
     private void reduceProductQuantity(Product product, String size) {
         switch (size.toLowerCase()) {
-            case "m" -> product.setAvailableQuantityS(product.getAvailableQuantityS() - 1);
-            case "l" -> product.setAvailableQuantityM(product.getAvailableQuantityM() - 1);
-            case "xl" -> product.setAvailableQuantityL(product.getAvailableQuantityL() - 1);
+            case "s" -> product.setAvailableQuantityS(product.getAvailableQuantityS() - 1);
+            case "m" -> product.setAvailableQuantityM(product.getAvailableQuantityM() - 1);
+            case "l" -> product.setAvailableQuantityL(product.getAvailableQuantityL() - 1);
+            default -> log.error("Попытка уменьшить количество для неизвестного размера: {}", size);
         }
         productRepository.save(product);
     }

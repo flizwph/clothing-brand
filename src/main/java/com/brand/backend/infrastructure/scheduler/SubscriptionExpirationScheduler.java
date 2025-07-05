@@ -19,10 +19,13 @@ public class SubscriptionExpirationScheduler {
     /**
      * Запускается каждый день в 00:00 для обновления статуса просроченных подписок
      */
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void checkExpiredSubscriptions() {
-        log.info("Запущена проверка просроченных подписок");
-        subscriptionService.updateExpiredSubscriptions();
-        log.info("Обновление статуса просроченных подписок завершено");
+        try {
+            subscriptionService.deactivateExpiredSubscriptions();
+            log.info("Проверка истекших подписок завершена");
+        } catch (Exception e) {
+            log.error("Ошибка при проверке истекших подписок: {}", e.getMessage(), e);
+        }
     }
 } 

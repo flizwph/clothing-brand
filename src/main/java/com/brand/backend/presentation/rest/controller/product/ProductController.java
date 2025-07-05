@@ -22,9 +22,16 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        Optional<Product> product = productService.getProductById(id);
+    public ResponseEntity<Product> getProductById(@PathVariable String id) {
+        try {
+            // Пытаемся парсить как Long
+            Long productId = Long.parseLong(id);
+            Optional<Product> product = productService.getProductById(productId);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (NumberFormatException e) {
+            // Если не число, возвращаем 400 Bad Request
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 /*    @PostMapping
@@ -44,13 +51,18 @@ public class ProductController {
     }*/
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        Optional<Product> product = productService.getProductById(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+        try {
+            Long productId = Long.parseLong(id);
+            Optional<Product> product = productService.getProductById(productId);
         if (product.isPresent()) {
-            productService.deleteProduct(id);
+                productService.deleteProduct(productId);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
+            }
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 

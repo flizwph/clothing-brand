@@ -35,6 +35,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.math.BigDecimal;
+import java.util.UUID;
+
+import com.brand.backend.domain.subscription.exception.SubscriptionNotFoundException;
+import com.brand.backend.domain.subscription.model.SubscriptionType;
 
 @Slf4j
 @Service
@@ -52,17 +56,7 @@ public class SubscriptionService {
      * @return сгенерированный код активации
      */
     public String generateActivationCode() {
-        byte[] randomBytes = new byte[32];
-        secureRandom.nextBytes(randomBytes);
-        String code = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-        
-        // Проверяем, что код уникален
-        while (subscriptionRepository.existsByActivationCode(code)) {
-            secureRandom.nextBytes(randomBytes);
-            code = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-        }
-        
-        return code;
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
 
     /**
@@ -197,9 +191,9 @@ public class SubscriptionService {
      */
     private int getDurationForLevel(SubscriptionLevel level) {
         return switch (level) {
-            case BASIC -> 30;    // 1 месяц
-            case STANDARD -> 90; // 3 месяца
-            case PREMIUM -> 365; // 1 год
+            case STANDARD -> 30;  // 1 месяц
+            case PREMIUM -> 90;   // 3 месяца
+            case DELUXE -> 365;   // 1 год
         };
     }
 
@@ -511,9 +505,9 @@ public class SubscriptionService {
      */
     private BigDecimal getSubscriptionPrice(String level) {
         return switch (level) {
-            case "BASIC" -> new BigDecimal("299");
-            case "STANDARD" -> new BigDecimal("599");
-            case "PREMIUM" -> new BigDecimal("999");
+            case "STANDARD" -> new BigDecimal("299");
+            case "PREMIUM" -> new BigDecimal("599");
+            case "DELUXE" -> new BigDecimal("999");
             default -> BigDecimal.ZERO;
         };
     }
@@ -523,10 +517,105 @@ public class SubscriptionService {
      */
     private String getSubscriptionName(String level) {
         return switch (level) {
-            case "BASIC" -> "Базовая подписка";
             case "STANDARD" -> "Стандартная подписка";
             case "PREMIUM" -> "Премиум подписка";
+            case "DELUXE" -> "Делюкс подписка";
             default -> "Неизвестная подписка";
         };
+    }
+
+    public Subscription createSubscription(SubscriptionType type, int durationInDays) {
+        Subscription subscription = new Subscription();
+        subscription.setType(type);
+        subscription.setActive(false);
+        subscription.setCreatedAt(LocalDateTime.now());
+        subscription.setExpirationDate(LocalDateTime.now().plusDays(durationInDays));
+        subscription.setActivationCode(generateActivationCode());
+        subscription.setAutoRenewal(false);
+        
+        return subscriptionRepository.save(subscription);
+    }
+
+    public void activateSubscription(Long userId, String activationCode) {
+        Optional<Subscription> subscriptionOpt = subscriptionRepository.findByActivationCode(activationCode);
+        
+        if (subscriptionOpt.isEmpty()) {
+            throw new SubscriptionNotFoundException("Подписка с кодом " + activationCode + " не найдена");
+        }
+        
+        Subscription subscription = subscriptionOpt.get();
+        
+        if (subscription.isActive()) {
+            throw new IllegalStateException("Подписка уже активирована");
+        }
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        
+        subscription.setUser(user);
+        subscription.setActive(true);
+        subscription.setActivatedAt(LocalDateTime.now());
+        
+        subscriptionRepository.save(subscription);
+        log.info("Подписка {} активирована для пользователя {}", subscription.getId(), userId);
+    }
+
+    public List<Subscription> findActiveSubscriptionsByUserId(Long userId) {
+        return subscriptionRepository.findActiveSubscriptionsByUserId(userId);
+    }
+
+    public List<Subscription> findAllActiveSubscriptions() {
+        return subscriptionRepository.findAllActiveSubscriptions();
+    }
+
+    public Optional<Subscription> findByActivationCode(String activationCode) {
+        return subscriptionRepository.findByActivationCode(activationCode);
+    }
+
+    public Subscription save(Subscription subscription) {
+        return subscriptionRepository.save(subscription);
+    }
+
+    public void deactivateExpiredSubscriptions() {
+        List<Subscription> expiredSubscriptions = subscriptionRepository.findExpiredActiveSubscriptions(LocalDateTime.now());
+        
+        for (Subscription subscription : expiredSubscriptions) {
+            subscription.setActive(false);
+            subscriptionRepository.save(subscription);
+            log.info("Подписка {} деактивирована по истечении срока", subscription.getId());
+        }
+    }
+
+    public boolean hasActiveSubscription(Long userId, SubscriptionType type) {
+        return subscriptionRepository.hasActiveSubscription(userId, type);
+    }
+
+    public void extendSubscription(Long subscriptionId, int additionalDays) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new SubscriptionNotFoundException("Подписка не найдена"));
+        
+        subscription.setExpirationDate(subscription.getExpirationDate().plusDays(additionalDays));
+        subscriptionRepository.save(subscription);
+        
+        log.info("Подписка {} продлена на {} дней", subscriptionId, additionalDays);
+    }
+
+    public void cancelSubscriptionById(Long subscriptionId) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new SubscriptionNotFoundException("Подписка не найдена"));
+        
+        subscription.setActive(false);
+        subscription.setAutoRenewal(false);
+        subscriptionRepository.save(subscription);
+        
+        log.info("Подписка {} отменена", subscriptionId);
+    }
+
+    public List<Subscription> getUserSubscriptions(Long userId) {
+        return subscriptionRepository.findByUserId(userId);
+    }
+
+    public long getActiveSubscriptionsCount() {
+        return subscriptionRepository.countActiveSubscriptions();
     }
 } 

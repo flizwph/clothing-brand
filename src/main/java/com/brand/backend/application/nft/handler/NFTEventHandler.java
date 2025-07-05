@@ -3,8 +3,8 @@ package com.brand.backend.application.nft.handler;
 import com.brand.backend.infrastructure.integration.telegram.user.service.TelegramBotService;
 import com.brand.backend.domain.nft.event.NFTEvent;
 import com.brand.backend.domain.nft.model.NFT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -18,18 +18,15 @@ import java.util.List;
 
 /**
  * Обработчик событий, связанных с NFT
+ * Работает без очередей с опциональным Telegram ботом
  */
 @Component
+@Slf4j
 public class NFTEventHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(NFTEventHandler.class);
     
-    private final TelegramBotService telegramBotService;
-    
-    @org.springframework.beans.factory.annotation.Autowired
-    public NFTEventHandler(TelegramBotService telegramBotService) {
-        this.telegramBotService = telegramBotService;
-    }
+    // Опциональная зависимость для Telegram бота
+    @Autowired(required = false)
+    private TelegramBotService telegramBotService;
 
     @Async("eventExecutor")
     @EventListener
@@ -57,7 +54,7 @@ public class NFTEventHandler {
     }
     
     private void notifyUserNFTCreated(NFT nft) {
-        if (nft.getUser().getTelegramId() != null) {
+        if (nft.getUser().getTelegramId() != null && telegramBotService != null) {
             String message = "🎁 Вам выдан новый NFT!\n" +
                     "Это placeholder-версия, которая будет раскрыта после доставки заказа.";
             
@@ -73,11 +70,13 @@ public class NFTEventHandler {
             } catch (TelegramApiException e) {
                 log.error("Ошибка отправки уведомления о создании NFT: {}", e.getMessage());
             }
+        } else if (telegramBotService == null) {
+            log.debug("Telegram бот отключен, уведомление о создании NFT не отправлено для пользователя: {}", nft.getUser().getUsername());
         }
     }
     
     private void notifyUserNFTRevealed(NFT nft) {
-        if (nft.getUser().getTelegramId() != null) {
+        if (nft.getUser().getTelegramId() != null && telegramBotService != null) {
             String message = "✨ Ваш NFT раскрыт!\n" +
                     "Редкость: " + nft.getRarity();
             
@@ -93,11 +92,13 @@ public class NFTEventHandler {
             } catch (TelegramApiException e) {
                 log.error("Ошибка отправки уведомления о раскрытии NFT: {}", e.getMessage());
             }
+        } else if (telegramBotService == null) {
+            log.debug("Telegram бот отключен, уведомление о раскрытии NFT не отправлено для пользователя: {}", nft.getUser().getUsername());
         }
     }
     
     private void notifyUserNFTTransferred(NFT nft) {
-        if (nft.getUser().getTelegramId() != null) {
+        if (nft.getUser().getTelegramId() != null && telegramBotService != null) {
             String message = "🔄 NFT успешно передан на ваш кошелек.";
             
             SendMessage sendMessage = new SendMessage();
@@ -110,6 +111,8 @@ public class NFTEventHandler {
             } catch (TelegramApiException e) {
                 log.error("Ошибка отправки уведомления о передаче NFT: {}", e.getMessage());
             }
+        } else if (telegramBotService == null) {
+            log.debug("Telegram бот отключен, уведомление о передаче NFT не отправлено для пользователя: {}", nft.getUser().getUsername());
         }
     }
     

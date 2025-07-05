@@ -36,11 +36,19 @@ public class NFTController {
     /**
      * Эндпоинт для получения списка NFT для текущего пользователя.
      */
+    @Operation(summary = "Получение своих NFT", description = "Возвращает список NFT текущего пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список NFT успешно получен"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
     @GetMapping("/me")
-    public ResponseEntity<List<NFTDto>> getMyNFTs() {
-        // Получаем текущего пользователя (например, через Spring Security)
-        var currentUser = userService.getCurrentUser();
-        List<NFT> nfts = nftService.getNFTsForUser(userService.getUserByUsername(currentUser.getUsername()));
+    public ResponseEntity<List<NFTDto>> getMyNFTs(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности");
+            return ResponseEntity.notFound().build();
+        }
+        
+        List<NFT> nfts = nftService.getNFTsForUser(user);
         // Преобразуем в DTO для отдачи на фронтенд
         List<NFTDto> nftDtos = nfts.stream().map(nft -> new NFTDto(
                 nft.getId(),
@@ -81,9 +89,16 @@ public class NFTController {
             return ResponseEntity.notFound().build();
         }
         
+        try {
+            log.debug("Запрос NFT коллекции для пользователя: {}", user.getUsername());
         List<NFTCollectionDTO> collection = nftService.getUserNFTCollection(
                 user.getId(), rarity, blockchain, status, search);
+            log.debug("Найдено {} NFT для пользователя {}", collection.size(), user.getUsername());
         return ResponseEntity.ok(collection);
+        } catch (Exception e) {
+            log.error("Ошибка при получении NFT коллекции для пользователя {}: {}", user.getUsername(), e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @Operation(summary = "Статистика NFT коллекции", description = "Возвращает статистику по NFT коллекции пользователя")
@@ -98,8 +113,14 @@ public class NFTController {
             return ResponseEntity.notFound().build();
         }
         
+        try {
+            log.debug("Запрос статистики NFT для пользователя: {}", user.getUsername());
         NFTCollectionStatsDTO stats = nftService.getUserNFTStats(user.getId());
         return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Ошибка при получении статистики NFT для пользователя {}: {}", user.getUsername(), e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @Operation(summary = "Детали NFT", description = "Получение подробной информации об NFT")

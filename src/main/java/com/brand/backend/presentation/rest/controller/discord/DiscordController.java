@@ -13,10 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,12 +38,16 @@ public class DiscordController {
      */
     @PostMapping("/unlink")
     public ResponseEntity<ApiResponse<DiscordUnlinkResponse>> unlinkDiscordAccount(
-            @AuthenticationPrincipal User user) {
+            Authentication authentication) {
         
-        log.info("Запрос на отвязку Discord-аккаунта от пользователя: {}", user.getUsername());
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        
+        log.info("Запрос на отвязку Discord-аккаунта от пользователя: {}", username);
         
         try {
-            boolean success = userService.unlinkDiscordAccount(user.getUsername());
+            boolean success = userService.unlinkDiscordAccount(username);
             
             DiscordUnlinkResponse response = DiscordUnlinkResponse.builder()
                     .success(success)
@@ -73,12 +76,16 @@ public class DiscordController {
      */
     @GetMapping("/status")
     public ResponseEntity<ApiResponse<DiscordStatusResponse>> getDiscordStatus(
-            @AuthenticationPrincipal User user) {
+            Authentication authentication) {
         
-        log.info("Запрос на получение статуса Discord-аккаунта от пользователя: {}", user.getUsername());
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        
+        log.info("Запрос на получение статуса Discord-аккаунта от пользователя: {}", username);
         
         DiscordStatusResponse response = DiscordStatusResponse.builder()
-                .linked(user.isLinkedDiscord())
+                .linked(user.isDiscordVerified())
                 .discordUsername(user.getDiscordUsername())
                 .discordId(user.getDiscordId())
                 .build();
@@ -95,11 +102,15 @@ public class DiscordController {
      */
     @PostMapping("/link")
     public ResponseEntity<ApiResponse<DiscordLinkResponse>> linkDiscordAccount(
-            @AuthenticationPrincipal User user,
-            @Valid @RequestBody LinkDiscordAccountRequest request) {
+            Authentication authentication,
+            @RequestBody LinkDiscordAccountRequest request) {
+        
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
         
         log.info("Запрос на привязку Discord-аккаунта от пользователя {}: discordId={}, discordUsername={}", 
-                user.getUsername(), request.getDiscordId(), request.getDiscordUsername());
+                username, request.getDiscordId(), request.getDiscordUsername());
         
         try {
             // Проверка, не привязан ли уже этот Discord ID к другому аккаунту
@@ -117,7 +128,7 @@ public class DiscordController {
             
             // Привязка Discord аккаунта
             boolean success = userService.linkDiscordAccount(
-                    user.getUsername(), 
+                    username, 
                     request.getDiscordId(), 
                     request.getDiscordUsername()
             );
@@ -125,11 +136,11 @@ public class DiscordController {
             DiscordLinkResponse response = DiscordLinkResponse.builder()
                     .success(success)
                     .message(success ? "Discord аккаунт успешно привязан" : "Ошибка при привязке Discord аккаунта")
-                    .username(user.getUsername())
+                    .username(username)
                     .build();
             
             log.info("Discord аккаунт {} успешно привязан к пользователю: {}", 
-                    request.getDiscordUsername(), user.getUsername());
+                    request.getDiscordUsername(), username);
             
             return ResponseEntity.ok(new ApiResponse<>(response));
         } catch (Exception e) {
@@ -147,72 +158,106 @@ public class DiscordController {
 
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyDiscordAccount(
-            @RequestBody Map<String, String> request) {
-        
-        String verificationCode = request.get("code");
-        String discordUsername = request.get("discordUsername");
-        
-        // Проверяем наличие параметра discordId в запросе
-        Long discordId = null;
-        if (request.containsKey("discordId")) {
-            discordId = Long.parseLong(request.get("discordId"));
-        } else {
-            // Если discordId не указан, используем значение по умолчанию или получаем из имени пользователя
-            // Например, можно использовать хеш от имени пользователя
-            discordId = (long) discordUsername.hashCode();
-        }
-        
-        log.info("Получен запрос на верификацию Discord аккаунта: code={}, discordId={}, discordUsername={}", 
-                verificationCode, discordId, discordUsername);
+            @RequestBody VerificationRequest request) {
         
         try {
-            // Ищем пользователя по коду верификации
-            User user = verificationService.verifyCode(verificationCode);
-            if (user == null) {
-                log.warn("Неверный код верификации: {}", verificationCode);
-                return ResponseEntity.ok(Map.of(
+            Optional<User> userOpt = userRepository.findByDiscordVerificationCode(request.getVerificationCode());
+            
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
                     "message", "Неверный код верификации"
                 ));
             }
             
-            // Привязываем Discord аккаунт
-            userService.linkDiscordAccount(user.getUsername(), discordId, discordUsername);
+            User user = userOpt.get();
             
-            log.info("Discord аккаунт успешно привязан: username={}, discordId={}, discordUsername={}", 
-                    user.getUsername(), discordId, discordUsername);
+            if (request.getDiscordId() != null && !request.getDiscordId().isEmpty()) {
+                Optional<User> existingUser = userRepository.findByDiscordId(Long.parseLong(request.getDiscordId()));
+                if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+                    return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Этот Discord аккаунт уже привязан к другому пользователю"
+                    ));
+                }
+                
+                user.setDiscordId(Long.parseLong(request.getDiscordId()));
+            }
+            
+            user.setDiscordVerified(true);
+            user.setDiscordVerificationCode(null);
+            userRepository.save(user);
+            
+            log.info("Discord аккаунт {} успешно привязан к пользователю {}", 
+                    request.getDiscordId(), user.getUsername());
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Discord аккаунт успешно привязан"
+                "message", "Discord аккаунт успешно привязан",
+                "username", user.getUsername()
             ));
+            
         } catch (Exception e) {
-            log.error("Ошибка при верификации Discord аккаунта: {}", e.getMessage(), e);
-            return ResponseEntity.ok(Map.of(
+            log.error("Ошибка при верификации Discord: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
-                "message", "Ошибка сервера при верификации: " + e.getMessage()
+                "message", "Ошибка при верификации"
             ));
         }
     }
 
-    @GetMapping("/generate-code")
-    public ResponseEntity<Map<String, String>> generateVerificationCode() {
-        try {
-            String username = userService.getAuthenticatedUsername();
-            String code = verificationService.generateAndSaveVerificationCode(username);
-            
-            log.info("Сгенерирован код верификации Discord для: {}", username);
-            
-            return ResponseEntity.ok(Map.of(
-                "code", code,
-                "message", "Используйте этот код в Discord боте с командой !link"
-            ));
-        } catch (Exception e) {
-            log.error("Ошибка при генерации кода верификации", e);
+    @PostMapping("/verify-by-code")
+    public ResponseEntity<Map<String, Object>> verifyByCode(
+            @RequestBody Map<String, String> request) {
+        
+        String verificationCode = request.get("verificationCode");
+        String discordId = request.get("discordId");
+        
+        if (discordId == null || discordId.isEmpty()) {
+            discordId = "default_" + verificationCode.hashCode();
+        }
+        
+        Optional<User> userOpt = userRepository.findByDiscordVerificationCode(verificationCode);
+        
+        if (userOpt.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of(
-                "error", "Не удалось сгенерировать код верификации"
+                "success", false,
+                "message", "Код верификации не найден или истек"
             ));
         }
+        
+        User user = userOpt.get();
+        user.setDiscordId(Long.parseLong(discordId));
+        user.setDiscordVerified(true);
+        user.setDiscordVerificationCode(null);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Discord аккаунт успешно привязан",
+            "username", user.getUsername(),
+            "discordId", discordId
+        ));
+    }
+
+    @GetMapping("/generate-code")
+    public ResponseEntity<Map<String, String>> generateVerificationCode(
+            @RequestBody(required = false) Map<String, String> request,
+            Authentication authentication) {
+        
+        String username = authentication.getName();
+        
+        String discordId = null;
+        if (request != null) {
+            discordId = request.get("discordId");
+        }
+        
+        String verificationCode = verificationService.generateDiscordVerificationCode(username, discordId);
+        
+        return ResponseEntity.ok(Map.of(
+            "verificationCode", verificationCode,
+            "message", "Код верификации создан. Используйте его в Discord боте."
+        ));
     }
 
     /**
@@ -263,5 +308,34 @@ public class DiscordController {
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
+    }
+
+    @GetMapping("/check-user/{discordId}")
+    public ResponseEntity<Map<String, Object>> checkUserByDiscordId(@PathVariable String discordId) {
+        Optional<User> userOpt = userRepository.findByDiscordId(Long.parseLong(discordId));
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return ResponseEntity.ok(Map.of(
+                "found", true,
+                "username", user.getUsername(),
+                "verified", user.isDiscordVerified()
+            ));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "found", false,
+            "message", "Пользователь с таким Discord ID не найден"
+        ));
+    }
+
+    public static class VerificationRequest {
+        private String verificationCode;
+        private String discordId;
+
+        public String getVerificationCode() { return verificationCode; }
+        public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+        public String getDiscordId() { return discordId; }
+        public void setDiscordId(String discordId) { this.discordId = discordId; }
     }
 }

@@ -41,6 +41,35 @@ public class DigitalProduct {
 
     @Column(name = "access_period_days")
     private Integer accessPeriodDays;
+    
+    // Новые поля для маркета
+    @Column(name = "category")
+    private String category; // GAMES, ACCOUNTS, SOFTWARE, SUBSCRIPTIONS
+    
+    @Column(name = "platform")
+    private String platform; // STEAM, EPIC, NETFLIX, SPOTIFY, etc.
+    
+    @Column(name = "region")
+    private String region; // RU, EU, GLOBAL, etc.
+    
+    @Column(name = "delivery_method")
+    @Enumerated(EnumType.STRING)
+    private DeliveryMethod deliveryMethod = DeliveryMethod.INSTANT;
+    
+    @Column(name = "auto_delivery")
+    private Boolean autoDelivery = true;
+    
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity = 0;
+    
+    @Column(name = "min_stock_alert")
+    private Integer minStockAlert = 5;
+    
+    @Column(name = "supplier_id")
+    private Long supplierId;
+    
+    @Column(name = "external_product_id")
+    private String externalProductId; // ID в системе поставщика
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -58,4 +87,48 @@ public class DigitalProduct {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+    
+    /**
+     * Проверяет, есть ли товар в наличии
+     */
+    public boolean isInStock() {
+        return stockQuantity != null && stockQuantity > 0;
+    }
+    
+    /**
+     * Проверяет, нужно ли пополнить запас
+     */
+    public boolean needsRestocking() {
+        return stockQuantity != null && minStockAlert != null && 
+               stockQuantity <= minStockAlert;
+    }
+    
+    /**
+     * Уменьшает количество на складе
+     */
+    public void decreaseStock(int quantity) {
+        if (stockQuantity != null) {
+            stockQuantity = Math.max(0, stockQuantity - quantity);
+        }
+    }
+    
+    /**
+     * Увеличивает количество на складе
+     */
+    public void increaseStock(int quantity) {
+        if (stockQuantity == null) {
+            stockQuantity = quantity;
+        } else {
+            stockQuantity += quantity;
+        }
+    }
+}
+
+/**
+ * Способ доставки цифрового товара
+ */
+enum DeliveryMethod {
+    INSTANT,        // Мгновенная автоматическая доставка
+    MANUAL,         // Ручная обработка администратором
+    API_INTEGRATION // Через API поставщика
 } 

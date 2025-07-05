@@ -82,9 +82,8 @@ public interface SecurityAuditRepository extends JpaRepository<SecurityAuditEven
      * Получить количество неудачных попыток входа для указанного пользователя за период
      */
     @Query("SELECT COUNT(e) FROM SecurityAuditEvent e " +
-           "WHERE e.username = :username AND e.eventType = 'LOGIN_FAILURE' " +
-           "AND e.timestamp > :since")
-    long countLoginFailuresByUsernameAndSince(@Param("username") String username, @Param("since") LocalDateTime since);
+           "WHERE e.username = :username AND e.eventType = 'LOGIN_FAILURE' AND e.timestamp > :since")
+    long countFailedLoginAttempts(@Param("username") String username, @Param("since") LocalDateTime since);
     
     /**
      * Поиск активности с конкретного IP-адреса за период времени
@@ -93,4 +92,9 @@ public interface SecurityAuditRepository extends JpaRepository<SecurityAuditEven
            "WHERE e.ipAddress = :ipAddress AND e.timestamp > :since " +
            "ORDER BY e.timestamp DESC")
     List<SecurityAuditEvent> findByIpAddressAndSince(@Param("ipAddress") String ipAddress, @Param("since") LocalDateTime since);
+    
+    /**
+     * Удаляет записи аудита по имени пользователя и типам событий
+     */
+    int deleteByUsernameAndEventTypeIn(String username, java.util.List<String> eventTypes);
 } 

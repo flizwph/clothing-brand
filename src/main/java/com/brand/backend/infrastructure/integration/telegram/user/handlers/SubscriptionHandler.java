@@ -217,24 +217,24 @@ public class SubscriptionHandler {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
         List<InlineKeyboardButton> row1 = new ArrayList<>();
-        InlineKeyboardButton basicButton = new InlineKeyboardButton();
-        basicButton.setText("Базовый (30 дней)");
-        basicButton.setCallbackData("subscription_select_BASIC");
-        row1.add(basicButton);
+        InlineKeyboardButton standardButton = new InlineKeyboardButton();
+        standardButton.setText("Стандартный (30 дней)");
+        standardButton.setCallbackData("subscription_select_STANDARD");
+        row1.add(standardButton);
         keyboard.add(row1);
         
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        InlineKeyboardButton standardButton = new InlineKeyboardButton();
-        standardButton.setText("Стандартный (90 дней)");
-        standardButton.setCallbackData("subscription_select_STANDARD");
-        row2.add(standardButton);
+        InlineKeyboardButton premiumButton = new InlineKeyboardButton();
+        premiumButton.setText("Премиум (90 дней)");
+        premiumButton.setCallbackData("subscription_select_PREMIUM");
+        row2.add(premiumButton);
         keyboard.add(row2);
         
         List<InlineKeyboardButton> row3 = new ArrayList<>();
-        InlineKeyboardButton premiumButton = new InlineKeyboardButton();
-        premiumButton.setText("Премиум (365 дней)");
-        premiumButton.setCallbackData("subscription_select_PREMIUM");
-        row3.add(premiumButton);
+        InlineKeyboardButton deluxeButton = new InlineKeyboardButton();
+        deluxeButton.setText("Делюкс (365 дней)");
+        deluxeButton.setCallbackData("subscription_select_DELUXE");
+        row3.add(deluxeButton);
         keyboard.add(row3);
         
         markup.setKeyboard(keyboard);
@@ -327,9 +327,9 @@ public class SubscriptionHandler {
      */
     private String getSubscriptionLevelName(SubscriptionLevel level) {
         return switch (level) {
-            case BASIC -> "Базовый";
             case STANDARD -> "Стандартный";
             case PREMIUM -> "Премиум";
+            case DELUXE -> "Делюкс";
         };
     }
     
@@ -340,9 +340,9 @@ public class SubscriptionHandler {
      */
     private int getDurationForLevel(SubscriptionLevel level) {
         return switch (level) {
-            case BASIC -> 30;    // 1 месяц
-            case STANDARD -> 90; // 3 месяца
-            case PREMIUM -> 365; // 1 год
+            case STANDARD -> 30;  // 1 месяц
+            case PREMIUM -> 90;   // 3 месяца
+            case DELUXE -> 365;   // 1 год
         };
     }
 } 

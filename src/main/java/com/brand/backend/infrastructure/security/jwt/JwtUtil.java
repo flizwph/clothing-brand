@@ -43,6 +43,10 @@ public class JwtUtil {
         return generateAccessToken(username, 1); // По умолчанию версия 1
     }
 
+    public String generateRefreshToken(String username) {
+        return generateToken(username, refreshTokenExpiration);
+    }
+
     private String generateToken(Map<String, Object> claims, String subject, long expiration) {
         return Jwts.builder()
                 .setClaims(claims)

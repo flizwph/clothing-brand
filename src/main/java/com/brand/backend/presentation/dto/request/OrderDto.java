@@ -56,6 +56,11 @@ public class OrderDto {
     private String orderComment;
     private String promoCode;
     
+    /**
+     * Адрес доставки (дополнительное поле для фронтенда)
+     */
+    private String shippingAddress;
+    
     @NotBlank(message = "Способ оплаты не может быть пустым")
     private String paymentMethod;
 }

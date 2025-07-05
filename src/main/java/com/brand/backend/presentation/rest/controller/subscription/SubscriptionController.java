@@ -43,6 +43,23 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscription);
     }
 
+    @Operation(summary = "Моя подписка", description = "Возвращает информацию о подписке текущего пользователя (алиас для /current)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Информация о подписке получена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @GetMapping("/my")
+    public ResponseEntity<SubscriptionInfoDTO> getMySubscription(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("Попытка получить подписку неавторизованным пользователем");
+            return ResponseEntity.status(401).build();
+        }
+        
+        log.debug("Запрос подписки пользователя: {}", user.getUsername());
+        SubscriptionInfoDTO subscription = subscriptionService.getDetailedSubscriptionInfo(user.getId());
+        return ResponseEntity.ok(subscription);
+    }
+
     @Operation(summary = "Получение всех тарифных планов", description = "Возвращает список всех доступных тарифных планов")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Тарифные планы получены")

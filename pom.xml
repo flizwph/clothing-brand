@@ -130,10 +130,9 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
-
 
         <!-- OpenAPI (Swagger UI) -->
         <dependency>
@@ -230,6 +229,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -242,9 +244,12 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.30</version>
+                            <version>1.18.34</version>
                         </path>
                     </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -257,4 +262,136 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Профили для различных типов сборки -->
+    <profiles>
+        <!-- Профиль для обфускации продакшен сборки -->
+        <profile>
+            <id>obfuscated</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- ProGuard Plugin для обфускации -->
+                    <plugin>
+                        <groupId>com.github.wvengen</groupId>
+                        <artifactId>proguard-maven-plugin</artifactId>
+                        <version>2.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>proguard</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <proguardVersion>7.2.2</proguardVersion>
+                            <injar>${project.build.finalName}-exec.jar</injar>
+                            <outjar>${project.build.finalName}-obfuscated.jar</outjar>
+                            <includeDependency>false</includeDependency>
+                            <libs>
+                                <lib>${java.home}/jmods/java.base.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.desktop.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.logging.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.management.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.naming.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.sql.jmod(!**.jar;!module-info.class)</lib>
+                                <lib>${java.home}/jmods/java.xml.jmod(!**.jar;!module-info.class)</lib>
+                            </libs>
+                            <options>
+                                <option>-dontshrink</option>
+                                <option>-dontoptimize</option>
+                                <option>-ignorewarnings</option>
+                                <option>-dontnote</option>
+                                
+                                <!-- Сохраняем главный класс -->
+                                <option>-keep public class com.brand.backend.applicationstart.ClothingBrandApplication {
+                                    public static void main(java.lang.String[]);
+                                }</option>
+                                
+                                <!-- Сохраняем Spring Boot классы -->
+                                <option>-keep @org.springframework.boot.autoconfigure.SpringBootApplication class * { *; }</option>
+                                <option>-keep @org.springframework.stereotype.Component class * { *; }</option>
+                                <option>-keep @org.springframework.stereotype.Service class * { *; }</option>
+                                <option>-keep @org.springframework.stereotype.Repository class * { *; }</option>
+                                <option>-keep @org.springframework.web.bind.annotation.RestController class * { *; }</option>
+                                <option>-keep @org.springframework.web.bind.annotation.Controller class * { *; }</option>
+                                <option>-keep @org.springframework.context.annotation.Configuration class * { *; }</option>
+                                
+                                <!-- Сохраняем JPA сущности -->
+                                <option>-keep @jakarta.persistence.Entity class * { *; }</option>
+                                <option>-keep @jakarta.persistence.Table class * { *; }</option>
+                                <option>-keep @jakarta.persistence.Embeddable class * { *; }</option>
+                                
+                                <!-- Сохраняем методы с аннотациями -->
+                                <option>-keepclassmembers class * {
+                                    @org.springframework.web.bind.annotation.RequestMapping *;
+                                    @org.springframework.web.bind.annotation.GetMapping *;
+                                    @org.springframework.web.bind.annotation.PostMapping *;
+                                    @org.springframework.web.bind.annotation.PutMapping *;
+                                    @org.springframework.web.bind.annotation.DeleteMapping *;
+                                    @org.springframework.web.bind.annotation.PatchMapping *;
+                                    @org.springframework.beans.factory.annotation.Autowired *;
+                                    @jakarta.persistence.* *;
+                                }</option>
+                                
+                                <!-- Сохраняем DTO классы -->
+                                <option>-keep class com.brand.backend.presentation.rest.dto.** { *; }</option>
+                                
+                                <!-- Сохраняем модели -->
+                                <option>-keep class com.brand.backend.domain.**.model.** { *; }</option>
+                                
+                                <!-- Сохраняем enum'ы -->
+                                <option>-keepclassmembers,allowoptimization enum * {
+                                    public static **[] values();
+                                    public static ** valueOf(java.lang.String);
+                                }</option>
+                                
+                                <!-- Сохраняем Lombok сгенерированные методы -->
+                                <option>-keep class * {
+                                    *** get*();
+                                    *** set*(***);
+                                    *** is*();
+                                }</option>
+                                
+                                <!-- Сохраняем Serializable -->
+                                <option>-keepclassmembers class * implements java.io.Serializable {
+                                    static final long serialVersionUID;
+                                    private static final java.io.ObjectStreamField[] serialPersistentFields;
+                                    private void writeObject(java.io.ObjectOutputStream);
+                                    private void readObject(java.io.ObjectInputStream);
+                                    java.lang.Object writeReplace();
+                                    java.lang.Object readResolve();
+                                }</option>
+                                
+                                <!-- Защита от декомпиляции -->
+                                <option>-renamesourcefileattribute SourceFile</option>
+                                <option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,LocalVariable*Table,*Annotation*,Synthetic,EnclosingMethod</option>
+                                
+                                <!-- Обфускация имен пакетов -->
+                                <option>-repackageclasses 'obfuscated'</option>
+                                <option>-allowaccessmodification</option>
+                                
+                                <!-- Исключения для рефлексии -->
+                                <option>-keep class org.springframework.** { *; }</option>
+                                <option>-keep class org.hibernate.** { *; }</option>
+                                <option>-keep class jakarta.** { *; }</option>
+                                <option>-keep class javax.** { *; }</option>
+                                <option>-keep class com.fasterxml.jackson.** { *; }</option>
+                            </options>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.guardsquare</groupId>
+                                <artifactId>proguard-base</artifactId>
+                                <version>7.2.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

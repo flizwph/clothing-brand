@@ -242,14 +242,14 @@ public class TelegramBotService extends TelegramLongPollingBot {
      * @param chatId ID чата
      */
     private void handleDesktopCallback(String data, String chatId) {
-        if (data.equals("desktop_basic")) {
-            showDesktopPlan(chatId, "basic");
-        } else if (data.equals("desktop_standard")) {
+        if (data.equals("desktop_standard")) {
             showDesktopPlan(chatId, "standard");
         } else if (data.equals("desktop_premium")) {
             showDesktopPlan(chatId, "premium");
+        } else if (data.equals("desktop_deluxe")) {
+            showDesktopPlan(chatId, "deluxe");
         } else if (data.startsWith("desktop_buy_")) {
-            // Пример: desktop_buy_basic_1
+            // Пример: desktop_buy_standard_1
             String[] parts = data.split("_");
             if (parts.length >= 4) {
                 String plan = parts[2];
@@ -271,16 +271,16 @@ public class TelegramBotService extends TelegramLongPollingBot {
         int pricePerMonth;
         
         switch (plan) {
-            case "basic":
-                planName = "Базовый";
-                pricePerMonth = 99;
-                break;
             case "standard":
-                planName = "Стандарт";
-                pricePerMonth = 199;
+                planName = "Стандартный";
+                pricePerMonth = 99;
                 break;
             case "premium":
                 planName = "Премиум";
+                pricePerMonth = 199;
+                break;
+            case "deluxe":
+                planName = "Делюкс";
                 pricePerMonth = 299;
                 break;
             default:
@@ -766,9 +766,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
         // Тарифные планы
-        rows.add(List.of(createButton("🥉 Базовый (99₽/мес)", "desktop_basic")));
-        rows.add(List.of(createButton("🥈 Стандарт (199₽/мес)", "desktop_standard")));
-        rows.add(List.of(createButton("🥇 Премиум (299₽/мес)", "desktop_premium")));
+        rows.add(List.of(createButton("🥉 Стандартный (99₽/мес)", "desktop_standard")));
+        rows.add(List.of(createButton("🥈 Премиум (199₽/мес)", "desktop_premium")));
+        rows.add(List.of(createButton("🥇 Делюкс (299₽/мес)", "desktop_deluxe")));
         
         // Длительность подписки
         List<InlineKeyboardButton> durationRow = new ArrayList<>();
@@ -824,8 +824,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
         String features;
         
         switch (plan) {
-            case "basic":
-                planName = "Базовый";
+            case "standard":
+                planName = "Стандартный";
                 pricePerMonth = 99;
                 features = """
                         • Базовый функционал
@@ -833,8 +833,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
                         • 1 проект
                         """;
                 break;
-            case "standard":
-                planName = "Стандарт";
+            case "premium":
+                planName = "Премиум";
                 pricePerMonth = 199;
                 features = """
                         • Расширенный функционал
@@ -843,8 +843,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
                         • Приоритетная поддержка
                         """;
                 break;
-            case "premium":
-                planName = "Премиум";
+            case "deluxe":
+                planName = "Делюкс";
                 pricePerMonth = 299;
                 features = """
                         • Полный функционал
@@ -1019,9 +1019,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
             
             // Формируем сообщение об успешной активации
             String subscriptionLevel = switch (subscription.getSubscriptionLevel()) {
-                case BASIC -> "Базовый";
                 case STANDARD -> "Стандартный";
                 case PREMIUM -> "Премиум";
+                case DELUXE -> "Делюкс";
             };
             
             // Форматируем дату окончания подписки
@@ -1218,14 +1218,14 @@ public class TelegramBotService extends TelegramLongPollingBot {
                     // Определяем название уровня подписки
                     String subscriptionLevel = "Неизвестно";
                     switch (subscription.getSubscriptionLevel()) {
-                        case BASIC:
-                            subscriptionLevel = "Базовый";
-                            break;
                         case STANDARD:
-                            subscriptionLevel = "Стандарт";
+                            subscriptionLevel = "Стандартный";
                             break;
                         case PREMIUM:
                             subscriptionLevel = "Премиум";
+                            break;
+                        case DELUXE:
+                            subscriptionLevel = "Делюкс";
                             break;
                     }
                     
@@ -1410,9 +1410,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 
                 Выберите план, который вы хотите приобрести для продления подписки:
                 
-                🔹 *Базовый* - 99₽/месяц
-                🔸 *Стандарт* - 199₽/месяц
-                🔶 *Премиум* - 299₽/месяц
+                🔹 *Стандартный* - 99₽/месяц
+                🔸 *Премиум* - 199₽/месяц
+                🔶 *Делюкс* - 299₽/месяц
                 
                 Выберите срок продления:
                 """;
@@ -1421,9 +1421,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
         // Кнопки для различных планов
-        rows.add(List.of(createButton("Базовый (1 месяц)", "desktop_buy_basic_1")));
-        rows.add(List.of(createButton("Стандарт (3 месяца)", "desktop_buy_standard_3")));
-        rows.add(List.of(createButton("Премиум (12 месяцев)", "desktop_buy_premium_12")));
+        rows.add(List.of(createButton("Стандартный (1 месяц)", "desktop_buy_standard_1")));
+        rows.add(List.of(createButton("Премиум (3 месяца)", "desktop_buy_premium_3")));
+        rows.add(List.of(createButton("Делюкс (12 месяцев)", "desktop_buy_deluxe_12")));
         
         // Навигационные кнопки
         rows.add(List.of(createButton("⬅️ Назад к настройкам", "subscription_settings")));

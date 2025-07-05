@@ -45,6 +45,19 @@ public class AdminTransactionController {
     }
     
     /**
+     * Получить все транзакции (основной endpoint)
+     */
+    @GetMapping
+    public ResponseEntity<Page<TransactionDTO>> getAllTransactions(Pageable pageable) {
+        log.info("Запрос всех транзакций");
+        
+        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        Page<TransactionDTO> transactionDtos = transactions.map(TransactionDTO::fromEntity);
+        
+        return ResponseEntity.ok(transactionDtos);
+    }
+    
+    /**
      * Подтвердить транзакцию
      */
     @PostMapping("/{id}/confirm")

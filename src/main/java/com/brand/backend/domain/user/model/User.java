@@ -120,7 +120,41 @@ public class User {
     @Column(name = "is_vk_linked", nullable = false)
     private boolean isVkLinked = false;
 
+    @Column(name = "discord_verification_code")
+    private String discordVerificationCode;
+
+    @Column(name = "discord_verified", nullable = false, columnDefinition = "boolean default false")
+    private boolean discordVerified = false;
+
+    @Column(name = "last_check_time")
+    private LocalDateTime lastCheckTime;
+
     public Integer getTokenVersion() {
         return tokenVersion != null ? tokenVersion : 1;
+    }
+
+    // Discord verification methods
+    public boolean isDiscordVerified() {
+        return discordVerified;
+    }
+
+    public void setDiscordVerified(boolean discordVerified) {
+        this.discordVerified = discordVerified;
+    }
+
+    public String getDiscordVerificationCode() {
+        return discordVerificationCode;
+    }
+
+    public void setDiscordVerificationCode(String discordVerificationCode) {
+        this.discordVerificationCode = discordVerificationCode;
+    }
+
+    public LocalDateTime getLastCheckTime() {
+        return lastCheckTime;
+    }
+
+    public void setLastCheckTime(LocalDateTime lastCheckTime) {
+        this.lastCheckTime = lastCheckTime;
     }
 }

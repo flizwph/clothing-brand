@@ -1,11 +1,13 @@
 package com.brand.backend.presentation.rest.controller.order;
 
 import com.brand.backend.presentation.dto.request.OrderDto;
+import com.brand.backend.presentation.dto.request.UpdateOrderDto;
 import com.brand.backend.presentation.dto.response.DetailedOrderDTO;
 import com.brand.backend.presentation.dto.response.OrderResponseDto;
 import com.brand.backend.common.exception.ResourceNotFoundException;
 import com.brand.backend.application.order.service.OrderService;
 import com.brand.backend.domain.user.model.User;
+import com.brand.backend.domain.order.model.OrderStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.HashMap;
@@ -105,15 +108,16 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @Operation(summary = "Отмена заказа", description = "Отменяет заказ текущего пользователя по ID")
+    @Operation(summary = "Отмена заказа", description = "Отменяет заказ текущего пользователя по ID (доступно в течение 24 часов)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Заказ успешно отменен"),
+            @ApiResponse(responseCode = "200", description = "Заказ успешно отменен"),
+            @ApiResponse(responseCode = "400", description = "Срок отмены истек или заказ нельзя отменить"),
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
             @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
             @ApiResponse(responseCode = "404", description = "Заказ не найден")
     })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelOrder(
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Map<String, Object>> cancelOrder(
             @Parameter(description = "ID заказа") @PathVariable Long id,
             Authentication authentication) {
         
@@ -124,8 +128,52 @@ public class OrderController {
             username = authentication.getName();
         }
         
+        try {
         orderService.cancelOrder(id, username);
-        return ResponseEntity.noContent().build();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Заказ успешно отменен");
+            response.put("orderId", id);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @Operation(summary = "Редактирование заказа", description = "Редактирует данные заказа (доступно в течение 24 часов, сумма не изменяется)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Заказ успешно обновлен"),
+            @ApiResponse(responseCode = "400", description = "Срок редактирования истек или некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+            @ApiResponse(responseCode = "404", description = "Заказ не найден")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderResponseDto> updateOrder(
+            @Parameter(description = "ID заказа") @PathVariable Long id,
+            @Parameter(description = "Новые данные заказа") @Valid @RequestBody UpdateOrderDto updateDto,
+            Authentication authentication) {
+        
+        String username;
+        if (authentication.getPrincipal() instanceof User) {
+            username = ((User) authentication.getPrincipal()).getUsername();
+        } else {
+            username = authentication.getName();
+        }
+        
+        try {
+            OrderResponseDto updatedOrder = orderService.updateOrder(id, username, updateDto);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+            log.error("Ошибка при обновлении заказа {}: {}", id, e.getMessage());
+            throw e;
+        }
     }
     
     @Operation(summary = "Получение статуса заказа", description = "Возвращает информацию о статусе заказа по его идентификатору")
@@ -179,6 +227,138 @@ public class OrderController {
         
         List<DetailedOrderDTO> orderHistory = orderService.getOrderHistoryDetailed(user.getId());
         return ResponseEntity.ok(orderHistory);
+    }
+
+    @Operation(summary = "Трекинг доставки заказов", description = "Возвращает информацию о доставке всех активных заказов пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Информация о трекинге получена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
+    })
+    @GetMapping("/status-tracking")
+    public ResponseEntity<Map<String, Object>> getOrderTracking(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.error("Пользователь не найден в контексте безопасности для трекинга");
+            return ResponseEntity.notFound().build();
+        }
+        
+        log.info("📦 [ORDER TRACKING] Запрос трекинга заказов от пользователя: {}", user.getUsername());
+        
+        try {
+            List<DetailedOrderDTO> activeOrders = orderService.getActiveOrdersDetailed(user.getId());
+            
+            Map<String, Object> trackingInfo = new HashMap<>();
+            trackingInfo.put("success", true);
+            trackingInfo.put("totalActiveOrders", activeOrders.size());
+            trackingInfo.put("orders", activeOrders.stream().map(order -> {
+                Map<String, Object> orderTracking = new HashMap<>();
+                orderTracking.put("orderId", order.getId());
+                orderTracking.put("orderNumber", order.getOrderNumber());
+                orderTracking.put("status", order.getStatus());
+                orderTracking.put("statusCode", order.getStatusCode());
+                orderTracking.put("trackingNumber", order.getTrackingNumber());
+                orderTracking.put("createdAt", order.getCreatedAt());
+                orderTracking.put("totalPrice", order.getTotalPrice());
+                orderTracking.put("paymentMethod", order.getPaymentMethod());
+                
+                // Добавляем информацию о прогрессе доставки
+                String progress = getDeliveryProgress(order.getStatusCode());
+                orderTracking.put("deliveryProgress", progress);
+                orderTracking.put("estimatedDelivery", getEstimatedDelivery(order.getStatusCode()));
+                orderTracking.put("canTrack", order.getTrackingNumber() != null && !order.getTrackingNumber().isEmpty());
+                
+                return orderTracking;
+            }).toList());
+            
+            log.info("✅ [ORDER TRACKING] Информация о трекинге передана для {} заказов пользователя: {}", 
+                    activeOrders.size(), user.getUsername());
+            
+            return ResponseEntity.ok(trackingInfo);
+            
+        } catch (Exception e) {
+            log.error("🔥 [ORDER TRACKING] Ошибка получения трекинга для пользователя {}: {}", 
+                    user.getUsername(), e.getMessage(), e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Ошибка получения информации о трекинге");
+            errorResponse.put("error", e.getMessage());
+            
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @Operation(summary = "Завершение заказа", description = "Завершает заказ (доступно только администраторам и продавцам)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Заказ успешно завершен"),
+            @ApiResponse(responseCode = "400", description = "Заказ нельзя завершить"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован"),
+            @ApiResponse(responseCode = "403", description = "Недостаточно прав доступа"),
+            @ApiResponse(responseCode = "404", description = "Заказ не найден")
+    })
+    @PostMapping("/{id}/complete")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+    public ResponseEntity<Map<String, Object>> completeOrder(
+            @Parameter(description = "ID заказа") @PathVariable Long id,
+            @AuthenticationPrincipal User admin) {
+        
+        log.info("🏁 [ORDER COMPLETE] Запрос на завершение заказа {} от: {}", id, admin.getUsername());
+        
+        try {
+            OrderResponseDto completedOrder = orderService.updateOrderStatus(id, OrderStatus.COMPLETED);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Заказ успешно завершен");
+            response.put("orderId", id);
+            response.put("orderNumber", completedOrder.getOrderNumber());
+            response.put("status", completedOrder.getStatus());
+            response.put("completedBy", admin.getUsername());
+            response.put("completedAt", java.time.LocalDateTime.now());
+            
+            log.info("✅ [ORDER COMPLETE] Заказ {} успешно завершен администратором: {}", 
+                    completedOrder.getOrderNumber(), admin.getUsername());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            log.error("🔥 [ORDER COMPLETE] Ошибка завершения заказа {} админом {}: {}", 
+                    id, admin.getUsername(), e.getMessage());
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Ошибка при завершении заказа");
+            errorResponse.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Получает прогресс доставки на основе статуса заказа
+     */
+    private String getDeliveryProgress(String statusCode) {
+        return switch (statusCode) {
+            case "NEW" -> "Заказ принят";
+            case "PROCESSING" -> "Заказ обрабатывается";
+            case "DISPATCHED" -> "Заказ отправлен";
+            case "COMPLETED" -> "Заказ доставлен";
+            case "CANCELLED" -> "Заказ отменен";
+            default -> "Статус неизвестен";
+        };
+    }
+
+    /**
+     * Получает примерное время доставки на основе статуса
+     */
+    private String getEstimatedDelivery(String statusCode) {
+        return switch (statusCode) {
+            case "NEW" -> "3-5 рабочих дней после обработки";
+            case "PROCESSING" -> "3-5 рабочих дней после отправки";
+            case "DISPATCHED" -> "1-3 рабочих дня";
+            case "COMPLETED" -> "Доставлен";
+            case "CANCELLED" -> "Отменен";
+            default -> "Неизвестно";
+        };
     }
     
     /**

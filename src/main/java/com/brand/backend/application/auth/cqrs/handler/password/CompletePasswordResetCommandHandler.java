@@ -44,8 +44,13 @@ public class CompletePasswordResetCommandHandler implements CommandHandler<Compl
             throw PasswordResetException.invalidResetCode();
         }
         
-        // Проверка существования пользователя
-        Optional<User> userOptional = userRepository.findByUsername(command.getUsername());
+        // Проверка существования пользователя - сначала по email, затем по username
+        Optional<User> userOptional = userRepository.findByEmail(command.getUsername());
+        if (userOptional.isEmpty()) {
+            // Если не найден по email, пробуем найти по username
+            userOptional = userRepository.findByUsername(command.getUsername());
+        }
+        
         if (userOptional.isEmpty()) {
             log.warn("Пользователь не найден: {}", command.getUsername());
             throw PasswordResetException.userNotFound(command.getUsername());

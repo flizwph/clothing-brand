@@ -51,6 +51,23 @@ public interface DigitalOrderRepository extends JpaRepository<DigitalOrder, Long
     List<DigitalOrder> findAllByUserAndPaid(User user, boolean paid);
     
     /**
+     * Подсчитать количество заказов пользователя
+     * 
+     * @param user пользователь
+     * @return количество заказов
+     */
+    Long countByUser(User user);
+    
+    /**
+     * Подсчитать количество заказов пользователя по статусу оплаты
+     * 
+     * @param user пользователь
+     * @param paid статус оплаты
+     * @return количество заказов
+     */
+    Long countByUserAndPaid(User user, boolean paid);
+    
+    /**
      * Найти заказ по идентификатору платежа
      * 
      * @param paymentId идентификатор платежа

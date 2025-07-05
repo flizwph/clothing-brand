@@ -454,9 +454,9 @@ public class UserService {
      */
     private BigDecimal getSubscriptionPrice(String level) {
         return switch (level) {
-            case "BASIC" -> new BigDecimal("299");
-            case "STANDARD" -> new BigDecimal("599");
-            case "PREMIUM" -> new BigDecimal("999");
+                    case "STANDARD" -> new BigDecimal("299");
+        case "PREMIUM" -> new BigDecimal("599");
+        case "DELUXE" -> new BigDecimal("999");
             default -> BigDecimal.ZERO;
         };
     }
@@ -466,9 +466,9 @@ public class UserService {
      */
     private String getSubscriptionName(String level) {
         return switch (level) {
-            case "BASIC" -> "Базовая подписка";
-            case "STANDARD" -> "Стандартная подписка";
-            case "PREMIUM" -> "Премиум подписка";
+                    case "STANDARD" -> "Стандартная подписка";
+        case "PREMIUM" -> "Премиум подписка";
+        case "DELUXE" -> "Делюкс подписка";
             default -> "Неизвестная подписка";
         };
     }

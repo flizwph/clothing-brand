@@ -52,4 +52,45 @@ public class Subscription {
 
     @Column(name = "auto_renewal", nullable = false)
     private boolean autoRenewal = false;
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private SubscriptionType type;
+
+    @Column(name = "activated_at")
+    private LocalDateTime activatedAt;
+
+    // Alias methods for compatibility
+    public SubscriptionType getType() {
+        return type != null ? type : convertLevelToType(subscriptionLevel);
+    }
+
+    public void setType(SubscriptionType type) {
+        this.type = type;
+    }
+
+    public LocalDateTime getExpirationDate() {
+        return endDate;
+    }
+
+    public void setExpirationDate(LocalDateTime expirationDate) {
+        this.endDate = expirationDate;
+    }
+
+    public LocalDateTime getActivatedAt() {
+        return activatedAt;
+    }
+
+    public void setActivatedAt(LocalDateTime activatedAt) {
+        this.activatedAt = activatedAt;
+    }
+
+    private SubscriptionType convertLevelToType(SubscriptionLevel level) {
+        if (level == null) return SubscriptionType.BASIC;
+        return switch (level) {
+            case STANDARD -> SubscriptionType.BASIC;
+            case PREMIUM -> SubscriptionType.PREMIUM;
+            case DELUXE -> SubscriptionType.VIP;
+        };
+    }
 } 
